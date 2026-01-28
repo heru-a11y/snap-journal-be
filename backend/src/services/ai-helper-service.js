@@ -97,7 +97,106 @@ const analyzeSentiment = async (text) => {
     }
 };
 
+/**
+ * Chat Interaktif dengan Konteks Jurnal
+ * @param {Object} journalData - Data lengkap jurnal (title, note, emotion, dll)
+ * @param {String} userMessage - Pertanyaan dari user
+ */
+const chatWithJournalContext = async (journalData, userMessage) => {
+    if (!model) {
+        throw new ResponseError(500, "Layanan AI sedang tidak tersedia.");
+    }
+
+    if (!userMessage) {
+        throw new ResponseError(400, "Pesan pertanyaan wajib diisi.");
+    }
+
+    const prompt = `
+        Peran: Kamu adalah asisten AI empatik dan psikolog pribadi yang mengerti perasaan user.
+        Tugas: Jawab pertanyaan user berdasarkan DATA JURNAL di bawah ini.
+        
+        DATA JURNAL USER:
+        - Judul: "${journalData.title}"
+        - Isi Catatan: "${journalData.note}"
+        - Emosi Terdeteksi Sebelumnya: ${journalData.emotion || "Tidak ada"}
+        - Ekspresi Wajah (Emoji): ${journalData.expression || "-"}
+        - Saran AI Sebelumnya: ${journalData.chatbot_suggestion || "-"}
+        
+        PERTANYAAN USER:
+        "${userMessage}"
+
+        Instruksi Jawaban:
+        1. Jawablah dengan bahasa Indonesia yang natural, hangat, dan suportif.
+        2. Gunakan "kamu" untuk menyapa user.
+        3. Jelaskan alasan logis jika user bertanya "Kenapa" (hubungkan dengan kata-kata di catatan atau emosi).
+        4. Jangan berhalusinasi (mengarang fakta di luar jurnal), tapi boleh memberikan saran psikologis umum yang relevan.
+    `;
+
+    try {
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        
+        let aiReply = response.text();
+        aiReply = aiFormat(aiReply);
+
+        return aiReply;
+
+    } catch (error) {
+        console.error("Gemini Chat Error:", error);
+        throw new ResponseError(500, "Gagal memproses percakapan dengan AI.");
+    }
+};
+
+/**
+ * Melakukan Deep Analysis untuk mengisi field Insight (Strategy, Highlight, Suggestion, Tags)
+ * @param {Object} journalData - Data jurnal (title, note)
+ * @returns {Object} JSON berisi tags, highlight, strategy, suggestion
+ */
+const generateJournalInsights = async (journalData) => {
+    if (!model) return null;
+
+    const prompt = `
+        Bertindaklah sebagai psikolog dan life coach profesional. 
+        Analisis jurnal berikut dan berikan insight mendalam dalam format JSON.
+        
+        Data Jurnal:
+        - Judul: "${journalData.title}"
+        - Isi: "${journalData.note}"
+        - Emosi Awal: "${journalData.emotion || 'Netral'}"
+
+        Tugasmu adalah mengisi 4 hal ini:
+        1. "tags": Array of strings (maksimal 3 kata kunci relevan, misal: ["Karir", "Kecemasan", "Produktivitas"]).
+        2. "chatbot_highlight": Satu kalimat pendek yang merangkum inti masalah/cerita (Ringkasan).
+        3. "chatbot_suggestion": Saran reflektif yang hangat dan menenangkan hati user (sekitar 2-3 kalimat).
+        4. "chatbot_strategy": Satu langkah aksi nyata (actionable step) yang bisa dilakukan user besok.
+
+        Output WAJIB JSON Valid tanpa markdown.
+        Contoh Format:
+        {
+            "tags": ["Stress", "Work"],
+            "chatbot_highlight": "Kamu merasa tertekan karena deadline pekerjaan yang menumpuk.",
+            "chatbot_suggestion": "Tidak apa-apa untuk merasa lelah. Cobalah untuk tidak memaksakan kesempurnaan.",
+            "chatbot_strategy": "Buatlah daftar prioritas dan kerjakan satu per satu mulai besok pagi."
+        }
+    `;
+
+    try {
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        let jsonText = response.text();
+
+        jsonText = jsonText.replace(/```json|```/g, "").trim();
+        
+        return JSON.parse(jsonText);
+    } catch (error) {
+        console.error("Gemini Insight Error:", error);
+        throw new ResponseError(500, "Gagal menghasilkan insight AI.");
+    }
+};
+
 export default {
     enhanceJournalText,
-    analyzeSentiment
+    analyzeSentiment,
+    chatWithJournalContext,
+    generateJournalInsights
 };

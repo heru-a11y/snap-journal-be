@@ -12,19 +12,27 @@ journalRouter.use(authMiddleware);
 journalRouter.use(verifiedMiddleware);
 
 journalRouter.post('/api/v1/journals', 
-    upload.single('video'),
+    upload.fields([
+        { name: 'video', maxCount: 1 }, 
+        { name: 'photo', maxCount: 1 }
+    ]),
     runValidation(createJournalValidation),
     journalController.createJournal
 );
 
 journalRouter.get('/api/v1/journals', journalController.listJournal);
+journalRouter.get('/api/v1/journals/mood-calendar', journalController.getMoodCalendar);
+journalRouter.post('/api/v1/journals/enhance', journalController.enhanceText);
 journalRouter.get('/api/v1/journals/:id', journalController.getDetailJournal);
+
 journalRouter.put('/api/v1/journals/:id', 
     runValidation(updateJournalValidation),
+    upload.single('photo'), 
     journalController.updateJournal
 );
 
 journalRouter.delete('/api/v1/journals/:id', journalController.deleteJournal);
-journalRouter.post('/api/v1/journals/enhance', journalController.enhanceText);
+journalRouter.post('/api/v1/journals/:id/chat', journalController.chat);
+journalRouter.post('/api/v1/journals/:id/analyze', journalController.analyze);
 
 export { journalRouter };

@@ -73,7 +73,7 @@ const updatePassword = async (user, request) => {
     }
 
     return {
-        message: "Password berhasil diperbarui"
+        message: "Password berhasil diperbarui, silakan login kembali dengan password baru"
     };
 }
 

@@ -80,7 +80,64 @@ const markAsRead = async (user, notificationId) => {
     };
 };
 
+/**
+ * Menghapus seluruh riwayat notifikasi milik user (DELETE /api/v1/notifications)
+ * Menggunakan Batch Delete untuk efisiensi.
+ * @param {Object} user - User object dari token
+ */
+const deleteAll = async (user) => {
+    const notificationsRef = database.collection("notifications");
+
+    const snapshot = await notificationsRef
+        .where("notifiable_id", "==", user.uid)
+        .get();
+
+    if (snapshot.empty) {
+        return { message: "Tidak ada notifikasi yang perlu dihapus" };
+    }
+
+    const batch = database.batch();
+    
+    snapshot.docs.forEach((doc) => {
+        batch.delete(doc.ref);
+    });
+
+    await batch.commit();
+
+    return {
+        message: "Seluruh notifikasi berhasil dihapus"
+    };
+};
+
+/**
+ * Menghapus satu notifikasi spesifik (DELETE /api/v1/notifications/:id)
+ * @param {Object} user - User object dari token
+ * @param {String} notificationId - ID Notifikasi
+ */
+const deleteById = async (user, notificationId) => {
+    const docRef = database.collection("notifications").doc(notificationId);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+        throw new ResponseError(404, "Notifikasi tidak ditemukan");
+    }
+
+    const data = doc.data();
+
+    if (data.notifiable_id !== user.uid) {
+        throw new ResponseError(404, "Notifikasi tidak ditemukan");
+    }
+
+    await docRef.delete();
+
+    return {
+        message: "Notifikasi berhasil dihapus"
+    };
+};
+
 export default {
     list,
-    markAsRead
+    markAsRead,
+    deleteAll,
+    deleteById
 };

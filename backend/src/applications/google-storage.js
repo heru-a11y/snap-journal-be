@@ -4,18 +4,11 @@ import { ResponseError } from "../error/response-error.js";
 
 const storage = new Storage({
     keyFilename: path.resolve(process.env.FIREBASE_CREDENTIALS), 
-    projectId: 'journal-app-project'
 });
 
-const bucketName = process.env.GCS_BUCKET_NAME;
+const bucketName = process.env.FIREBASE_BUCKET_NAME;
 const bucket = storage.bucket(bucketName);
 
-/**
- * Upload file buffer dari Multer ke Google Cloud Storage
- * @param {Object} file - Object file dari req.file (Multer)
- * @param {String} folder - Nama folder tujuan (misal: 'journals/videos')
- * @returns {Promise<String>} - URL Public file yang berhasil diupload
- */
 const uploadToGCS = (file, folder) => {
     return new Promise((resolve, reject) => {
         if (!file) {
@@ -39,19 +32,22 @@ const uploadToGCS = (file, folder) => {
             reject(new ResponseError(500, `Gagal upload ke storage: ${err.message}`));
         });
 
-        blobStream.on('finish', () => {            
-            const publicUrl = `https://storage.googleapis.com/${bucketName}/${destination}`;
-            resolve(publicUrl);
+        blobStream.on('finish', async () => {            
+            try {
+                await blob.makePublic(); 
+                
+                const publicUrl = `https://storage.googleapis.com/${bucketName}/${destination}`;
+                resolve(publicUrl);
+            } catch (error) {
+                console.error("Gagal set public permission:", error);
+                reject(new ResponseError(500, `Gagal setting permission file: ${error.message}`));
+            }
         });
 
         blobStream.end(file.buffer);
     });
 };
 
-/**
- * Menghapus file fisik dari Google Cloud Storage
- * @param {String} fileUrl - Full URL file (https://storage.googleapis.com/...)
- */
 const deleteFromGCS = async (fileUrl) => {
     if (!fileUrl) return;
 
@@ -66,7 +62,6 @@ const deleteFromGCS = async (fileUrl) => {
         const filePath = fileUrl.replace(prefix, '');
 
         await bucket.file(filePath).delete();
-        console.log(`Berhasil menghapus file GCS: ${filePath}`);
 
     } catch (error) {
         if (error.code === 404) {
@@ -77,7 +72,17 @@ const deleteFromGCS = async (fileUrl) => {
     }
 };
 
+const getGcsUrl = (path) => {
+    if (!path) return null;
+
+    const cleanPath = path.replace(/^\/+/, '');
+    const bucketName = process.env.FIREBASE_BUCKET_NAME; 
+
+    return `https://storage.googleapis.com/${bucketName}/${cleanPath}`;
+};
+
 export {
     uploadToGCS,
-    deleteFromGCS
+    deleteFromGCS,
+    getGcsUrl
 }

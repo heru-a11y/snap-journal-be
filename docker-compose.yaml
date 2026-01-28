@@ -11,10 +11,3 @@ services:
       - ./backend/.env
     volumes:
       - ./backend/service-account-key.json:/app/service-account-key.json
-    environment:
-      - PORT=3000
-      - NODE_ENV=production
-      # Gunakan host.docker.internal jika layanan FastAPI berjalan di host (bukan container lain)
-      # Jika FastAPI ada di IP publik (seperti 34.101...), gunakan IP tersebut
-      # - FASTAPI_TEXT_URL=http://host.docker.internal:5004 
-      # - FASTAPI_VIDEO_URL=http://host.docker.internal:5003

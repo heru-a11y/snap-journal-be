@@ -1,5 +1,5 @@
 import express from "express";
-import cors from "cors";
+import { limiter, corsOptions } from "../middlewares/security-middleware.js";
 
 import { errorMiddleware } from "../middlewares/error-middleware.js";
 import { publicRouter } from "../routes/public-api.js";
@@ -8,19 +8,18 @@ import { authRouter } from "../routes/auth-api.js";
 import { journalRouter } from "../routes/journal-api.js";
 import { notificationRouter } from "../routes/notification-api.js";
 import { cronRouter } from "../routes/cron-api.js";
+import swaggerDocs from "./swagger.js";
 
 export const web = express();
 
-web.use(
-  cors({
-    origin: true,
-    credentials: true,
-  })
-);
+web.use(limiter);
+web.use(corsOptions);
 
 web.use(express.json());
-web.use("/public", express.static("public"));
 
+swaggerDocs(web);
+
+web.use("/public", express.static("public"));
 web.use(publicRouter);
 web.use(cronRouter);
 web.use(authRouter);

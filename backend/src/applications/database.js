@@ -6,7 +6,7 @@ const database = getFirestore(firebaseApp, "snap-journal-db");
 
 try {
     if (database) {
-        logger.info("Firestore Database Client ready (Connected to: snap-journal-db)");
+        logger.info("Firestore Database Client ready");
     } else {
         throw new Error("Firestore instance is undefined");
     }

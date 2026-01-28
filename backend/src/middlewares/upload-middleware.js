@@ -3,16 +3,19 @@ import { ResponseError } from "../error/response-error.js";
 
 const storage = multer.memoryStorage();
 
-
 const fileFilter = (req, file, cb) => {
     const allowedMimeTypes = [
-        'video/webm' 
+        'video/webm',       
+        'image/jpeg',       
+        'image/png',        
+        'image/jpg',        
+        'image/webp'        
     ];
 
     if (allowedMimeTypes.includes(file.mimetype)) {
         cb(null, true);
     } else {            
-        cb(new ResponseError(400, 'Format video tidak valid. Wajib menggunakan format .webm (Realtime Camera).'), false);
+        cb(new ResponseError(400, 'Format file tidak valid. Gunakan .webm untuk video, atau .jpg/.png/.webp untuk foto.'), false);
     }
 };
 

@@ -2,22 +2,29 @@ import { database } from "../applications/database.js";
 import { admin } from "../applications/firebase.js";
 import { ResponseError } from "../error/response-error.js";
 import axios from "axios";
-import nodemailer from "nodemailer";
 import jwt from "jsonwebtoken";
+import emailService from "./email-service.js";
 
 const FIREBASE_API_KEY = process.env.FIREBASE_CLIENT_API_KEY;
 const JWT_SECRET = process.env.JWT_SECRET;
 const APP_URL = process.env.APP_URL;
 
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
-    secure: process.env.SMTP_PORT == 465,
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-    },
-});
+// --- INTERNAL HELPER: Proses Verifikasi Email ---
+const _processVerificationEmail = async (uid, email, name) => {
+    const token = jwt.sign(
+        { uid: uid, email: email }, 
+        JWT_SECRET, 
+        { expiresIn: '1h' }
+    );
+
+    const verificationLink = `${APP_URL}/api/v1/auth/email/verify?token=${token}`;
+
+    await emailService.sendVerificationEmail(email, name, verificationLink);
+
+    await database.collection("users").doc(uid).update({
+        last_verification_sent_at: new Date().toISOString()
+    });
+};
 
 /**
  * Mendaftarkan user baru ke Firebase Auth & Firestore
@@ -63,11 +70,14 @@ const register = async (request) => {
 
     await database.collection("users").doc(userRecord.uid).set(userData);
 
+    await _processVerificationEmail(userRecord.uid, request.email, request.name);
+
     return {
         uid: userData.uid,
         name: userData.name,
         email: userData.email,
-        created_at: userData.created_at
+        created_at: userData.created_at,
+        message: "Registrasi berhasil. Silakan cek email Anda untuk verifikasi."
     };
 }
 
@@ -158,8 +168,8 @@ const getMe = async (user) => {
         uid: userData.uid,
         name: userData.name,
         email: userData.email,
-        createdAt: userData.createdAt,
-        updatedAt: userData.updatedAt,
+        createdAt: userData.created_at,
+        updatedAt: userData.updated_at,
         last_entry_at: userData.last_entry_at
     };
 }
@@ -192,46 +202,10 @@ const sendVerificationEmail = async (user) => {
         }
     }
 
-    const token = jwt.sign(
-        { uid: user.uid, email: userData.email }, 
-        JWT_SECRET, 
-        { expiresIn: '1h' }
-    );
-
-    const verificationLink = `${APP_URL}/api/v1/auth/email/verify?token=${token}`;
-
-    const mailOptions = {
-        from: `"${process.env.SMTP_FROM_NAME}" <${process.env.SMTP_USER}>`,
-        to: userData.email,
-        subject: "Verifikasi Email Akun Snap Journal",
-        html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
-                <h2 style="color: #333;">Halo, ${userData.name}!</h2>
-                <p>Terima kasih telah mendaftar di Snap Journal. Untuk mengaktifkan akun Anda, silakan verifikasi alamat email Anda dengan mengklik tombol di bawah ini:</p>
-                <div style="text-align: center; margin: 30px 0;">
-                    <a href="${verificationLink}" style="background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Verifikasi Email Saya</a>
-                </div>
-                <p style="color: #666; font-size: 14px;">Tautan ini hanya berlaku selama 1 jam.</p>
-                <p style="color: #666; font-size: 14px;">Jika Anda tidak merasa mendaftar, abaikan email ini.</p>
-                <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-                <p style="color: #999; font-size: 12px; text-align: center;">&copy; 2026 Snap Journal Team</p>
-            </div>
-        `
-    };
-
-    try {
-        await transporter.sendMail(mailOptions);
-    } catch (error) {
-        console.error("SMTP Error:", error);
-        throw new ResponseError(500, "Gagal mengirim email verifikasi.");
-    }
-
-    await userRef.update({
-        last_verification_sent_at: now.toISOString()
-    });
+    await _processVerificationEmail(user.uid, userData.email, userData.name);
 
     return {
-        message: "Link verifikasi telah dikirim ke email Anda.",
+        message: "Link verifikasi telah dikirim ulang ke email Anda.",
         status: "verification-link-sent"
     };
 }
@@ -279,7 +253,7 @@ const verifyEmail = async (request) => {
 
     await userRef.update({
         email_verified_at: now,
-        updatedAt: now
+        updated_at: now
     });
 
     try {
@@ -321,26 +295,7 @@ const forgotPassword = async (request) => {
 
     const resetLink = `${APP_URL}/reset-password?token=${token}&email=${request.email}`;
 
-    const mailOptions = {
-        from: `"${process.env.SMTP_FROM_NAME}" <${process.env.SMTP_USER}>`,
-        to: request.email,
-        subject: "Reset Password - Snap Journal",
-        html: `
-            <h3>Permintaan Reset Password</h3>
-            <p>Seseorang meminta untuk mereset password akun Snap Journal Anda.</p>
-            <p>Silakan klik link di bawah ini untuk membuat password baru:</p>
-            <a href="${resetLink}">Reset Password</a>
-            <p>Link ini berlaku selama 60 menit.</p>
-            <p>Jika ini bukan Anda, abaikan email ini.</p>
-        `
-    };
-
-    try {
-        await transporter.sendMail(mailOptions);
-    } catch (error) {
-        console.error("SMTP Error:", error);
-        throw new ResponseError(500, "Gagal mengirim email reset password.");
-    }
+    await emailService.sendResetPasswordEmail(request.email, resetLink);
 
     return {
         message: "Link reset password telah dikirim ke email Anda."
@@ -351,15 +306,21 @@ const forgotPassword = async (request) => {
  * Proses Reset Password Baru (POST /reset-password)
  */
 const resetPassword = async (request) => {
-    const { email, token, password } = request;
+    const { email, token, password, password_confirmation } = request;
 
+    if (password !== password_confirmation) {
+        throw new ResponseError(400, "Konfirmasi password tidak cocok.");
+    }
+
+    let decoded;
     try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        if (decoded.email !== email) {
-            throw new ResponseError(400, "Token tidak valid untuk email ini.");
-        }
+        decoded = jwt.verify(token, JWT_SECRET);
     } catch (error) {
         throw new ResponseError(400, "Token tidak valid atau sudah kadaluarsa.");
+    }
+
+    if (decoded.email !== email) {
+        throw new ResponseError(400, "Token tidak valid untuk email ini.");
     }
 
     const tokenDocRef = database.collection("password_reset_tokens").doc(email);
@@ -372,14 +333,19 @@ const resetPassword = async (request) => {
     const tokenData = tokenDoc.data();
 
     if (tokenData.token !== token) {
-        throw new ResponseError(400, "Token tidak valid.");
+        throw new ResponseError(400, "Token reset password tidak valid.");
     }
 
-    const usersSnapshot = await database.collection("users").where("email", "==", email).limit(1).get();
+    const usersSnapshot = await database
+        .collection("users")
+        .where("email", "==", email)
+        .limit(1)
+        .get();
+
     if (usersSnapshot.empty) {
         throw new ResponseError(404, "User tidak ditemukan.");
     }
-    
+
     const userDoc = usersSnapshot.docs[0];
     const userId = userDoc.id;
 
@@ -398,7 +364,7 @@ const resetPassword = async (request) => {
     return {
         message: "Password berhasil diubah. Silakan login dengan password baru."
     };
-}
+};
 
 export default {
     register,

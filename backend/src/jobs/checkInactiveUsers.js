@@ -16,7 +16,6 @@ export const checkInactiveUsers = async () => {
             .get();
 
         if (snapshot.empty) {
-            console.log("No inactive users found.");
             return;
         }
 

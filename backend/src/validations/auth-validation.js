@@ -1,6 +1,5 @@
 import Joi from "joi";
 
-// Schema untuk Register (Butuh Nama, Email, Password)
 const registerUserValidation = Joi.object({
     name: Joi.string().max(100).required().messages({
         'string.base': 'Nama harus berupa teks',
@@ -17,7 +16,6 @@ const registerUserValidation = Joi.object({
     })
 });
 
-// Schema untuk Login (Cukup Email, Password)
 const loginUserValidation = Joi.object({
     email: Joi.string().email().max(100).required().messages({
         'string.email': 'Format email tidak valid',
@@ -29,7 +27,6 @@ const loginUserValidation = Joi.object({
     })
 });
 
-// Schema untuk Request Forgot Password
 const forgotPasswordValidation = Joi.object({
     email: Joi.string().email().max(100).required().messages({
         'string.email': 'Format email tidak valid',
@@ -37,7 +34,6 @@ const forgotPasswordValidation = Joi.object({
     })
 });
 
-// Schema untuk Reset Password
 const resetPasswordValidation = Joi.object({
     token: Joi.string().required().messages({
         'any.required': 'Token wajib disertakan'

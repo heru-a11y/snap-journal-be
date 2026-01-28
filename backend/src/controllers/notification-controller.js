@@ -24,7 +24,33 @@ const markAsRead = async (req, res, next) => {
     }
 }
 
+const deleteAll = async (req, res, next) => {
+    try {
+        const result = await notificationService.deleteAll(req.user);
+        res.status(200).json({
+            data: result
+        });
+    } catch (e) {
+        next(e);
+    }
+}
+
+const deleteById = async (req, res, next) => {
+    try {
+        const notificationId = req.params.id;
+        const result = await notificationService.deleteById(req.user, notificationId);
+        
+        res.status(200).json({
+            data: result
+        });
+    } catch (e) {
+        next(e);
+    }
+}
+
 export default {
     list,
-    markAsRead
+    markAsRead,
+    deleteAll,
+    deleteById
 }
