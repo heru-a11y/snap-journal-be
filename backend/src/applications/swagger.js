@@ -15,11 +15,12 @@ const options = {
     },
 
     tags: [
-      { name: "Auth Public", description: "Endpoint Autentikasi Publik" },
-      { name: "Auth", description: "Endpoint Autentikasi Private" },
-      { name: "User", description: "Manajemen User" },
-      { name: "Journal", description: "Manajemen Journal" },
-      { name: "Notification", description: "Manajemen Notifikasi" },
+    { name: "Auth Public", description: "Endpoint Autentikasi Publik" },
+    { name: "Auth", description: "Endpoint Autentikasi Private" },
+    { name: "User", description: "Manajemen User" },
+    { name: "Journal", description: "Manajemen Journal" },
+    { name: "Cron Job (Testing)", description: "Endpoint Cron Manual" },
+    { name: "Notification", description: "Manajemen Notifikasi" },
     ],
     
     servers: [
