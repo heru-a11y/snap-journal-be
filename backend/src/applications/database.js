@@ -2,7 +2,7 @@ import { getFirestore } from "firebase-admin/firestore";
 import { firebaseApp } from "./firebase.js";
 import { logger } from "./logging.js";
 
-const database = getFirestore(firebaseApp, "snap-journal-db");
+const database = getFirestore(firebaseApp, "snapjournal-nodejs-database");
 
 try {
     if (database) {
