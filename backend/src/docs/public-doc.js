@@ -22,6 +22,7 @@
  *               - name
  *               - email
  *               - password
+ *               - confirmPassword
  *             properties:
  *               name:
  *                 type: string
@@ -33,8 +34,13 @@
  *               password:
  *                 type: string
  *                 format: password
- *                 example: "Rahasia123!"
  *                 description: Minimal 6 karakter
+ *                 example: "Rahasia123!"
+ *               confirmPassword:
+ *                 type: string
+ *                 format: password
+ *                 description: Harus sama dengan password
+ *                 example: "Rahasia123!"
  *     responses:
  *       201:
  *         description: Registrasi berhasil
@@ -58,9 +64,9 @@
  *                     created_at:
  *                       type: string
  *                       format: date-time
- *                     message:
- *                       type: string
- *                       example: "Registrasi berhasil. Silakan cek email Anda untuk verifikasi."
+ *                 message:
+ *                   type: string
+ *                   example: "Registrasi berhasil. Silakan cek email Anda untuk verifikasi."
  *       400:
  *         description: Validasi gagal atau email sudah terdaftar
  *         content:

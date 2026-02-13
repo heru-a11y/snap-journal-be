@@ -14,6 +14,10 @@ const registerUserValidation = Joi.object({
     password: Joi.string().min(6).max(100).required().messages({
         'string.min': 'Password minimal 6 karakter',
         'any.required': 'Password wajib diisi'
+    }),
+    confirmPassword: Joi.any().valid(Joi.ref('password')).required().messages({
+        'any.only': 'Konfirmasi password tidak cocok dengan password',
+        'any.required': 'Konfirmasi password wajib diisi'
     })
 });
 
