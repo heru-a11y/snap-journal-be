@@ -95,7 +95,11 @@
  * /api/v1/journals:
  *   get:
  *     summary: Mengambil daftar jurnal
- *     description: Mengambil jurnal user berdasarkan bulan & tahun (default bulan dan tahun saat ini)
+ *     description: |
+ *       Mengambil daftar jurnal user dengan prioritas filter:
+ *       1. Rentang Tanggal (start_date & end_date)
+ *       2. Tanggal Spesifik (date)
+ *       3. Bulan & Tahun (month & year) - Default
  *     tags:
  *       - Journal
  *     security:
@@ -107,14 +111,35 @@
  *           type: integer
  *           minimum: 1
  *           maximum: 12
- *         description: Filter bulan (1–12)
- *         example: 1
+ *         description: Filter bulan (1–12). Digunakan jika date/range kosong.
+ *         example: 2
  *       - in: query
  *         name: year
  *         schema:
  *           type: integer
- *         description: Filter tahun
+ *         description: Filter tahun. Digunakan jika date/range kosong.
  *         example: 2026
+ *       - in: query
+ *         name: date
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Filter tanggal spesifik (YYYY-MM-DD).
+ *         example: "2026-02-14"
+ *       - in: query
+ *         name: start_date
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Tanggal awal rentang (YYYY-MM-DD).
+ *         example: "2026-02-01"
+ *       - in: query
+ *         name: end_date
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Tanggal akhir rentang (YYYY-MM-DD).
+ *         example: "2026-02-07"
  *     responses:
  *       200:
  *         description: List jurnal berhasil diambil
@@ -126,21 +151,22 @@
  *                 meta:
  *                   type: object
  *                   properties:
- *                     filter_month:
- *                       type: integer
- *                       example: 2
- *                     filter_year:
- *                       type: integer
- *                       example: 2026
- *                     days_in_month:
- *                       type: integer
- *                       example: 28
- *                     period_start:
+ *                     filter_type:
+ *                       type: string
+ *                       example: "monthly"
+ *                       description: "Jenis filter yang digunakan: 'monthly', 'date', atau 'range'"
+ *                     filter_start:
  *                       type: string
  *                       format: date-time
- *                     period_end:
+ *                       description: "Waktu mulai periode filter (ISO 8601)"
+ *                     filter_end:
  *                       type: string
  *                       format: date-time
+ *                       description: "Waktu akhir periode filter (ISO 8601)"
+ *                     total_data:
+ *                       type: integer
+ *                       example: 10
+ *                       description: "Jumlah data yang ditemukan"
  *                 data:
  *                   type: array
  *                   items:
@@ -148,13 +174,17 @@
  *                     properties:
  *                       id:
  *                         type: string
+ *                         example: "journal_id_123"
  *                       title:
  *                         type: string
+ *                         example: "Judul Jurnal"
  *                       note:
  *                         type: string
+ *                         example: "Isi catatan hari ini..."
  *                       emotion:
  *                         type: string
  *                         nullable: true
+ *                         example: "Happy"
  *                       video_url:
  *                         type: string
  *                         nullable: true
@@ -164,6 +194,8 @@
  *                       created_at:
  *                         type: string
  *                         format: date-time
+ *       400:
+ *         description: Validasi query gagal (Format tanggal salah)
  *       401:
  *         description: Unauthorized
  *       500:

@@ -101,18 +101,49 @@ const createJournal = async (user, request, videoFile, photoFile) => {
 
 /**
  * Mengambil daftar jurnal (GET /api/v1/journals)
- * Filter berdasarkan User ID, Bulan, dan Tahun.
- * * @param {Object} user - User yang sedang login (req.user)
+ * Filter Prioritas:
+ * 1. Range Tanggal (start_date & end_date)
+ * 2. Tanggal Spesifik (date)
+ * 3. Bulan & Tahun (month & year) - Default
+ * @param {Object} user - User yang sedang login (req.user)
  * @param {Object} request - Query params (request.month, request.year)
  * @returns {Object} - Object berisi 'meta' dan 'data'
  */
 const listJournal = async (user, request) => {
-    const now = new Date();
-    const month = request.month ? parseInt(request.month) : now.getMonth() + 1;
-    const year = request.year ? parseInt(request.year) : now.getFullYear();
-    const startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0));
-    const endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
-    const daysInMonth = endDate.getDate();
+    let startDate, endDate;
+    let filterType;
+
+    // Skenario 1: Custom Range (Dari tanggal X sampai Y)
+    if (request.start_date && request.end_date) {
+        filterType = "range";
+
+        startDate = new Date(request.start_date);
+        startDate.setHours(0, 0, 0, 0);
+
+        endDate = new Date(request.end_date);
+        endDate.setHours(23, 59, 59, 999);
+    }
+
+    // Skenario 2: Specific Date (Hanya tanggal X)
+    else if (request.date) {
+        filterType = "date";
+        startDate = new Date(request.date);
+        startDate.setHours(0, 0, 0, 0);
+
+        endDate = new Date(request.date);
+        endDate.setHours(23, 59, 59, 999);
+    }
+    // Skenario 3: Default Month & Year
+    else {
+        filterType = "monthly";
+        const now = new Date();
+        const month = request.month ? parseInt(request.month) : now.getMonth() + 1;
+        const year = request.year ? parseInt(request.year) : now.getFullYear();
+        
+        startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0));
+        endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
+    }
+
     const journalsRef = database.collection("journals");
     
     const snapshot = await journalsRef
@@ -131,11 +162,10 @@ const listJournal = async (user, request) => {
 
     return {
         meta: {
-            filter_month: month,
-            filter_year: year,
-            days_in_month: daysInMonth,
-            period_start: startDate.toISOString(),
-            period_end: endDate.toISOString()
+            filter_type: filterType,
+            filter_start: startDate.toISOString(),
+            filter_end: endDate.toISOString(),
+            total_data: journals.length
         },
         data: journals
     };
