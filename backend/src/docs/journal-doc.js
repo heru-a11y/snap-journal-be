@@ -10,7 +10,7 @@
  * /api/v1/journals:
  *   post:
  *     summary: Membuat jurnal baru
- *     description: Upload video dan foto opsional. Analisis AI (emotion, expression, confidence) otomatis jika teks mencukupi.
+ *     description: Upload video (attachment) dan teks rich-text (HTML). Foto inline diatur via endpoint upload terpisah.
  *     tags:
  *       - Journal
  *     security:
@@ -26,68 +26,16 @@
  *             properties:
  *               title:
  *                 type: string
- *                 example: "Hari yang melelahkan"
  *               note:
  *                 type: string
- *                 example: "Hari ini banyak pikiran, tapi aku bertahan."
- *               photo:
- *                 type: string
- *                 format: binary
- *                 description: Foto kenangan (.jpg/.png, max 50MB)
+ *                 description: "HTML String dari editor (berisi tag <img src='...'>)"
  *               video:
  *                 type: string
  *                 format: binary
- *                 description: Video ekspresi (.webm, max 50MB)
+ *                 description: "Video attachment utama (opsional)"
  *     responses:
  *       201:
- *         description: Jurnal berhasil dibuat
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 data:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: string
- *                     user_id:
- *                       type: string
- *                     title:
- *                       type: string
- *                     note:
- *                       type: string
- *                     video_url:
- *                       type: string
- *                       nullable: true
- *                     photo_url:
- *                       type: string
- *                       nullable: true
- *                     image_path:
- *                       type: string
- *                       nullable: true
- *                     emotion:
- *                       type: string
- *                       nullable: true
- *                       example: "Sad"
- *                     expression:
- *                       type: string
- *                       nullable: true
- *                     confidence:
- *                       type: number
- *                       nullable: true
- *                     created_at:
- *                       type: string
- *                       format: date-time
- *                     updated_at:
- *                       type: string
- *                       format: date-time
- *       400:
- *         description: Validasi gagal (judul kosong)
- *       401:
- *         description: Unauthorized
- *       500:
- *         description: Gagal upload file atau proses internal
+ *         description: Berhasil
  */
 
 /**
@@ -202,6 +150,7 @@
  *         description: Gagal mengambil data jurnal
  */
 
+
 /**
  * @swagger
  * /api/v1/journals/{id}:
@@ -292,7 +241,6 @@
  * /api/v1/journals/{id}:
  *   put:
  *     summary: Mengupdate jurnal
- *     description: Mengubah judul, catatan, dan/atau mengganti foto jurnal. Jika upload foto baru, foto lama akan dihapus dari storage.
  *     tags:
  *       - Journal
  *     security:
@@ -303,7 +251,7 @@
  *         required: true
  *         schema:
  *           type: string
- *         description: ID jurnal (UUID)
+ *         description: ID jurnal yang akan diupdate
  *     requestBody:
  *       required: true
  *       content:
@@ -313,48 +261,16 @@
  *             properties:
  *               title:
  *                 type: string
- *                 example: "Judul jurnal diperbarui"
  *               note:
  *                 type: string
- *                 example: "Isi jurnal setelah diedit"
- *               photo:
+ *                 description: "HTML String baru"
+ *               video:
  *                 type: string
  *                 format: binary
- *                 description: Foto baru (opsional, akan menggantikan foto lama)
+ *                 description: "Video attachment baru (opsional)"
  *     responses:
  *       200:
- *         description: Jurnal berhasil diperbarui
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 data:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: string
- *                     title:
- *                       type: string
- *                     note:
- *                       type: string
- *                     photo_url:
- *                       type: string
- *                       nullable: true
- *                     image_path:
- *                       type: string
- *                       nullable: true
- *                     updated_at:
- *                       type: string
- *                       format: date-time
- *       403:
- *         description: Tidak memiliki akses untuk mengedit jurnal
- *       404:
- *         description: Jurnal tidak ditemukan
- *       401:
- *         description: Unauthorized
- *       500:
- *         description: Gagal update foto atau error internal
+ *         description: Berhasil
  */
 
 /**

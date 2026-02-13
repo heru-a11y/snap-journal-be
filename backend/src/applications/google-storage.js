@@ -3,13 +3,16 @@ import { ResponseError } from "../error/response-error.js";
 
 const bucketName = process.env.GOOGLE_BUCKET_NAME;
 
+/**
+ * Upload ke GCS (Mendukung Buffer & Stream)
+ */
 const uploadToGCS = (file, folder) => {
     return new Promise((resolve, reject) => {
         if (!file) {
             return reject(new ResponseError(400, "File wajib diupload."));
         }
 
-        const fileName = `${Date.now()}-${file.originalname.replace(/\s+/g, '-')}`;
+        const fileName = file.originalname || `${Date.now()}-file`;
         const destination = `${folder}/${fileName}`;        
         const blob = bucket.file(destination);
         
@@ -30,39 +33,43 @@ const uploadToGCS = (file, folder) => {
                 try {
                     await blob.makePublic(); 
                 } catch (publicError) {
-                    console.warn("Info: Gagal set public permission (Mungkin kebijakan Bucket). File tetap tersimpan aman.");
+                    console.warn("Info: Gagal set public permission. Cek IAM Bucket.");
                 }                
                 const publicUrl = `https://storage.googleapis.com/${bucketName}/${destination}`;
+                console.log(`Upload sukses: ${publicUrl}`);
                 resolve(publicUrl);
             } catch (error) {
-                console.error("Error post-upload:", error);            
                 reject(new ResponseError(500, `Gagal finalize file: ${error.message}`));
             }
         });
 
-        blobStream.end(file.buffer);
+        if (file.stream) {
+            file.stream.pipe(blobStream);
+
+            file.stream.on('error', (err) => {
+                blobStream.destroy();
+                reject(err);
+            });
+
+        } else if (file.buffer) {
+            blobStream.end(file.buffer);
+        } else {
+            reject(new ResponseError(400, "Format data file tidak dikenali (No buffer/stream)."));
+        }
     });
 };
 
 const deleteFromGCS = async (fileUrl) => {
     if (!fileUrl) return;
-
     try {
         const prefix = `https://storage.googleapis.com/${bucketName}/`;
-        
-        if (!fileUrl.startsWith(prefix)) {
-            console.warn(`URL tidak valid atau bukan dari bucket ini: ${fileUrl}`);
-            return;
-        }
+        if (!fileUrl.startsWith(prefix)) return;
 
         const filePath = fileUrl.replace(prefix, '');
-
         await bucket.file(filePath).delete();
-
+        console.log(`Berhasil menghapus file GCS: ${filePath}`);
     } catch (error) {
-        if (error.code === 404) {
-            console.warn(`File GCS tidak ditemukan (skip): ${fileUrl}`);
-        } else {
+        if (error.code !== 404) {
             console.error(`Gagal menghapus file GCS: ${error.message}`);
         }
     }
@@ -70,13 +77,8 @@ const deleteFromGCS = async (fileUrl) => {
 
 const getGcsUrl = (path) => {
     if (!path) return null;
-
     const cleanPath = path.replace(/^\/+/, '');
     return `https://storage.googleapis.com/${bucketName}/${cleanPath}`;
 };
 
-export {
-    uploadToGCS,
-    deleteFromGCS,
-    getGcsUrl
-}
+export { uploadToGCS, deleteFromGCS, getGcsUrl };

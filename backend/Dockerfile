@@ -1,5 +1,15 @@
 FROM node:20-alpine
 
+RUN apk add --no-cache \
+    ffmpeg \
+    x264-libs \
+    libvpx \
+    libwebp \
+    libass \
+    libvorbis \
+    libvpx-dev \
+    opus
+
 WORKDIR /app
 
 COPY package*.json ./

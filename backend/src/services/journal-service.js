@@ -1,100 +1,57 @@
 import { database } from "../applications/database.js";
 import { ResponseError } from "../error/response-error.js";
-import { uploadToGCS, deleteFromGCS } from "../applications/google-storage.js";
 import { v4 as uuidv4 } from "uuid";
 import aiHelperService from "./ai-helper-service.js";
+import { stripHtmlTags, extractImageUrls} from "../utils/journal-util.js";
+import uploadService from "./upload-service.js";
+import deleteService from "./delete-service.js";
 
 /**
  * Membuat Journal Baru (POST /api/v1/journals)
  * @param {Object} user - User yang sedang login (req.user)
  * @param {Object} request - Body request (title, note)
  * @param {Object|null} videoFile - File video dari Multer (req.files['video'])
- * @param {Object|null} photoFile - File foto dari Multer (req.files['photo'])
  */
-const createJournal = async (user, request, videoFile, photoFile) => {
+const createJournal = async (user, request, videoFile) => {
     if (!request.title) {
         throw new ResponseError(400, "Judul jurnal wajib diisi.");
     }
 
     const journalId = uuidv4();
     const now = new Date().toISOString();
-
-    let videoUrl = null;
-    let photoUrl = null;
-    let imagePath = null;
-
-    if (videoFile) {
-        try {
-            const folder = `journals/${user.uid}/videos`;
-            videoUrl = await uploadToGCS(videoFile, folder);
-        } catch (error) {
-            throw new ResponseError(500, `Gagal upload video: ${error.message}`);
-        }
-    }
-
-    if (photoFile) {
-        try {
-            const folder = `journals/${user.uid}/photos`;
-            photoUrl = await uploadToGCS(photoFile, folder);
-            
-            if (photoUrl) {
-                const matches = photoUrl.match(/https:\/\/storage\.googleapis\.com\/[^\/]+\/(.+)/);
-                if (matches && matches[1]) {
-                    imagePath = matches[1];
-                } else {
-                    imagePath = `${folder}/${photoFile.originalname}`;
-                }
-            }
-        } catch (error) {
-            throw new ResponseError(500, `Gagal upload foto: ${error.message}`);
-        }
-    }
-
-    const fullText = `${request.title} . ${request.note || ""}`;
+    
+    const videoUrl = await uploadService.uploadJournalVideo(user, videoFile);
+    
+    const cleanNote = stripHtmlTags(request.note || "");     
+    const fullTextForAI = `${request.title} . ${cleanNote}`;
     let aiAnalysis = { emotion: null, expression: null, confidence: null };
 
     try {
-        if (fullText.length > 3) {
-            const result = await aiHelperService.analyzeSentiment(fullText);
-            if (result) {
-                aiAnalysis = result;
-            }
+        if (fullTextForAI.length > 3) {
+            const result = await aiHelperService.analyzeSentiment(fullTextForAI);
+            if (result) aiAnalysis = result;
         }
     } catch (e) {
-        console.error("AI Analysis Skipped (Network/Quota Error):", e.message);
+        console.error("AI Analysis Skipped:", e.message);
     }
 
     const journalData = {
         id: journalId,
         user_id: user.uid,
         title: request.title,
-        note: request.note || "", 
-        
+        note: request.note || "",
         video_url: videoUrl,
-        photo_url: photoUrl,     
-        image_path: imagePath,    
-        
         emotion: aiAnalysis.emotion,        
         expression: aiAnalysis.expression,  
         confidence: aiAnalysis.confidence,  
-        
-        similarity: null,        
-        tags: null,             
-        illustrator: null,      
-        illustrator_urls: null, 
-        chatbot_suggestion: null, 
-        chatbot_highlight: null,  
-        chatbot_strategy: null,   
-
+        similarity: null, tags: null, illustrator: null, illustrator_urls: null, 
+        chatbot_suggestion: null, chatbot_highlight: null, chatbot_strategy: null,   
         created_at: now,
         updated_at: now
     };
 
     await database.collection("journals").doc(journalId).set(journalData);
-
-    await database.collection("users").doc(user.uid).update({
-        last_entry: now
-    });
+    await database.collection("users").doc(user.uid).update({ last_entry: now });
 
     return journalData;
 };
@@ -113,7 +70,6 @@ const listJournal = async (user, request) => {
     let startDate, endDate;
     let filterType;
 
-    // Skenario 1: Custom Range (Dari tanggal X sampai Y)
     if (request.start_date && request.end_date) {
         filterType = "range";
 
@@ -124,7 +80,6 @@ const listJournal = async (user, request) => {
         endDate.setHours(23, 59, 59, 999);
     }
 
-    // Skenario 2: Specific Date (Hanya tanggal X)
     else if (request.date) {
         filterType = "date";
         startDate = new Date(request.date);
@@ -133,7 +88,6 @@ const listJournal = async (user, request) => {
         endDate = new Date(request.date);
         endDate.setHours(23, 59, 59, 999);
     }
-    // Skenario 3: Default Month & Year
     else {
         filterType = "monthly";
         const now = new Date();
@@ -193,110 +147,62 @@ const getDetailJournal = async (user, journalId) => {
 }
 
 /**
- * Mengupdate data jurnal (Teks & Foto) (PUT /api/v1/journals/:id)
- * Jika ada upload foto baru, foto lama akan dihapus.
+ * Mengupdate data jurnal (Teks & Inline Image Cleanup) (PUT /api/v1/journals/:id)
  * @param {Object} user - User object
  * @param {Object} request - Body (title, note)
- * @param {Object|null} photoFile - File foto baru (opsional)
  * @param {String} journalId - ID Jurnal
  */
-const updateJournal = async (user, request, photoFile, journalId) => {
+const updateJournal = async (user, request, journalId) => {
     const docRef = database.collection("journals").doc(journalId);
     const doc = await docRef.get();
 
-    if (!doc.exists) {
-        throw new ResponseError(404, "Jurnal tidak ditemukan");
-    }
+    if (!doc.exists) throw new ResponseError(404, "Jurnal tidak ditemukan");
 
     const currentData = doc.data();
-
-    if (currentData.user_id !== user.uid) {
-        throw new ResponseError(403, "Anda tidak memiliki akses untuk mengedit jurnal ini");
-    }
+    if (currentData.user_id !== user.uid) throw new ResponseError(403, "Akses ditolak");
 
     const now = new Date().toISOString();
-    
-    const updates = {
-        updated_at: now
-    };
+    const updates = { updated_at: now };
 
-    if (request.title !== undefined) {
-        updates.title = request.title;
-    }
-
-    if (request.note !== undefined) {
-        updates.note = request.note;
-    }
-
-    if (photoFile) {
-        try {
-            if (currentData.photo_url) {
-                await deleteFromGCS(currentData.photo_url);
-            }
-
-            const folder = `journals/${user.uid}/photos`;
-            const newPhotoUrl = await uploadToGCS(photoFile, folder);
-        
-            let newImagePath = null;
-            if (newPhotoUrl) {
-                const matches = newPhotoUrl.match(/https:\/\/storage\.googleapis\.com\/[^\/]+\/(.+)/);
-                if (matches && matches[1]) {
-                    newImagePath = matches[1];
-                } else {
-                    newImagePath = `${folder}/${photoFile.originalname}`;
-                }
-            }
-
-            updates.photo_url = newPhotoUrl;
-            updates.image_path = newImagePath;
-
-        } catch (error) {
-            throw new ResponseError(500, `Gagal update foto: ${error.message}`);
-        }
-    }
+    if (request.title !== undefined) updates.title = request.title;
+    if (request.note !== undefined) updates.note = request.note;
 
     await docRef.update(updates);
-
-    return {
-        ...currentData, 
-        ...updates
-    };
+    return { ...currentData, ...updates };
 };
 
 /**
  * Menghapus jurnal & file terkait (DELETE /api/v1/journals/:id)
- * @param {Object} user - User object
- * @param {String} journalId - ID Jurnal
+ * Perbaikan: Menghapus Video DAN Semua Foto Inline di GCS
  */
 const deleteJournal = async (user, journalId) => {
     const docRef = database.collection("journals").doc(journalId);
     const doc = await docRef.get();
 
-    if (!doc.exists) {
-        throw new ResponseError(404, "Jurnal tidak ditemukan");
-    }
+    if (!doc.exists) throw new ResponseError(404, "Jurnal tidak ditemukan");
 
     const journalData = doc.data();
-    if (journalData.user_id !== user.uid) {
-        throw new ResponseError(403, "Anda tidak memiliki akses untuk menghapus jurnal ini");
-    }
+    if (journalData.user_id !== user.uid) throw new ResponseError(403, "Akses ditolak");
 
     const deletePromises = [];
     
     if (journalData.video_url) {
-        deletePromises.push(deleteFromGCS(journalData.video_url));
+        deletePromises.push(deleteService.removeFile(user, journalData.video_url));
     }
     
-    if (journalData.photo_url) {
-        deletePromises.push(deleteFromGCS(journalData.photo_url));
+    if (journalData.note) {
+        const imageUrls = extractImageUrls(journalData.note);
+        if (imageUrls.length > 0) {
+            imageUrls.forEach(url => {
+                deletePromises.push(deleteService.removeFile(user, url)); 
+            });
+        }
     }
 
-    await Promise.all(deletePromises);
+    await Promise.allSettled(deletePromises);
     await docRef.delete();
 
-    return {
-        message: "Jurnal dan file terkait berhasil dihapus"
-    };
+    return { message: "Jurnal dan seluruh file terkait berhasil dihapus" };
 };
 
 /**

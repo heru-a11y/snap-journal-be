@@ -14,12 +14,12 @@ const createJournalValidation = Joi.object({
 });
 
 const updateJournalValidation = Joi.object({
-
     title: Joi.string().max(255).optional().messages({
         'string.base': 'Judul harus berupa teks',
         'string.max': 'Judul maksimal 255 karakter',
         'string.empty': 'Judul tidak boleh kosong'
     }),
+    
     note: Joi.string().optional().allow('').messages({
         'string.base': 'Catatan harus berupa teks'
     })
