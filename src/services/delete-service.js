@@ -4,7 +4,10 @@ import { ResponseError } from "../error/response-error.js";
 const removeFile = async (user, fileUrl) => {
     if (!fileUrl) return;
 
-    if (!fileUrl.includes(`journals/${user.uid}/`)) {
+    const isJournalFile = fileUrl.includes(`journals/${user.uid}/`);
+    const isProfileFile = fileUrl.includes(`users/${user.uid}/`);
+
+    if (!isJournalFile && !isProfileFile) {
         throw new ResponseError(403, "Anda tidak memiliki izin untuk menghapus file ini.");
     }
 

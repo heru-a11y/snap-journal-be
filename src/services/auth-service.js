@@ -29,9 +29,10 @@ const register = async (request) => {
             email: request.email,
             password: request.password,
             displayName: request.name,
+            photoURL: null 
         });
     } catch (error) {
-        throw new ResponseError(400, `Gagal mendaftarkan user: ${error.message}`);
+        throw new ResponseError(400, `Gagal mendaftarkan user ke Auth: ${error.message}`);
     }
 
     const now = new Date().toISOString();
@@ -40,25 +41,36 @@ const register = async (request) => {
         uid: userRecord.uid,
         name: request.name,
         email: request.email,
-        password: "encrypted_by_firebase", 
+        password: "encrypted_by_firebase",
+        photoUrl: null,
         email_verified_at: null,
         remember_token: null,
         fcm_token: null,
-        last_entry_at: now,
-        last_entry: null,  
+        last_entry_at: now, 
+        last_entry: null,
         last_reminder_at: null,
         created_at: now,
         updated_at: now
     };
 
-    await database.collection("users").doc(userRecord.uid).set(userData);
+    try {
+        await database.collection("users").doc(userRecord.uid).set(userData);
+    } catch (error) {
+        await admin.auth().deleteUser(userRecord.uid);
+        throw new ResponseError(500, `Gagal menyimpan data user: ${error.message}`);
+    }
 
-    await _processVerificationEmail(userRecord.uid, request.email, request.name);
+    try {
+        await _processVerificationEmail(userRecord.uid, request.email, request.name);
+    } catch (emailError) {
+        console.error("Gagal mengirim email verifikasi:", emailError);
+    }
 
     return {
         uid: userData.uid,
         name: userData.name,
         email: userData.email,
+        photoUrl: userData.photoUrl,
         created_at: userData.created_at,
         message: "Registrasi berhasil. Silakan cek email Anda untuk verifikasi."
     };

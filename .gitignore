@@ -4,21 +4,17 @@
 ._*
 
 # --- 2. Secrets & Keys (SANGAT KRUSIAL) ---
-# Jangan sampai ini ter-upload ke GitHub!
-backend/service-account-key.json
-backend/.env
+service-account-key.json
 .env
 
 # --- 3. Logs & Debugging ---
 *.log
-backend/firebase-debug.log
-backend/functions/firebase-debug.log
+firebase-debug.log
+functions/firebase-debug.log
 
 # --- 4. Firebase Cache ---
-# Folder ini dibuat otomatis saat deploy/emulator
 .firebase/
-backend/.firebase/
-backend/functions/.firebase/
+functions/.firebase/
 
 # --- 5. Coverage (Jika ada testing nanti) ---
-coverage/
+coverage/service-account-key.json

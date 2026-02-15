@@ -13,6 +13,33 @@ const setUniqueFilename = (file) => {
 };
 
 /**
+ * Service untuk Upload Foto Profil
+ * Path: users/{uid}/profile.jpg
+ */
+const uploadProfilePicture = async (user, file) => {
+    if (!file) {
+        throw new ResponseError(400, "File foto profil wajib ada.");
+    }
+
+    try {
+        const fileBuffer = await sharp(file.buffer)
+            .resize(500, 500, { fit: 'cover' }) 
+            .jpeg({ quality: 80 })
+            .toBuffer();
+        
+        file.buffer = fileBuffer;
+        file.originalname = `profile-${Date.now()}.jpg`;
+
+        const folder = `users/${user.uid}`;
+        const imageUrl = await uploadToGCS(file, folder);
+
+        return imageUrl;
+    } catch (error) {
+        throw new ResponseError(500, `Gagal proses foto profil: ${error.message}`);
+    }
+};
+
+/**
  * Service untuk Upload Foto Inline dengan Kompresi Otomatis
  */
 const uploadEditorImage = async (user, file) => {
@@ -114,6 +141,7 @@ function cleanup(inFiles, outFiles) {
 }
 
 export default {
+    uploadProfilePicture,
     uploadEditorImage,
     uploadJournalVideo
 };

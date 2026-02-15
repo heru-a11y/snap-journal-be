@@ -11,6 +11,28 @@ const updateProfile = async (req, res, next) => {
     }
 }
 
+const updateProfilePicture = async (req, res, next) => {
+    try {
+        const result = await userService.updateProfilePicture(req.user, req.file);
+        res.status(200).json({
+            data: result
+        });
+    } catch (e) {
+        next(e);
+    }
+}
+
+const removeProfilePicture = async (req, res, next) => {
+    try {
+        const result = await userService.removeProfilePicture(req.user);
+        res.status(200).json({
+            data: result
+        });
+    } catch (e) {
+        next(e);
+    }
+}
+
 const updatePassword = async (req, res, next) => {
     try {
         const result = await userService.updatePassword(req.user, req.body);
@@ -46,6 +68,8 @@ const setFcmToken = async (req, res, next) => {
 
 export default {
     updateProfile,
+    updateProfilePicture,
+    removeProfilePicture,
     updatePassword,
     deleteAccount,
     setFcmToken

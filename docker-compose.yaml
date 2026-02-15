@@ -1,16 +1,16 @@
 services:
   backend:
     build:
-      context: ./backend
+      # context: .
       dockerfile: Dockerfile
-    container_name: snap-journal-backend
+    container_name: snap-journal-nodejs
     restart: always
     ports:
       - "3001:3001"
     env_file:
-      - ./backend/.env
+      - .env
     volumes:
-      - ./backend:/app
+      - .:/app
       - /app/node_modules
-      - ./backend/service-account-key.json:/app/service-account-key.json
+      - ./service-account-key.json:/app/service-account-key.json
     command: npm run dev

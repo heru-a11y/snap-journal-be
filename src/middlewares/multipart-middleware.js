@@ -19,6 +19,8 @@ export const multipartMiddleware = async (req, res, next) => {
                 }
                 req.files[file.fieldname].push(file);
             });
+
+            req.file = result.files[0]; 
         }
 
         next();
