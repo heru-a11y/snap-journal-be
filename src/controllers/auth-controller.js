@@ -33,9 +33,9 @@ const logout = async (req, res, next) => {
     }
 }
 
-const getMe = async (req, res, next) => {
+const sendVerificationOtp = async (req, res, next) => {
     try {
-        const result = await authService.getMe(req.user);
+        const result = await authService.sendVerificationOtp(req.body);
         res.status(200).json({
             data: result
         });
@@ -44,20 +44,9 @@ const getMe = async (req, res, next) => {
     }
 }
 
-const sendVerificationEmail = async (req, res, next) => {
+const verifyOtp = async (req, res, next) => {
     try {
-        const result = await authService.sendVerificationEmail(req.user);
-        res.status(200).json({
-            data: result
-        });
-    } catch (e) {
-        next(e);
-    }
-}
-
-const verifyEmail = async (req, res, next) => {
-    try {
-        const result = await authService.verifyEmail(req.query);
+        const result = await authService.verifyOtp(req.body);
         res.status(200).json({
             data: result
         });
@@ -69,6 +58,17 @@ const verifyEmail = async (req, res, next) => {
 const forgotPassword = async (req, res, next) => {
     try {
         const result = await authService.forgotPassword(req.body);
+        res.status(200).json({
+            data: result
+        });
+    } catch (e) {
+        next(e);
+    }
+}
+
+const verifyResetOtp = async (req, res, next) => {
+    try {
+        const result = await authService.verifyResetOtp(req.body);
         res.status(200).json({
             data: result
         });
@@ -92,9 +92,9 @@ export default {
     register,
     login,
     logout,
-    getMe,
-    sendVerificationEmail,
-    verifyEmail,
+    sendVerificationOtp,
+    verifyOtp,
     forgotPassword,
+    verifyResetOtp, 
     resetPassword
 }

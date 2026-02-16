@@ -2,7 +2,7 @@ import { database } from "../applications/database.js";
 import { ResponseError } from "../error/response-error.js";
 
 /**
- * Mengambil daftar notifikasi user (GET /api/v1/notifications)
+ * Mengambil daftar notifikasi user
  * @param {Object} user - User object dari token
  * @param {Object} request - Query params (limit)
  */
@@ -48,7 +48,7 @@ const list = async (user, request) => {
 };
 
 /**
- * Menandai satu notifikasi sebagai sudah dibaca (PATCH /api/v1/notifications/:id/read)
+ * Menandai satu notifikasi sebagai sudah dibaca
  * @param {Object} user - User object
  * @param {String} notificationId - UUID Notifikasi
  */
@@ -81,7 +81,7 @@ const markAsRead = async (user, notificationId) => {
 };
 
 /**
- * Menghapus seluruh riwayat notifikasi milik user (DELETE /api/v1/notifications)
+ * Menghapus seluruh riwayat notifikasi milik user
  * Menggunakan Batch Delete untuk efisiensi.
  * @param {Object} user - User object dari token
  */
@@ -110,7 +110,7 @@ const deleteAll = async (user) => {
 };
 
 /**
- * Menghapus satu notifikasi spesifik (DELETE /api/v1/notifications/:id)
+ * Menghapus satu notifikasi spesifik
  * @param {Object} user - User object dari token
  * @param {String} notificationId - ID Notifikasi
  */

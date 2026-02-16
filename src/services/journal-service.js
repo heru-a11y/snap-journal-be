@@ -7,7 +7,7 @@ import uploadService from "./upload-service.js";
 import deleteService from "./delete-service.js";
 
 /**
- * Membuat Journal Baru (POST /api/v1/journals)
+ * Membuat Journal Baru
  * @param {Object} user - User yang sedang login (req.user)
  * @param {Object} request - Body request (title, note)
  * @param {Object|null} videoFile - File video dari Multer (req.files['video'])
@@ -57,7 +57,7 @@ const createJournal = async (user, request, videoFile) => {
 };
 
 /**
- * Mengambil daftar jurnal (GET /api/v1/journals)
+ * Mengambil daftar jurnal
  * Filter Prioritas:
  * 1. Range Tanggal (start_date & end_date)
  * 2. Tanggal Spesifik (date)
@@ -126,7 +126,7 @@ const listJournal = async (user, request) => {
 };
 
 /**
- * Mengambil detail lengkap satu jurnal (GET /api/v1/journals/:id)
+ * Mengambil detail lengkap satu jurnal
  * Termasuk data hasil analisis AI jika sudah tersedia.
  * @param {Object} user - User object dari token
  * @param {String} journalId - ID Jurnal
@@ -147,7 +147,7 @@ const getDetailJournal = async (user, journalId) => {
 }
 
 /**
- * Mengupdate data jurnal (Teks & Inline Image Cleanup) (PUT /api/v1/journals/:id)
+ * Mengupdate data jurnal (Teks & Inline Image Cleanup)
  * @param {Object} user - User object
  * @param {Object} request - Body (title, note)
  * @param {String} journalId - ID Jurnal
@@ -172,7 +172,7 @@ const updateJournal = async (user, request, journalId) => {
 };
 
 /**
- * Menghapus jurnal & file terkait (DELETE /api/v1/journals/:id)
+ * Menghapus jurnal & file terkait
  * Perbaikan: Menghapus Video DAN Semua Foto Inline di GCS
  */
 const deleteJournal = async (user, journalId) => {
@@ -206,7 +206,7 @@ const deleteJournal = async (user, journalId) => {
 };
 
 /**
- * Meminta AI untuk memperbaiki / mengembangkan teks jurnal (POST /api/v1/journals/enhance)
+ * Meminta AI untuk memperbaiki / mengembangkan teks jurnal
  * Hanya meneruskan request ke ai-helper-service.
  * @param {Object} user - User object (tidak digunakan, tapi konsisten dengan service lain)
  * @param {Object} request - Body request { text, instruction }
@@ -217,7 +217,7 @@ const enhanceJournalText = async (user, request) => {
 };
 
 /**
- * Melakukan tanya jawab interaktif dengan konteks jurnal tertentu (POST /api/v1/journals/:id/chat)
+ * Melakukan tanya jawab interaktif dengan konteks jurnal tertentu
  * @param {Object} user - User object yang sedang login (req.user)
  * @param {String} journalId - UUID Jurnal yang akan dijadikan konteks
  * @param {Object} request - Body request berisi { message: "..." }
@@ -248,7 +248,7 @@ const chat = async (user, journalId, request) => {
 };
 
 /**
- * Memicu analisis AI manual untuk jurnal tertentu (POST /api/v1/journals/:id/analyze)
+ * Memicu analisis AI manual untuk jurnal tertentu
  * Mengambil data jurnal, meminta insight ke AI (Tags, Strategy, Suggestion), 
  * dan menyimpan hasilnya secara permanen ke database.
  * * @param {Object} user - User object yang sedang login (mengandung uid)
@@ -294,7 +294,7 @@ const analyze = async (user, journalId) => {
 };
 
 /**
- * Mengambil data Mood Calendar (GET /api/v1/mood-calendar)
+ * Mengambil data Mood Calendar
  * Mengelompokkan emosi berdasarkan tanggal dalam bulan tertentu.
  * @param {Object} user - User object
  * @param {Object} request - Query { year, month }

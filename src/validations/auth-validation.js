@@ -1,65 +1,61 @@
 import Joi from "joi";
 
 const registerUserValidation = Joi.object({
-    name: Joi.string().min(5).max(100).required().messages({
-        'string.base': 'Nama harus berupa teks',
-        'string.min': 'Nama minimal 5 karakter',
-        'string.max': 'Nama maksimal 100 karakter',
-        'any.required': 'Nama wajib diisi'
-    }),
-    email: Joi.string().email().max(100).required().messages({
-        'string.email': 'Format email tidak valid',
-        'any.required': 'Email wajib diisi'
-    }),
-    password: Joi.string().min(6).max(100).required().messages({
-        'string.min': 'Password minimal 6 karakter',
-        'any.required': 'Password wajib diisi'
-    }),
-    confirmPassword: Joi.any().valid(Joi.ref('password')).required().messages({
-        'any.only': 'Konfirmasi password tidak cocok dengan password',
-        'any.required': 'Konfirmasi password wajib diisi'
-    })
+    name: Joi.string().min(5).max(100).required(),
+    email: Joi.string().max(100).email().required(),
+    password: Joi.string().min(6).max(100).required()
 });
 
 const loginUserValidation = Joi.object({
-    email: Joi.string().email().max(100).required().messages({
+    email: Joi.string().max(100).email().required(),
+    password: Joi.string().min(6).max(100).required()
+});
+
+const verifyOtpValidation = Joi.object({
+    email: Joi.string().max(100).email().required().messages({
         'string.email': 'Format email tidak valid',
         'any.required': 'Email wajib diisi'
     }),
-    password: Joi.string().min(6).max(100).required().messages({
-        'string.min': 'Password minimal 6 karakter',
-        'any.required': 'Password wajib diisi'
+    otp: Joi.string().length(4).required().messages({
+        'string.length': 'Kode OTP harus 4 digit',
+        'any.required': 'Kode OTP wajib diisi'
+    })
+});
+
+const sendOtpValidation = Joi.object({
+    email: Joi.string().max(100).email().required().messages({
+        'string.email': 'Format email tidak valid',
+        'any.required': 'Email wajib diisi'
     })
 });
 
 const forgotPasswordValidation = Joi.object({
-    email: Joi.string().email().max(100).required().messages({
-        'string.email': 'Format email tidak valid',
-        'any.required': 'Email wajib diisi'
+    email: Joi.string().max(100).email().required()
+});
+
+const verifyResetOtpValidation = Joi.object({
+    email: Joi.string().max(100).email().required(),
+    otp: Joi.string().length(4).required().messages({
+        'string.length': 'Kode OTP harus 4 digit',
+        'any.required': 'Kode OTP wajib diisi'
     })
 });
 
 const resetPasswordValidation = Joi.object({
-    token: Joi.string().required().messages({
-        'any.required': 'Token wajib disertakan'
-    }),
-    email: Joi.string().email().required().messages({
-        'string.email': 'Format email tidak valid',
-        'any.required': 'Email wajib disertakan'
-    }),
-    password: Joi.string().min(6).max(100).required().messages({
-        'string.min': 'Password minimal 6 karakter',
-        'any.required': 'Password baru wajib diisi'
-    }),
+    email: Joi.string().max(100).email().required(),
+    otp: Joi.string().length(4).required(),
+    password: Joi.string().min(6).max(100).required(),
     password_confirmation: Joi.any().valid(Joi.ref('password')).required().messages({
-        'any.only': 'Konfirmasi password tidak cocok',
-        'any.required': 'Konfirmasi password wajib diisi'
+        "any.only": "Konfirmasi password tidak cocok"
     })
 });
 
 export {
     registerUserValidation,
     loginUserValidation,
+    verifyOtpValidation, 
+    sendOtpValidation,   
     forgotPasswordValidation,
+    verifyResetOtpValidation,
     resetPasswordValidation
-};
+}

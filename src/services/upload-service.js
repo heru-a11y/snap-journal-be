@@ -73,7 +73,7 @@ const uploadEditorImage = async (user, file) => {
 };
 
 /**
- * Video tidak dikompres (biasanya butuh library berbeda seperti FFmpeg)
+ * Video dikompres
  */
 const uploadJournalVideo = async (user, file) => {
     if (!file) return null;

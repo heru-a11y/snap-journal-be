@@ -66,7 +66,9 @@ const analyzeSentiment = async (text) => {
 
     const prompt = `
         Analisis teks jurnal berikut sebagai seorang psikolog empati. Tentukan:
-        1. "emotion": Satu kata sifat bahasa Inggris yang paling mewakili perasaan dominan penulis (contoh: Happy, Sad, Anxious, Grateful, Tired, Excited, Angry, Calm).
+        1. "emotion": Pilih SATU dari 5 kategori emosi berikut yang paling dominan:
+           ["Happy", "Calm", "Sad", "Tired", "Angry"].
+           Instruksi: Jika emosi lain terdeteksi (misal: Anxious, Excited, Grateful), kamu WAJIB memetakannya ke salah satu dari 5 opsi di atas yang paling mendekati maknanya.
         2. "expression": Satu emoji yang paling tepat mewakili nuansa teks (contoh: 😊, 😢, 😴, 😡, 🧘).
         3. "confidence": Angka desimal 0.0 - 1.0 seberapa yakin kamu dengan analisis ini.
 
@@ -85,8 +87,17 @@ const analyzeSentiment = async (text) => {
 
         const analysis = JSON.parse(jsonText);
 
+        const validEmotions = ["Happy", "Calm", "Sad", "Tired", "Angry"];
+        let finalEmotion = analysis.emotion || "Calm";
+        
+        finalEmotion = finalEmotion.charAt(0).toUpperCase() + finalEmotion.slice(1).toLowerCase();
+
+        if (!validEmotions.includes(finalEmotion)) {
+            finalEmotion = "Calm";
+        }
+
         return {
-            emotion: analysis.emotion || "Neutral",
+            emotion: finalEmotion,
             expression: analysis.expression || "😐",
             confidence: analysis.confidence || 0.5
         };
@@ -194,9 +205,51 @@ const generateJournalInsights = async (journalData) => {
     }
 };
 
+/**
+ * Membuat pesan reminder personal (Title & Body) berdasarkan konteks jurnal terakhir
+ */
+const generatePersonalizedReminder = async (lastJournal, userName) => {
+    if (!model) return null;
+
+    const prompt = `
+        Tugas: Buatlah notifikasi push pengingat menulis jurnal untuk user bernama ${userName}.
+        
+        Konteks Jurnal Terakhir User:
+        - Judul: "${lastJournal.title}"
+        - Isi: "${lastJournal.note}"
+        - Emosi: "${lastJournal.emotion || 'Netral'}"
+        
+        Instruksi:
+        1. Gunakan nada bicara yang empati, hangat, dan suportif.
+        2. Hubungkan dengan topik jurnal terakhirnya secara kreatif.
+        3. Output WAJIB berupa JSON valid tanpa markdown.
+        
+        Format JSON:
+        {
+          "title": "Judul singkat (3-5 kata) yang menarik perhatian",
+          "body": "Satu kalimat hangat (maks 20 kata) yang berkaitan dengan jurnal sebelumnya"
+        }
+    `;
+
+    try {
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        let jsonText = response.text().replace(/```json|```/g, "").trim();
+        
+        return JSON.parse(jsonText);
+    } catch (error) {
+        console.error("AI Personalized Reminder Error:", error);
+        return {
+            title: "Waktunya Menulis Jurnal ✍️",
+            body: `Halo ${userName}, bagaimana harimu? Ceritakan di Snap Journal yuk!`
+        };
+    }
+};
+
 export default {
     enhanceJournalText,
     analyzeSentiment,
     chatWithJournalContext,
-    generateJournalInsights
+    generateJournalInsights,
+    generatePersonalizedReminder
 };

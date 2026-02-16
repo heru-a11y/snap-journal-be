@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Reset Password OTP</title>
+    <title>Ganti Email</title>
 </head>
 <body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f3ff;">
     
@@ -14,17 +14,17 @@
                 Snap Journal
             </h1>
             <p style="color: #ede9fe; margin-top: 6px; font-size: 14px;">
-                Password Reset Request
+                Email Change Verification
             </p>
         </div>
 
         <!-- Content -->
         <div style="padding: 32px;">
-            <h2 style="color: #6d28d9; margin-top: 0;">Permintaan Reset Password</h2>
+            <h2 style="color: #6d28d9; margin-top: 0;">Halo, {{name}}!</h2>
             
             <p style="color: #4b5563; line-height: 1.6;">
-                Kami menerima permintaan untuk mengatur ulang kata sandi akun Anda.
-                Masukkan kode OTP berikut di aplikasi untuk melanjutkan proses reset:
+                Kami menerima permintaan untuk mengubah alamat email akun Anda ke alamat ini.
+                Gunakan kode OTP berikut untuk menyelesaikan proses perubahan:
             </p>
 
             <!-- OTP Box -->
@@ -41,7 +41,7 @@
                         font-size: 36px;
                         font-weight: bold;
                         letter-spacing: 10px;
-                        color: #6d28d9;
+                        color: #7c3aed;
                         font-family: 'Courier New', monospace;
                     ">
                         {{otp}}
@@ -50,11 +50,12 @@
             </div>
 
             <p style="color: #6b7280; font-size: 14px;">
-                Kode hanya berlaku selama <strong>5 menit</strong>.
+                Kode ini berlaku selama <strong>5 menit</strong>.
             </p>
 
             <p style="color: #6b7280; font-size: 14px;">
-                Jika Anda tidak merasa meminta reset password, abaikan email ini atau segera amankan akun Anda.
+                Jika Anda tidak merasa meminta perubahan ini, abaikan email ini.
+                Email lama Anda akan tetap aman.
             </p>
         </div>
 

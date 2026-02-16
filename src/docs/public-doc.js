@@ -2,7 +2,7 @@
  * @swagger
  * tags:
  *   - name: Auth Public
- *     description: Endpoint Autentikasi Publik (Register, Login, Lupa Password)
+ *     description: Endpoint Autentikasi Publik (Register, Login, Verifikasi OTP, Lupa Password)
  */
 
 /**
@@ -10,6 +10,7 @@
  * /api/v1/auth/register:
  *   post:
  *     summary: Mendaftarkan pengguna baru
+ *     description: Setelah sukses, sistem akan mengirimkan kode OTP ke email. Jika email sudah terdaftar tapi belum verifikasi, sistem akan otomatis mengirim ulang OTP baru.
  *     tags:
  *       - Auth Public
  *     requestBody:
@@ -22,28 +23,22 @@
  *               - name
  *               - email
  *               - password
- *               - confirmPassword
  *             properties:
  *               name:
  *                 type: string
- *                 example: "Name User"
+ *                 example: "Heru Sudrajat"
  *               email:
  *                 type: string
  *                 format: email
- *                 example: "user@example.com"
+ *                 example: "heru@example.com"
  *               password:
  *                 type: string
  *                 format: password
  *                 description: Minimal 6 karakter
  *                 example: "Rahasia123!"
- *               confirmPassword:
- *                 type: string
- *                 format: password
- *                 description: Harus sama dengan password
- *                 example: "Rahasia123!"
  *     responses:
- *       201:
- *         description: Registrasi berhasil
+ *       200:
+ *         description: Registrasi berhasil atau OTP dikirim ulang
  *         content:
  *           application/json:
  *             schema:
@@ -52,31 +47,15 @@
  *                 data:
  *                   type: object
  *                   properties:
- *                     uid:
- *                       type: string
- *                       example: "uid_firebase_123"
- *                     name:
- *                       type: string
- *                       example: "Name User"
  *                     email:
  *                       type: string
- *                       example: "user@example.com"
- *                     created_at:
+ *                     is_resend:
+ *                       type: boolean
+ *                     message:
  *                       type: string
- *                       format: date-time
- *                 message:
- *                   type: string
- *                   example: "Registrasi berhasil. Silakan cek email Anda untuk verifikasi."
+ *                       example: Registrasi berhasil. Kode OTP telah dikirim ke email Anda.
  *       400:
- *         description: Validasi gagal atau email sudah terdaftar
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Email sudah terdaftar"
+ *         description: Validasi gagal atau email sudah aktif
  */
 
 /**
@@ -84,6 +63,7 @@
  * /api/v1/auth/login:
  *   post:
  *     summary: Login pengguna (Firebase Auth)
+ *     description: User hanya bisa login jika sudah melakukan verifikasi OTP.
  *     tags:
  *       - Auth Public
  *     requestBody:
@@ -99,7 +79,7 @@
  *               email:
  *                 type: string
  *                 format: email
- *                 example: "user@example.com"
+ *                 example: "heru@example.com"
  *               password:
  *                 type: string
  *                 format: password
@@ -117,81 +97,114 @@
  *                   properties:
  *                     token:
  *                       type: string
- *                       description: Firebase ID Token (Bearer)
- *                       example: "eyJhbGciOiJSUzI1NiIs..."
  *                     refreshToken:
  *                       type: string
- *                       example: "AEu4IL0..."
  *                     expiresIn:
  *                       type: string
- *                       example: "3600"
  *                     user:
  *                       type: object
  *                       properties:
  *                         uid:
  *                           type: string
- *                           example: "uid_firebase_123"
  *                         name:
  *                           type: string
- *                           example: "Name User"
  *                         email:
  *                           type: string
- *                           example: "user@example.com"
  *                         email_verified_at:
  *                           type: string
  *                           format: date-time
- *                           nullable: true
- *       401:
- *         description: Email atau password salah
  *       403:
- *         description: Akun dinonaktifkan
- *       429:
- *         description: Terlalu banyak percobaan login
- *       500:
- *         description: Layanan login bermasalah
- */
-
-/**
- * @swagger
- * /api/v1/auth/email/verify:
- *   get:
- *     summary: Verifikasi email pengguna
- *     tags:
- *       - Auth Public
- *     parameters:
- *       - in: query
- *         name: token
- *         required: true
- *         schema:
- *           type: string
- *         description: Token JWT verifikasi email
- *     responses:
- *       200:
- *         description: Email berhasil diverifikasi atau sudah diverifikasi sebelumnya
+ *         description: Akun belum diverifikasi
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 message:
+ *                 errors:
  *                   type: string
- *                   example: "Email berhasil diverifikasi! Akun Anda kini aktif."
- *                 email_verified_at:
- *                   type: string
- *                   format: date-time
+ *                   example: Akun belum diverifikasi. Silakan masukkan kode OTP.
+ */
+
+/**
+ * @swagger
+ * /api/v1/auth/email/verify:
+ *   post:
+ *     summary: Verifikasi Email Registrasi (OTP)
+ *     tags:
+ *       - Auth Public
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - otp
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: "heru@example.com"
+ *               otp:
+ *                 type: string
+ *                 example: "1234"
+ *     responses:
+ *       200:
+ *         description: Email berhasil diverifikasi
+ */
+
+/**
+ * @swagger
+ * /api/v1/auth/email/send-otp:
+ *   post:
+ *     summary: Kirim Ulang Kode OTP Registrasi (Resend)
+ *     description: Mengirim ulang kode OTP ke email untuk user yang sudah mendaftar tetapi belum verifikasi. Terdapat pembatasan waktu (rate limit) antar permintaan.
+ *     tags:
+ *       - Auth Public
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: "heru@example.com"
+ *     responses:
+ *       200:
+ *         description: Kode OTP baru berhasil dikirim
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: Kode OTP baru dikirim ke email heru@example.com.
+ *                     expires_in:
+ *                       type: string
+ *                       example: 5 minutes
  *       400:
- *         description: Token verifikasi tidak ada
- *       403:
- *         description: Token tidak valid atau sudah kadaluarsa
+ *         description: Akun sudah terverifikasi sebelumnya
  *       404:
- *         description: User tidak ditemukan
+ *         description: Email tidak ditemukan dalam sistem
+ *       429:
+ *         description: Terlalu banyak permintaan. Silakan tunggu beberapa saat.
  */
 
 /**
  * @swagger
  * /api/v1/auth/forgot-password:
  *   post:
- *     summary: Mengirim link reset password ke email
+ *     summary: Langkah 1 - Request OTP Lupa Password
+ *     description: Mengirim kode OTP 4 digit ke email untuk memulai proses reset password.
  *     tags:
  *       - Auth Public
  *     requestBody:
@@ -205,30 +218,61 @@
  *             properties:
  *               email:
  *                 type: string
- *                 format: email
- *                 example: "user@example.com"
+ *                 example: "heru@example.com"
  *     responses:
  *       200:
- *         description: Link reset password berhasil dikirim
+ *         description: Kode OTP berhasil dikirim
+ */
+
+/**
+ * @swagger
+ * /api/v1/auth/forgot-password/verify:
+ *   post:
+ *     summary: Langkah 2 - Verifikasi OTP Lupa Password
+ *     description: Validasi kode OTP sebelum pengguna diizinkan masuk ke form password baru.
+ *     tags:
+ *       - Auth Public
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - otp
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: "heru@example.com"
+ *               otp:
+ *                 type: string
+ *                 example: "1234"
+ *     responses:
+ *       200:
+ *         description: OTP Valid
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 message:
- *                   type: string
- *                   example: "Link reset password telah dikirim ke email Anda."
- *       404:
- *         description: Email tidak terdaftar
- *       500:
- *         description: Gagal mengirim email reset password
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                     otp:
+ *                       type: string
  */
 
 /**
  * @swagger
  * /api/v1/auth/reset-password:
  *   post:
- *     summary: Reset password menggunakan token
+ *     summary: Langkah 3 - Reset Password Baru
+ *     description: Mengubah password lama dengan yang baru menggunakan verifikasi email dan OTP.
  *     tags:
  *       - Auth Public
  *     requestBody:
@@ -239,31 +283,40 @@
  *             type: object
  *             required:
  *               - email
- *               - token
+ *               - otp
  *               - password
  *               - password_confirmation
  *             properties:
  *               email:
  *                 type: string
- *                 format: email
- *                 example: "user@example.com"
- *               token:
+ *                 example: "heru@example.com"
+ *               otp:
  *                 type: string
- *                 description: Token reset password (JWT)
- *                 example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *                 example: "1234"
  *               password:
  *                 type: string
  *                 format: password
- *                 description: Password baru (min 6 karakter)
  *                 example: "PasswordBaru123!"
  *               password_confirmation:
  *                 type: string
  *                 format: password
- *                 description: Konfirmasi password baru
  *                 example: "PasswordBaru123!"
  *     responses:
  *       200:
  *         description: Password berhasil diubah
+ */
+
+/**
+ * @swagger
+ * /api/v1/test/reminder-job:
+ *   get:
+ *     summary: "[TEST] Pemicu Manual Personalized AI Reminder"
+ *     description: "Memicu background job untuk mengirim push notification AI berdasarkan konteks jurnal terakhir user yang tidak aktif > 48 jam."
+ *     tags:
+ *       - Testing
+ *     responses:
+ *       200:
+ *         description: Job berhasil dijalankan
  *         content:
  *           application/json:
  *             schema:
@@ -271,11 +324,5 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Password berhasil diubah. Silakan login dengan password baru."
- *       400:
- *         description: Token tidak valid, kadaluarsa, atau konfirmasi password tidak cocok
- *       404:
- *         description: User tidak ditemukan
- *       500:
- *         description: Gagal mengupdate password
+ *                   example: "Job manual berhasil dijalankan. Silakan periksa log terminal backend."
  */

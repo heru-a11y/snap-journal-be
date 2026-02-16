@@ -1,10 +1,5 @@
 import nodemailer from "nodemailer";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { getHtmlTemplate } from "../utils/email-utils.js";
 
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
@@ -17,83 +12,138 @@ const transporter = nodemailer.createTransport({
 });
 
 /**
- * Helper untuk membaca template HTML dan mengganti variabel
- * @param {string} templateName - Nama file template (misal: verification.html)
- * @param {object} data - Object berisi data untuk direplace (key: value)
+ * Mengirim Email Verifikasi berisi Kode OTP saat Registrasi.
  */
-const getHtmlTemplate = (templateName, data) => {
-    const templatePath = path.join(__dirname, "../templates/emails", templateName);
-    
-    let htmlContent = fs.readFileSync(templatePath, "utf8");
-    
-    Object.keys(data).forEach((key) => {
-        const regex = new RegExp(`{{${key}}}`, "g");
-        htmlContent = htmlContent.replace(regex, data[key]);
-    });
-
-    return htmlContent;
-};
-
-/**
- * Mengirim Email Verifikasi Akun menggunakan template HTML.
- * Fungsi ini akan membaca file 'verification.html' dan mengganti placeholder data.
- * * @param {string} email - Alamat email penerima
- * @param {string} name - Nama user (untuk sapaan di dalam email)
- * @param {string} verificationLink - URL lengkap verifikasi (Frontend URL + Token)
- * @returns {Promise<void>}
- */
-const sendVerificationEmail = async (email, name, verificationLink) => {
+const sendVerificationOtp = async (email, name, otp) => {
     try {
-        const html = getHtmlTemplate("verification.html", {
+        const html = getHtmlTemplate("verification-email.html", {
             name: name,
-            link: verificationLink,
+            otp: otp,
             year: new Date().getFullYear()
         });
 
         const mailOptions = {
             from: `"${process.env.SMTP_FROM_NAME}" <${process.env.SMTP_USER}>`,
             to: email,
-            subject: "Verifikasi Email Akun Snap Journal",
+            subject: "Kode Verifikasi (OTP) - Snap Journal",
             html: html
         };
 
         await transporter.sendMail(mailOptions);
-        console.log(`[Email Service] Verification email sent to ${email}`);
+        console.log(`[Email Service] Verification OTP sent to ${email}`);
     } catch (error) {
-        console.error("[Email Service] SMTP Error (Verification):", error);
+        console.error("[Email Service] SMTP Error (Verification OTP):", error);
     }
 };
 
 /**
- * Mengirim Email Reset Password menggunakan template HTML.
- * Fungsi ini akan membaca file 'reset-password.html' dan mengganti placeholder link.
- * * @param {string} email - Alamat email penerima
- * @param {string} resetLink - URL lengkap reset password (Frontend URL + Token)
- * @returns {Promise<void>}
+ * Mengirim Email OTP untuk Reset Password (Lupa Password).
  */
-const sendResetPasswordEmail = async (email, resetLink) => {
+const sendResetPasswordOtp = async (email, name, otp) => {
     try {
         const html = getHtmlTemplate("reset-password.html", {
-            link: resetLink,
+            name: name,
+            otp: otp,
             year: new Date().getFullYear()
         });
 
         const mailOptions = {
             from: `"${process.env.SMTP_FROM_NAME}" <${process.env.SMTP_USER}>`,
             to: email,
-            subject: "Reset Password - Snap Journal",
+            subject: "Permintaan Reset Password - Snap Journal",
             html: html
         };
 
         await transporter.sendMail(mailOptions);
-        console.log(`[Email Service] Reset password email sent to ${email}`);
+        console.log(`[Email Service] Reset Password OTP sent to ${email}`);
     } catch (error) {
-        console.error("[Email Service] SMTP Error (Reset Password):", error);
-        throw new Error("Gagal mengirim email reset password (SMTP Error).");
+        console.error("[Email Service] SMTP Error (Reset Password OTP):", error);
+        throw new Error("Gagal mengirim email reset password.");
+    }
+};
+
+/**
+ * Mengirim Email OTP untuk Perubahan Password (Saat Sedang Login).
+ */
+const sendUpdatePasswordOtp = async (email, name, otp) => {
+    try {
+        const html = getHtmlTemplate("update-password.html", {
+            name: name,
+            otp: otp,
+            year: new Date().getFullYear()
+        });
+
+        const mailOptions = {
+            from: `"${process.env.SMTP_FROM_NAME}" <${process.env.SMTP_USER}>`,
+            to: email,
+            subject: "Keamanan Akun: Kode Verifikasi Ganti Password - Snap Journal",
+            html: html
+        };
+
+        await transporter.sendMail(mailOptions);
+        console.log(`[Email Service] Update Password OTP sent to ${email}`);
+    } catch (error) {
+        console.error("[Email Service] SMTP Error (Update Password OTP):", error);
+        throw new Error("Gagal mengirim email OTP ganti password.");
+    }
+};
+
+/**
+ * Mengirim Email OTP untuk Perubahan Email.
+ */
+const sendChangeEmailOtp = async (email, name, otp) => {
+    try {
+        const html = getHtmlTemplate("change-email.html", {
+            name: name,
+            otp: otp,
+            year: new Date().getFullYear()
+        });
+
+        const mailOptions = {
+            from: `"${process.env.SMTP_FROM_NAME}" <${process.env.SMTP_USER}>`,
+            to: email,
+            subject: "Konfirmasi Perubahan Email - Snap Journal",
+            html: html
+        };
+
+        await transporter.sendMail(mailOptions);
+        console.log(`[Email Service] Change Email OTP sent to ${email}`);
+    } catch (error) {
+        console.error("[Email Service] SMTP Error (Change Email):", error);
+        throw new Error("Gagal mengirim email OTP.");
+    }
+};
+
+/**
+ * Mengirim Email OTP untuk Penghapusan Akun.
+ */
+const sendDeleteAccountOtp = async (email, name, otp) => {
+    try {
+        const html = getHtmlTemplate("delete-account.html", {
+            name: name,
+            otp: otp,
+            year: new Date().getFullYear()
+        });
+
+        const mailOptions = {
+            from: `"${process.env.SMTP_FROM_NAME}" <${process.env.SMTP_USER}>`,
+            to: email,
+            subject: "PENTING: Kode Konfirmasi Penghapusan Akun - Snap Journal",
+            html: html
+        };
+
+        await transporter.sendMail(mailOptions);
+        console.log(`[Email Service] Delete Account OTP sent to ${email}`);
+    } catch (error) {
+        console.error("[Email Service] SMTP Error (Delete Account):", error);
+        throw new Error("Gagal mengirim email OTP hapus akun.");
     }
 };
 
 export default {
-    sendVerificationEmail,
-    sendResetPasswordEmail
+    sendVerificationOtp,
+    sendChangeEmailOtp,
+    sendResetPasswordOtp,
+    sendUpdatePasswordOtp,
+    sendDeleteAccountOtp 
 };
