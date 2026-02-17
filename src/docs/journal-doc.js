@@ -150,6 +150,112 @@
  *         description: Gagal mengambil data jurnal
  */
 
+/**
+ * @swagger
+ * /api/v1/journals/latest:
+ *   get:
+ *     summary: Mengambil jurnal terakhir (Daily Insight)
+ *     description: |
+ *       Mengambil satu dokumen jurnal yang paling baru dibuat oleh user. 
+ *       Endpoint ini digunakan untuk menampilkan "Daily Insight" (Highlight, Strategy, Suggestion) pada dashboard.
+ *       Jika user belum pernah membuat jurnal, data akan bernilai null.
+ *     tags:
+ *       - Journal
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Berhasil mengambil jurnal terakhir
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: object
+ *                   nullable: true
+ *                   description: Objek jurnal terakhir atau null jika tidak ada data.
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: "550e8400-e29b-41d4-a716-446655440000"
+ *                     title:
+ *                       type: string
+ *                       example: "Hari yang melelahkan"
+ *                     note:
+ *                       type: string
+ *                       example: "<p>Hari ini cukup berat...</p>"
+ *                     emotion:
+ *                       type: string
+ *                       example: "Sad"
+ *                     chatbot_highlight:
+ *                       type: string
+ *                       description: Ringkasan kondisi mental user dari AI
+ *                       example: "Anda merasa sangat lelah secara mental dan fisik."
+ *                     chatbot_strategy:
+ *                       type: string
+ *                       description: Saran tindakan konkret dari AI
+ *                       example: "Luangkan 5-10 menit untuk praktik pernapasan."
+ *                     chatbot_suggestion:
+ *                       type: string
+ *                       description: Kalimat validasi emosi dari AI
+ *                       example: "Sangat wajar untuk merasa lelah, istirahatlah sejenak."
+ *                     created_at:
+ *                       type: string
+ *                       format: date-time
+ *                     updated_at:
+ *                       type: string
+ *                       format: date-time
+ *       401:
+ *         description: Unauthorized (Token tidak valid atau tidak ada)
+ *       500:
+ *         description: Internal Server Error
+ */
+
+/**
+ * @swagger
+ * /api/v1/journals/daily-insight:
+ *   get:
+ *     summary: Mengambil Daily Insight (Emoji & Highlight)
+ *     description: |
+ *       Mengambil ringkasan insight dari jurnal terakhir user.
+ *       Jika user baru saja menulis jurnal dan analisis belum selesai, endpoint ini
+ *       akan otomatis memicu AI untuk membuatkan insight saat itu juga.
+ *     tags:
+ *       - Journal
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Berhasil mengambil insight
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: object
+ *                   nullable: true
+ *                   properties:
+ *                     journal_id:
+ *                       type: string
+ *                       example: "b2773b03-70a7-426f-9f53-8ae41118f56d"
+ *                     date:
+ *                       type: string
+ *                       format: date-time
+ *                     expression:
+ *                       type: string
+ *                       description: Emoji yang menggambarkan perasaan user
+ *                       example: "😌"
+ *                     highlight:
+ *                       type: string
+ *                       description: Ringkasan kondisi mental user dari AI
+ *                       example: "Anda merasa sangat lelah secara mental dan fisik karena tekanan pekerjaan."
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal Server Error
+ */
 
 /**
  * @swagger

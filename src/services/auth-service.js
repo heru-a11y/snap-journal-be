@@ -14,7 +14,7 @@ const GOOGLE_API_KEY = process.env.GOOGLE_CLIENT_API_KEY;
 
 /**
  * 1. Register User Baru
- */
+*/
 const register = async (request) => {
     const userCheck = await database.collection("users")
         .where("email", "==", request.email)

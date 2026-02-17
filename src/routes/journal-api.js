@@ -26,6 +26,12 @@ journalRouter.get('/api/v1/journals',
     journalController.listJournal
 );
 
+journalRouter.get('/api/v1/journals/latest',
+    journalController.getLatestJournal
+);
+
+journalRouter.get('/api/v1/journals/daily-insight', journalController.getDailyInsight);
+
 journalRouter.get('/api/v1/journals/mood-calendar', journalController.getMoodCalendar);
 journalRouter.post('/api/v1/journals/enhance', journalController.enhanceText);
 journalRouter.get('/api/v1/journals/:id', journalController.getDetailJournal);

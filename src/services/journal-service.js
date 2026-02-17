@@ -147,6 +147,77 @@ const getDetailJournal = async (user, journalId) => {
 }
 
 /**
+ * Mengambil journal terakhir yang dibuat oleh user.
+ * Digunakan untuk menampilkan Daily Insight di dashboard.
+ * @param {Object} user - User yang sedang login (req.user)
+ * @returns {Promise<Object|null>} Data jurnal terakhir atau null jika belum ada
+ */
+const getLatestJournal = async (user) => {
+    const journalsRef = database.collection("journals");
+
+    const snapshot = await journalsRef
+        .where("user_id", "==", user.uid)
+        .orderBy("created_at", "desc")
+        .limit(1)
+        .get();
+
+    if (snapshot.empty) {
+        return null;
+    }
+
+    const journalData = snapshot.docs[0].data();
+
+    return journalData;
+};
+
+/**
+ * Mengambil Daily Insight dari jurnal terakhir.
+ * Hanya mengembalikan 'expression' (emoji) dan 'highlight' (ringkasan).
+ * Jika insight belum ada, otomatis trigger AI untuk membuatnya.
+ */
+const getDailyInsight = async (user) => {
+    const journalsRef = database.collection("journals");
+    const snapshot = await journalsRef
+        .where("user_id", "==", user.uid)
+        .orderBy("created_at", "desc")
+        .limit(1)
+        .get();
+
+    if (snapshot.empty) {
+        return null;
+    }
+
+    const doc = snapshot.docs[0];
+    let journalData = doc.data();
+
+    if (!journalData.chatbot_highlight) {
+        try {
+            const insights = await aiHelperService.generateJournalInsights(journalData);
+            
+            if (insights) {
+                await doc.ref.update({
+                    chatbot_highlight: insights.chatbot_highlight,
+                    chatbot_strategy: insights.chatbot_strategy,
+                    chatbot_suggestion: insights.chatbot_suggestion,
+                    updated_at: new Date().toISOString()
+                });
+
+                journalData.chatbot_highlight = insights.chatbot_highlight;
+            }
+        } catch (e) {
+            console.error("Gagal generate insight otomatis:", e.message);
+        }
+    }
+
+    return {
+        journal_id: journalData.id,
+        date: journalData.created_at,
+        expression: journalData.expression || "😐",
+        highlight: journalData.chatbot_highlight || "Belum ada insight untuk saat ini."
+    };
+};
+
+/**
  * Mengupdate data jurnal (Teks & Inline Image Cleanup)
  * @param {Object} user - User object
  * @param {Object} request - Body (title, note)
@@ -344,6 +415,8 @@ export default {
     createJournal,
     listJournal,
     getDetailJournal,
+    getLatestJournal,
+    getDailyInsight,
     updateJournal,
     deleteJournal,
     chat,

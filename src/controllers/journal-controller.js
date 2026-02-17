@@ -41,6 +41,36 @@ const getDetailJournal = async (req, res, next) => {
     }
 }
 
+const getLatestJournal = async (req, res, next) => {
+    try {
+        const result = await journalService.getLatestJournal(req.user);
+        res.status(200).json({
+            data: result
+        });
+    } catch (e) {
+        next(e);
+    }
+};
+
+const getDailyInsight = async (req, res, next) => {
+    try {
+        const result = await journalService.getDailyInsight(req.user);
+        
+        if (!result) {
+            return res.status(200).json({
+                message: "Belum ada jurnal untuk dianalisis.",
+                data: null
+            });
+        }
+
+        res.status(200).json({
+            data: result
+        });
+    } catch (e) {
+        next(e);
+    }
+};
+
 const updateJournal = async (req, res, next) => {
     try {
         const user = req.user;
@@ -130,6 +160,8 @@ export default {
     createJournal,
     listJournal,
     getDetailJournal,
+    getLatestJournal,
+    getDailyInsight,
     updateJournal,
     deleteJournal,
     enhanceText,
