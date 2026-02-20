@@ -30,10 +30,9 @@
  *                       example: "7s8d6f87s6d8f76s8d7f"
  *                     name:
  *                       type: string
- *                       example: "Heru Sudrajat"
  *                     email:
  *                       type: string
- *                       example: "heru@example.com"
+ *                       format: email
  *                     bio:
  *                       type: string
  *                       example: "Fullstack Developer Enthusiast"

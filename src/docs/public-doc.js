@@ -26,11 +26,9 @@
  *             properties:
  *               name:
  *                 type: string
- *                 example: "Heru Sudrajat"
  *               email:
  *                 type: string
  *                 format: email
- *                 example: "heru@example.com"
  *               password:
  *                 type: string
  *                 format: password
@@ -79,7 +77,6 @@
  *               email:
  *                 type: string
  *                 format: email
- *                 example: "heru@example.com"
  *               password:
  *                 type: string
  *                 format: password
@@ -144,7 +141,7 @@
  *             properties:
  *               email:
  *                 type: string
- *                 example: "heru@example.com"
+ *                 format: email
  *               otp:
  *                 type: string
  *                 example: "1234"
@@ -173,7 +170,6 @@
  *               email:
  *                 type: string
  *                 format: email
- *                 example: "heru@example.com"
  *     responses:
  *       200:
  *         description: Kode OTP baru berhasil dikirim
@@ -187,7 +183,7 @@
  *                   properties:
  *                     message:
  *                       type: string
- *                       example: Kode OTP baru dikirim ke email heru@example.com.
+ *                       example: Kode OTP baru dikirim ke email user@example.com.
  *                     expires_in:
  *                       type: string
  *                       example: 5 minutes
@@ -218,7 +214,7 @@
  *             properties:
  *               email:
  *                 type: string
- *                 example: "heru@example.com"
+ *                 format: email
  *     responses:
  *       200:
  *         description: Kode OTP berhasil dikirim
@@ -244,7 +240,7 @@
  *             properties:
  *               email:
  *                 type: string
- *                 example: "heru@example.com"
+ *                 format: email
  *               otp:
  *                 type: string
  *                 example: "1234"
@@ -289,7 +285,7 @@
  *             properties:
  *               email:
  *                 type: string
- *                 example: "heru@example.com"
+ *                 format: email
  *               otp:
  *                 type: string
  *                 example: "1234"
