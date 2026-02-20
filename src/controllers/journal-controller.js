@@ -83,7 +83,25 @@ const updateJournal = async (req, res, next) => {
 
 const listJournal = async (req, res, next) => {
     try {
-        const result = await journalService.listJournal(req.user, req.query);
+        const result = await journalService.listJournal(req.user);
+        res.status(200).json(result);
+    } catch (e) {
+        next(e);
+    }
+}
+
+const getDraftJournal = async (req, res, next) => {
+    try {
+        const result = await journalService.getDraftJournal(req.user);
+        res.status(200).json(result);
+    } catch (e) {
+        next(e);
+    }
+}
+
+const getFavoriteJournal = async (req, res, next) => {
+    try {
+        const result = await journalService.getFavoriteJournal(req.user);
         res.status(200).json(result);
     } catch (e) {
         next(e);
@@ -240,6 +258,8 @@ export default {
     createJournal,
     createJournalDraft,
     listJournal,
+    getDraftJournal,
+    getFavoriteJournal,
     getDetailJournal,
     getLatestJournal,
     getDailyInsight,

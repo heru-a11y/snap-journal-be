@@ -140,129 +140,76 @@ const updateJournal = async (user, request, journalId, videoFile) => {
     return { ...currentData, ...updates };
 };
 
-const listJournal = async (user, request) => {
-    let startDate, endDate;
-    let filterType;
-
-    if (request.start_date && request.end_date) {
-        filterType = "range";
-        startDate = new Date(request.start_date);
-        startDate.setHours(0, 0, 0, 0);
-        endDate = new Date(request.end_date);
-        endDate.setHours(23, 59, 59, 999);
-    } else if (request.date) {
-        filterType = "date";
-        startDate = new Date(request.date);
-        startDate.setHours(0, 0, 0, 0);
-        endDate = new Date(request.date);
-        endDate.setHours(23, 59, 59, 999);
-    } else {
-        filterType = "monthly";
-        const now = new Date();
-        const month = request.month ? parseInt(request.month) : now.getMonth() + 1;
-        const year = request.year ? parseInt(request.year) : now.getFullYear();
-        startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0));
-        endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
-    }
-
+const listJournal = async (user) => {
     const journalsRef = database.collection("journals");
     
     const snapshot = await journalsRef
         .where("user_id", "==", user.uid)
-        .where("created_at", ">=", startDate.toISOString())
-        .where("created_at", "<=", endDate.toISOString())
+        .where("is_draft", "==", false)
         .orderBy("created_at", "desc")
         .get();
 
-    let journals = [];
+    const journals = [];
     if (!snapshot.empty) {
         snapshot.forEach(doc => {
             journals.push(doc.data());
         });
     }
 
-    if (request.category) {
-        const cat = request.category.toLowerCase();
-        
-        if (cat === 'draft') {
-            journals = journals.filter(j => j.is_draft === true);
-        } else if (cat === 'favorites') {
-            journals = journals.filter(j => j.is_favorite === true && j.is_draft !== true);
-        } else {
-            journals = journals.filter(j => j.is_draft !== true);
-        }
-    } else {
-        journals = journals.filter(j => j.is_draft !== true);
-    }
-
     return {
         meta: {
-            filter_type: filterType,
-            filter_category: request.category || "all",
             total_data: journals.length
         },
         data: journals
     };
 };
 
-const toggleFavorite = async (user, journalId, request) => {
-    const docRef = database.collection("journals").doc(journalId);
-    const doc = await docRef.get();
-
-    if (!doc.exists) throw new ResponseError(404, "Jurnal tidak ditemukan");
+const getDraftJournal = async (user) => {
+    const journalsRef = database.collection("journals");
     
-    const currentData = doc.data();
-    if (currentData.user_id !== user.uid) throw new ResponseError(403, "Akses ditolak");
+    const snapshot = await journalsRef
+        .where("user_id", "==", user.uid)
+        .where("is_draft", "==", true)
+        .orderBy("created_at", "desc")
+        .get();
 
-    const isFavorite = request.is_favorite === true || request.is_favorite === "true";
-
-    await docRef.update({
-        is_favorite: isFavorite,
-        updated_at: new Date().toISOString()
-    });
+    const journals = [];
+    if (!snapshot.empty) {
+        snapshot.forEach(doc => {
+            journals.push(doc.data());
+        });
+    }
 
     return {
-        id: journalId,
-        is_favorite: isFavorite
+        meta: {
+            total_data: journals.length
+        },
+        data: journals
     };
 };
 
-const toggleDraft = async (user, journalId, request) => {
-    const docRef = database.collection("journals").doc(journalId);
-    const doc = await docRef.get();
-
-    if (!doc.exists) throw new ResponseError(404, "Jurnal tidak ditemukan");
+const getFavoriteJournal = async (user) => {
+    const journalsRef = database.collection("journals");
     
-    const currentData = doc.data();
-    if (currentData.user_id !== user.uid) throw new ResponseError(403, "Akses ditolak");
+    const snapshot = await journalsRef
+        .where("user_id", "==", user.uid)
+        .where("is_draft", "==", false)
+        .where("is_favorite", "==", true)
+        .orderBy("created_at", "desc")
+        .get();
 
-    const isDraft = request.is_draft === true || request.is_draft === "true";
-    const now = new Date().toISOString();
-
-    if (isDraft === false) {
-        if (!currentData.title || currentData.title.trim() === "" || currentData.title === "Untitled Draft") {
-            throw new ResponseError(400, "Judul harus diisi dengan benar sebelum dipublikasikan.");
-        }
-        if (!currentData.video_url) {
-            throw new ResponseError(400, "Jurnal harus memiliki video sebelum dipublikasikan.");
-        }
+    const journals = [];
+    if (!snapshot.empty) {
+        snapshot.forEach(doc => {
+            journals.push(doc.data());
+        });
     }
-
-    const updates = {
-        is_draft: isDraft,
-        updated_at: now
-    };
-
-    if (currentData.is_draft === true && isDraft === false) {
-        await database.collection("users").doc(user.uid).update({ last_entry: now });
-    }
-
-    await docRef.update(updates);
 
     return {
-        id: journalId,
-        is_draft: isDraft,
-        message: isDraft ? "Jurnal disimpan ke draft" : "Jurnal berhasil dipublikasikan"
+        meta: {
+            total_data: journals.length
+        },
+        data: journals
     };
 };
 
@@ -327,6 +274,67 @@ const getDailyInsight = async (user) => {
         date: journalData.created_at,
         expression: journalData.expression || "😐",
         highlight: journalData.chatbot_highlight || "Belum ada insight."
+    };
+};
+
+const toggleFavorite = async (user, journalId, request) => {
+    const docRef = database.collection("journals").doc(journalId);
+    const doc = await docRef.get();
+
+    if (!doc.exists) throw new ResponseError(404, "Jurnal tidak ditemukan");
+    
+    const currentData = doc.data();
+    if (currentData.user_id !== user.uid) throw new ResponseError(403, "Akses ditolak");
+
+    const isFavorite = request.is_favorite === true || request.is_favorite === "true";
+
+    await docRef.update({
+        is_favorite: isFavorite,
+        updated_at: new Date().toISOString()
+    });
+
+    return {
+        id: journalId,
+        is_favorite: isFavorite
+    };
+};
+
+const toggleDraft = async (user, journalId, request) => {
+    const docRef = database.collection("journals").doc(journalId);
+    const doc = await docRef.get();
+
+    if (!doc.exists) throw new ResponseError(404, "Jurnal tidak ditemukan");
+    
+    const currentData = doc.data();
+    if (currentData.user_id !== user.uid) throw new ResponseError(403, "Akses ditolak");
+
+    const isDraft = request.is_draft === true || request.is_draft === "true";
+    const now = new Date().toISOString();
+
+    if (isDraft === false) {
+        if (!currentData.title || currentData.title.trim() === "" || currentData.title === "Untitled Draft") {
+            throw new ResponseError(400, "Judul harus diisi dengan benar sebelum dipublikasikan.");
+        }
+        if (!currentData.video_url) {
+            throw new ResponseError(400, "Jurnal harus memiliki video sebelum dipublikasikan.");
+        }
+    }
+
+    const updates = {
+        is_draft: isDraft,
+        updated_at: now
+    };
+
+    if (currentData.is_draft === true && isDraft === false) {
+        await database.collection("users").doc(user.uid).update({ last_entry: now });
+    }
+
+    await docRef.update(updates);
+
+    return {
+        id: journalId,
+        is_draft: isDraft,
+        message: isDraft ? "Jurnal disimpan ke draft" : "Jurnal berhasil dipublikasikan"
     };
 };
 
@@ -438,6 +446,8 @@ export default {
     createJournal,
     createJournalDraft,
     listJournal,
+    getDraftJournal,
+    getFavoriteJournal,
     getDetailJournal,
     getLatestJournal,
     getDailyInsight,

@@ -4,7 +4,6 @@ import { runValidation } from "../middlewares/validation-middleware.js";
 import { 
     createJournalValidation, 
     updateJournalValidation, 
-    searchJournalValidation,
     favoriteJournalValidation,
     draftJournalValidation
 } from "../validations/journal-validation.js";
@@ -27,8 +26,15 @@ journalRouter.post('/api/v1/journals/draft',
 );
 
 journalRouter.get('/api/v1/journals', 
-    runValidation(searchJournalValidation),
     journalController.listJournal
+);
+
+journalRouter.get('/api/v1/journals/draft',
+    journalController.getDraftJournal
+);
+
+journalRouter.get('/api/v1/journals/favorite',
+    journalController.getFavoriteJournal
 );
 
 journalRouter.get('/api/v1/journals/latest',

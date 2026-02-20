@@ -143,44 +143,75 @@
  * @swagger
  * /api/v1/journals:
  *   get:
- *     summary: Mengambil daftar jurnal (Filter & Search)
+ *     summary: Mengambil seluruh daftar jurnal (Published & Favorit)
+ *     description: Mengambil semua jurnal dari yang paling baru ke paling lama. Draf tidak ditampilkan.
  *     tags:
  *       - Journal
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: category
- *         schema:
- *           type: string
- *           enum: [all, favorites, draft]
- *         description: Filter kategori jurnal.
- *       - in: query
- *         name: month
- *         schema:
- *           type: integer
- *       - in: query
- *         name: year
- *         schema:
- *           type: integer
- *       - in: query
- *         name: date
- *         schema:
- *           type: string
- *           format: date
- *       - in: query
- *         name: start_date
- *         schema:
- *           type: string
- *           format: date
- *       - in: query
- *         name: end_date
- *         schema:
- *           type: string
- *           format: date
  *     responses:
  *       200:
  *         description: List jurnal berhasil diambil.
+ */
+
+/**
+ * @swagger
+ * /api/v1/journals/draft:
+ *   get:
+ *     summary: Mengambil daftar draf jurnal
+ *     description: Mengambil semua jurnal yang masih berstatus draf (is_draft = true) milik pengguna yang sedang login.
+ *     tags:
+ *       - Journal
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List draf jurnal berhasil diambil.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 meta:
+ *                   type: object
+ *                   properties:
+ *                     total_data:
+ *                       type: integer
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       401:
+ *         description: Unauthorized.
+ */
+
+/**
+ * @swagger
+ * /api/v1/journals/favorite:
+ *   get:
+ *     summary: Mengambil daftar jurnal favorit
+ *     description: Mengambil semua jurnal yang ditandai sebagai favorit (is_favorite = true) dan bukan draf.
+ *     tags:
+ *       - Journal
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Daftar jurnal favorit berhasil diambil.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 meta:
+ *                   type: object
+ *                   properties:
+ *                     total_data:
+ *                       type: integer
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
  */
 
 /**
