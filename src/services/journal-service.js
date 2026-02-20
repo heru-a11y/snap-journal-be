@@ -164,6 +164,82 @@ const listJournal = async (user) => {
     };
 };
 
+const searchJournal = async (user, request) => {
+    let query = database.collection("journals").where("user_id", "==", user.uid);
+
+    if (request.category === 'favorites') {
+        query = query.where("is_favorite", "==", true).where("is_draft", "==", false);
+    } else if (request.category === 'draft') {
+        query = query.where("is_draft", "==", true);
+    } else if (request.category === 'all' || !request.category) {
+        query = query.where("is_draft", "==", false);
+    }
+
+    const snapshot = await query.orderBy("created_at", "desc").get();
+    let journals = [];
+
+    if (!snapshot.empty) {
+        snapshot.forEach(doc => {
+            journals.push(doc.data());
+        });
+    }
+
+    if (request.keyword) {
+        const keyword = request.keyword.toLowerCase();
+        journals = journals.filter(journal => {
+            const matchTitle = journal.title && journal.title.toLowerCase().includes(keyword);
+            const matchNote = journal.note && journal.note.toLowerCase().includes(keyword);
+            const matchTags = journal.tags && Array.isArray(journal.tags) 
+                ? journal.tags.some(tag => tag.toLowerCase().includes(keyword))
+                : false;
+            
+            return matchTitle || matchNote || matchTags;
+        });
+    }
+
+    if (request.date) {
+            const searchDate = new Date(request.date).toISOString().split('T')[0];
+            journals = journals.filter(journal => journal.created_at.startsWith(searchDate));
+        } else if (request.start_date && request.end_date) {
+            const start = new Date(request.start_date).getTime();
+            const end = new Date(request.end_date).getTime();
+            journals = journals.filter(journal => {
+                const time = new Date(journal.created_at).getTime();
+                return time >= start && time <= end;
+            });
+        } else if (request.month && request.year) {
+            const searchYear = parseInt(request.year);
+            const searchMonth = parseInt(request.month);
+            journals = journals.filter(journal => {
+                const dateObj = new Date(journal.created_at);
+                return dateObj.getUTCFullYear() === searchYear && (dateObj.getUTCMonth() + 1) === searchMonth;
+            });
+        } else if (request.year) {
+            const searchYear = parseInt(request.year);
+            journals = journals.filter(journal => {
+                const dateObj = new Date(journal.created_at);
+                return dateObj.getUTCFullYear() === searchYear;
+            });
+        }
+
+    const page = request.page || 1;
+    const size = request.size || 10;
+    const startIndex = (page - 1) * size;
+    const endIndex = startIndex + size;
+
+    const paginatedJournals = journals.slice(startIndex, endIndex);
+
+    return {
+        meta: {
+            page: page,
+            size: size,
+            total_data: journals.length,
+            total_page: Math.ceil(journals.length / size)
+        },
+        data: paginatedJournals
+    };
+};
+
 const getDraftJournal = async (user) => {
     const journalsRef = database.collection("journals");
     
@@ -446,6 +522,7 @@ export default {
     createJournal,
     createJournalDraft,
     listJournal,
+    searchJournal,
     getDraftJournal,
     getFavoriteJournal,
     getDetailJournal,

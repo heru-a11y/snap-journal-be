@@ -89,6 +89,18 @@ const listJournal = async (req, res, next) => {
         next(e);
     }
 }
+const searchJournal = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const request = req.query;
+
+        const result = await journalService.searchJournal(user, request);
+
+        res.status(200).json(result);
+    } catch (e) {
+        next(e);
+    }
+}
 
 const getDraftJournal = async (req, res, next) => {
     try {
@@ -258,6 +270,7 @@ export default {
     createJournal,
     createJournalDraft,
     listJournal,
+    searchJournal,
     getDraftJournal,
     getFavoriteJournal,
     getDetailJournal,

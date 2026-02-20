@@ -156,6 +156,95 @@
 
 /**
  * @swagger
+ * /api/v1/journals/search:
+ *   get:
+ *     summary: Mencari dan memfilter jurnal
+ *     description: Mencari jurnal berdasarkan kata kunci (mencakup judul, catatan, dan tag) beserta filter kategori dan waktu. Mendukung paginasi.
+ *     tags:
+ *       - Journal
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: keyword
+ *         schema:
+ *           type: string
+ *         description: Kata kunci pencarian
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *           enum: [all, favorites, draft]
+ *         description: Kategori jurnal
+ *       - in: query
+ *         name: date
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Tanggal spesifik (YYYY-MM-DD)
+ *       - in: query
+ *         name: start_date
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Tanggal mulai rentang pencarian (YYYY-MM-DD)
+ *       - in: query
+ *         name: end_date
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Tanggal akhir rentang pencarian (YYYY-MM-DD)
+ *       - in: query
+ *         name: month
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 12
+ *         description: Bulan (1-12)
+ *       - in: query
+ *         name: year
+ *         schema:
+ *           type: integer
+ *         description: Tahun (contoh 2026)
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Halaman paginasi
+ *       - in: query
+ *         name: size
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Jumlah data per halaman
+ *     responses:
+ *       200:
+ *         description: Hasil pencarian jurnal berhasil diambil.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 meta:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                     size:
+ *                       type: integer
+ *                     total_data:
+ *                       type: integer
+ *                     total_page:
+ *                       type: integer
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ */
+
+/**
+ * @swagger
  * /api/v1/journals/draft:
  *   get:
  *     summary: Mengambil daftar draf jurnal

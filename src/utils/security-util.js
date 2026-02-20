@@ -60,7 +60,7 @@ export const checkCooldown = (lastAttemptStr, currentCount, maxAttempts = 3, coo
 };
 
 /**
- * 4. HITUNG LOGIC LOGIN GAGAL [BARU]
+ * 4. HITUNG LOGIC LOGIN GAGAL
  * Menghitung counter gagal dan menentukan apakah harus dikunci.
  * * @param {number} currentFailCount - Jumlah gagal saat ini dari DB
  * @param {number} maxAttempts - Batas maksimal gagal (default: 5)

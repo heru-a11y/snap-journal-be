@@ -2,6 +2,7 @@ import express from "express";
 import { authMiddleware } from "../middlewares/auth-middleware.js";
 import { runValidation } from "../middlewares/validation-middleware.js";
 import { 
+    searchJournalValidation,
     createJournalValidation, 
     updateJournalValidation, 
     favoriteJournalValidation,
@@ -27,6 +28,11 @@ journalRouter.post('/api/v1/journals/draft',
 
 journalRouter.get('/api/v1/journals', 
     journalController.listJournal
+);
+
+journalRouter.get('/api/v1/journals/search',
+    runValidation(searchJournalValidation),
+    journalController.searchJournal
 );
 
 journalRouter.get('/api/v1/journals/draft',

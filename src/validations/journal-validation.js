@@ -39,13 +39,13 @@ const searchJournalValidation = Joi.object({
     size: Joi.number().min(1).max(100).positive().default(10),
     month: Joi.number().min(1).max(12).optional(),
     year: Joi.number().min(2000).max(2100).optional(),
-
     date: Joi.date().iso().optional().messages({
         'date.format': 'Format tanggal salah, gunakan YYYY-MM-DD'
     }),
     start_date: Joi.date().iso().optional(),
     end_date: Joi.date().iso().optional(),
-    category: Joi.string().valid('all', 'favorites', 'draft').optional()
+    category: Joi.string().valid('all', 'favorites', 'draft').optional(),
+    keyword: Joi.string().allow('').optional()
 });
 
 const favoriteJournalValidation = Joi.object({
