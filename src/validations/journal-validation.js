@@ -10,19 +10,28 @@ const createJournalValidation = Joi.object({
 
     note: Joi.string().optional().allow('').messages({
         'string.base': 'Catatan harus berupa teks'
-    })
+    }),
+
+    is_favorite: Joi.boolean().optional(),
+    is_draft: Joi.boolean().optional(),
+    video: Joi.any().optional(),
+    photos: Joi.any().optional() 
 });
 
 const updateJournalValidation = Joi.object({
-    title: Joi.string().max(255).optional().messages({
+    title: Joi.string().max(255).optional().allow('').messages({
         'string.base': 'Judul harus berupa teks',
         'string.max': 'Judul maksimal 255 karakter',
-        'string.empty': 'Judul tidak boleh kosong'
     }),
     
     note: Joi.string().optional().allow('').messages({
         'string.base': 'Catatan harus berupa teks'
-    })
+    }),
+    is_favorite: Joi.boolean().optional(),
+    is_draft: Joi.boolean().optional(),
+    delete_photo: Joi.boolean().optional(), 
+    video: Joi.any().optional(),
+    photos: Joi.any().optional()
 });
 
 const searchJournalValidation = Joi.object({
@@ -35,11 +44,28 @@ const searchJournalValidation = Joi.object({
         'date.format': 'Format tanggal salah, gunakan YYYY-MM-DD'
     }),
     start_date: Joi.date().iso().optional(),
-    end_date: Joi.date().iso().optional()
+    end_date: Joi.date().iso().optional(),
+    category: Joi.string().valid('all', 'favorites', 'draft').optional()
+});
+
+const favoriteJournalValidation = Joi.object({
+    is_favorite: Joi.boolean().required().messages({
+        'boolean.base': 'Status favorite harus berupa boolean (true/false)',
+        'any.required': 'Status favorite wajib diisi'
+    })
+});
+
+const draftJournalValidation = Joi.object({
+    is_draft: Joi.boolean().required().messages({
+        'boolean.base': 'Status draft harus berupa boolean (true/false)',
+        'any.required': 'Status draft wajib diisi'
+    })
 });
 
 export {
     createJournalValidation,
     updateJournalValidation,
-    searchJournalValidation
+    searchJournalValidation,
+    favoriteJournalValidation,
+    draftJournalValidation
 };

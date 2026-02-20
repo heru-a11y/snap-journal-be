@@ -1,11 +1,12 @@
 import express from "express";
 import { authMiddleware } from "../middlewares/auth-middleware.js";
-import { verifiedMiddleware } from "../middlewares/verified-middleware.js";
 import { runValidation } from "../middlewares/validation-middleware.js";
 import { 
     createJournalValidation, 
     updateJournalValidation, 
-    searchJournalValidation 
+    searchJournalValidation,
+    favoriteJournalValidation,
+    draftJournalValidation
 } from "../validations/journal-validation.js";
 import { multipartMiddleware } from "../middlewares/multipart-middleware.js";
 import journalController from "../controllers/journal-controller.js";
@@ -13,12 +14,16 @@ import journalController from "../controllers/journal-controller.js";
 const journalRouter = new express.Router();
 
 journalRouter.use(authMiddleware);
-journalRouter.use(verifiedMiddleware);
 
 journalRouter.post('/api/v1/journals', 
     multipartMiddleware,
     runValidation(createJournalValidation),
     journalController.createJournal
+);
+
+journalRouter.post('/api/v1/journals/draft', 
+    multipartMiddleware,
+    journalController.createJournalDraft
 );
 
 journalRouter.get('/api/v1/journals', 
@@ -30,11 +35,26 @@ journalRouter.get('/api/v1/journals/latest',
     journalController.getLatestJournal
 );
 
-journalRouter.get('/api/v1/journals/daily-insight', journalController.getDailyInsight);
+journalRouter.get('/api/v1/journals/daily-insight', 
+    journalController.getDailyInsight
+);
 
-journalRouter.get('/api/v1/journals/mood-calendar', journalController.getMoodCalendar);
-journalRouter.post('/api/v1/journals/enhance', journalController.enhanceText);
-journalRouter.get('/api/v1/journals/:id', journalController.getDetailJournal);
+journalRouter.get('/api/v1/journals/mood-calendar', 
+    journalController.getMoodCalendar
+);
+
+journalRouter.post('/api/v1/journals/editor-image',
+    multipartMiddleware,
+    journalController.uploadEditorImage
+);
+
+journalRouter.delete('/api/v1/journals/editor-image',
+    journalController.deleteEditorImage
+);
+
+journalRouter.get('/api/v1/journals/:id', 
+    journalController.getDetailJournal
+);
 
 journalRouter.put('/api/v1/journals/:id', 
     multipartMiddleware,
@@ -42,8 +62,30 @@ journalRouter.put('/api/v1/journals/:id',
     journalController.updateJournal
 );
 
-journalRouter.delete('/api/v1/journals/:id', journalController.deleteJournal);
-journalRouter.post('/api/v1/journals/:id/chat', journalController.chat);
-journalRouter.post('/api/v1/journals/:id/analyze', journalController.analyze);
+journalRouter.patch('/api/v1/journals/:id/favorite',
+    runValidation(favoriteJournalValidation),
+    journalController.toggleFavorite
+);
+
+journalRouter.patch('/api/v1/journals/:id/draft',
+    runValidation(draftJournalValidation),
+    journalController.toggleDraft
+);
+
+journalRouter.post('/api/v1/journals/enhance', 
+    journalController.enhanceText
+);
+
+journalRouter.post('/api/v1/journals/:id/chat', 
+    journalController.chat
+);
+
+journalRouter.post('/api/v1/journals/:id/analyze', 
+    journalController.analyze
+);
+
+journalRouter.delete('/api/v1/journals/:id', 
+    journalController.deleteJournal
+);
 
 export { journalRouter };

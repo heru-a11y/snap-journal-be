@@ -12,10 +12,6 @@ const setUniqueFilename = (file) => {
     return file;
 };
 
-/**
- * Service untuk Upload Foto Profil
- * Path: users/{uid}/profile.jpg
- */
 const uploadProfilePicture = async (user, file) => {
     if (!file) {
         throw new ResponseError(400, "File foto profil wajib ada.");
@@ -24,7 +20,7 @@ const uploadProfilePicture = async (user, file) => {
     try {
         const fileBuffer = await sharp(file.buffer)
             .resize(500, 500, { fit: 'cover' }) 
-            .jpeg({ quality: 80 })
+            .jpeg({ quality: 80, mozjpeg: true }) 
             .toBuffer();
         
         file.buffer = fileBuffer;
@@ -39,42 +35,31 @@ const uploadProfilePicture = async (user, file) => {
     }
 };
 
-/**
- * Service untuk Upload Foto Inline dengan Kompresi Otomatis
- */
 const uploadEditorImage = async (user, file) => {
-    if (!file) {
-        throw new ResponseError(400, "File gambar wajib ada.");
-    }
+    if (!file) return null;
 
     try {
-        setUniqueFilename(file);
-        
-        let fileBuffer = file.buffer;
-        const limitSize = 2 * 1024 * 1024;
+        const timestamp = Date.now();
+        const cleanName = file.originalname.replace(/\.[^/.]+$/, "").replace(/\s+/g, '-');
+        file.originalname = `${timestamp}-${cleanName}.jpg`;
 
-        if (file.size > limitSize) {
-            fileBuffer = await sharp(file.buffer)
-                .resize({ width: 2000, withoutEnlargement: true })
-                .jpeg({ quality: 80 })
-                .toBuffer();
-            file.buffer = fileBuffer;
-        }
+        const fileBuffer = await sharp(file.buffer)
+            .resize({ width: 1080, withoutEnlargement: true })
+            .jpeg({ quality: 80, mozjpeg: true })
+            .toBuffer();
 
-        const folder = `journals/${user.uid}/photos`;
+        file.buffer = fileBuffer;
+        file.mimetype = 'image/jpeg';
+
+        const folder = `journals/${user.uid}/content-images`;
         const imageUrl = await uploadToGCS(file, folder);
 
-        return {
-            url: imageUrl
-        };
+        return { url: imageUrl };
     } catch (error) {
-        throw new ResponseError(500, `Gagal proses/upload gambar: ${error.message}`);
+        throw new ResponseError(500, `Gagal upload gambar editor: ${error.message}`);
     }
 };
 
-/**
- * Video dikompres
- */
 const uploadJournalVideo = async (user, file) => {
     if (!file) return null;
 
@@ -89,12 +74,15 @@ const uploadJournalVideo = async (user, file) => {
         return new Promise((resolve, reject) => {
             ffmpeg(tempInput.name)
                 .videoCodec('libx264')
-                .size('1280x720')
+                .size('1280x720') 
+                .audioCodec('aac')
+                .audioBitrate('128k')
                 .format('mp4')
                 .outputOptions([
-                    '-preset ultrafast', 
-                    '-crf 28',           
-                    '-movflags +faststart'
+                    '-preset veryfast', 
+                    '-crf 28',          
+                    '-movflags +faststart',
+                    '-pix_fmt yuv420p' 
                 ])
                 .on('error', (err) => {
                     cleanup(tempInput, tempOutput);
@@ -130,7 +118,6 @@ const uploadJournalVideo = async (user, file) => {
     }
 };
 
-// Helper untuk membersihkan file agar tidak memenuhi storage Docker
 function cleanup(inFiles, outFiles) {
     try {
         if (inFiles && fs.existsSync(inFiles.name)) inFiles.removeCallback();
@@ -142,6 +129,6 @@ function cleanup(inFiles, outFiles) {
 
 export default {
     uploadProfilePicture,
-    uploadEditorImage,
+    uploadEditorImage, 
     uploadJournalVideo
 };

@@ -57,54 +57,44 @@ const enhanceJournalText = async (request) => {
 };
 
 /**
- * Menganalisis teks untuk mendapatkan Emosi & Ekspresi (Emoji)
- * @param {String} text - Teks jurnal (Title + Note)
+ * Menganalisis VISUAL (Video) untuk deteksi ekspresi wajah (Face Recognition)
+ * Fungsi ini tidak membaca teks, hanya fokus pada aspek visual.
+ * @param {Object} filePart - Objek file format Gemini { inlineData: { data, mimeType } }
  */
-const analyzeSentiment = async (text) => {
-    if (!model) return null; 
-    if (!text || text.length < 3) return null; 
+const analyzeVideo = async (filePart) => {
+    if (!model || !filePart) return null; 
 
     const prompt = `
-        Analisis teks jurnal berikut sebagai seorang psikolog empati. Tentukan:
-        1. "emotion": Pilih SATU dari 5 kategori emosi berikut yang paling dominan:
-           ["Happy", "Calm", "Sad", "Tired", "Angry"].
-           Instruksi: Jika emosi lain terdeteksi (misal: Anxious, Excited, Grateful), kamu WAJIB memetakannya ke salah satu dari 5 opsi di atas yang paling mendekati maknanya.
-        2. "expression": Satu emoji yang paling tepat mewakili nuansa teks (contoh: 😊, 😢, 😴, 😡, 🧘).
-        3. "confidence": Angka desimal 0.0 - 1.0 seberapa yakin kamu dengan analisis ini.
+        Tugas: Analisis ekspresi wajah dan aura emosi secara VISUAL dari media ini.
+        Instruksi:
+        1. "emotion": Pilih SATU dari kategori: ["Happy", "Calm", "Sad", "Tired", "Angry"].
+        2. "expression": Satu emoji yang paling mewakili raut wajah (misal: 😊, 😢, 😴, 😡, 🧘).
+        3. "confidence": Skor keyakinan visual (0.0 - 1.0).
 
-        Output WAJIB berupa JSON valid saja tanpa format markdown.
-        Format JSON: {"emotion": "string", "expression": "string", "confidence": number}
-        
-        Teks Jurnal: "${text}"
+        Output WAJIB JSON valid tanpa markdown:
+        {"emotion": "string", "expression": "string", "confidence": number}
     `;
 
     try {
-        const result = await model.generateContent(prompt);
+        const result = await model.generateContent([prompt, filePart]);
         const response = await result.response;
-        let jsonText = response.text();
-
-        jsonText = jsonText.replace(/```json|```/g, "").trim();
+        let jsonText = response.text().replace(/```json|```/g, "").trim();
 
         const analysis = JSON.parse(jsonText);
 
         const validEmotions = ["Happy", "Calm", "Sad", "Tired", "Angry"];
-        let finalEmotion = analysis.emotion || "Calm";
-        
-        finalEmotion = finalEmotion.charAt(0).toUpperCase() + finalEmotion.slice(1).toLowerCase();
+        let finalEmotion = (analysis.emotion || "Calm").charAt(0).toUpperCase() + (analysis.emotion || "Calm").slice(1).toLowerCase();
 
-        if (!validEmotions.includes(finalEmotion)) {
-            finalEmotion = "Calm";
-        }
+        if (!validEmotions.includes(finalEmotion)) finalEmotion = "Calm";
 
         return {
             emotion: finalEmotion,
             expression: analysis.expression || "😐",
             confidence: analysis.confidence || 0.5
         };
-
     } catch (error) {
-        console.error("Gemini Sentiment Error:", error.message);
-        return null; 
+        console.error("Gemini Visual Analysis Error:", error.message);
+        return { emotion: "Calm", expression: "😐", confidence: 0.5 }; 
     }
 };
 
@@ -159,35 +149,38 @@ const chatWithJournalContext = async (journalData, userMessage) => {
 };
 
 /**
- * Melakukan Deep Analysis untuk mengisi field Insight (Strategy, Highlight, Suggestion, Tags)
- * @param {Object} journalData - Data jurnal (title, note)
- * @returns {Object} JSON berisi tags, highlight, strategy, suggestion
+ * Melakukan Deep Analysis pada TEKS Jurnal (Title & Note)
+ * untuk mengisi field Insight (Tags, Highlight, Suggestion, Strategy)
+ * * @param {Object} journalData - Data jurnal lengkap (termasuk title, note, dan emotion dari video jika ada)
+ * @returns {Object|null} JSON berisi tags, highlight, strategy, suggestion atau null jika gagal
  */
 const generateJournalInsights = async (journalData) => {
-    if (!model) return null;
+    if (!model || !journalData) return null;
+
+    const journalText = `Judul: "${journalData.title}"\nIsi Catatan: "${journalData.note || '-'}"`;
+    const visualContext = journalData.emotion 
+        ? `(Konteks Tambahan: Wajah user terdeteksi emosi "${journalData.emotion}")` 
+        : "";
 
     const prompt = `
-        Bertindaklah sebagai psikolog dan life coach profesional. 
-        Analisis jurnal berikut dan berikan insight mendalam dalam format JSON.
-        
+        Bertindaklah sebagai psikolog klinis dan life coach yang empatik.
+        Lakukan analisis mendalam terhadap TEKS jurnal berikut.
+
         Data Jurnal:
-        - Judul: "${journalData.title}"
-        - Isi: "${journalData.note}"
-        - Emosi Awal: "${journalData.emotion || 'Netral'}"
+        ${journalText}
+        ${visualContext}
 
-        Tugasmu adalah mengisi 4 hal ini:
-        1. "tags": Array of strings (maksimal 3 kata kunci relevan, misal: ["Karir", "Kecemasan", "Produktivitas"]).
-        2. "chatbot_highlight": Satu kalimat pendek yang merangkum inti masalah/cerita (Ringkasan).
-        3. "chatbot_suggestion": Saran reflektif yang hangat dan menenangkan hati user (sekitar 2-3 kalimat).
-        4. "chatbot_strategy": Satu langkah aksi nyata (actionable step) yang bisa dilakukan user besok.
+        Instruksi Analisis:
+        1. Identifikasi topik utama dan perasaan tersirat dari kata-kata user.
+        2. Jika teks sangat singkat, kembangkan saran berdasarkan Judul dan Emosi Visual.
+        3. Gunakan Bahasa Indonesia yang natural, hangat, dan tidak kaku (seperti teman curhat yang bijak).
 
-        Output WAJIB JSON Valid tanpa markdown.
-        Contoh Format:
+        Output WAJIB JSON Valid (tanpa markdown):
         {
-            "tags": ["Stress", "Work"],
-            "chatbot_highlight": "Kamu merasa tertekan karena deadline pekerjaan yang menumpuk.",
-            "chatbot_suggestion": "Tidak apa-apa untuk merasa lelah. Cobalah untuk tidak memaksakan kesempurnaan.",
-            "chatbot_strategy": "Buatlah daftar prioritas dan kerjakan satu per satu mulai besok pagi."
+            "tags": ["String", "String", "String"], // Maksimal 3 kata kunci relevan (misal: "Burnout", "Keluarga", "Syukur")
+            "chatbot_highlight": "String", // Satu kalimat ringkasan inti masalah/cerita (maks 20 kata)
+            "chatbot_suggestion": "String", // Saran reflektif yang menenangkan & validasi perasaan (2-3 kalimat)
+            "chatbot_strategy": "String" // Satu tindakan nyata (actionable step) yang spesifik dan mudah dilakukan
         }
     `;
 
@@ -198,10 +191,18 @@ const generateJournalInsights = async (journalData) => {
 
         jsonText = jsonText.replace(/```json|```/g, "").trim();
         
-        return JSON.parse(jsonText);
+        const analysis = JSON.parse(jsonText);
+
+        return {
+            tags: Array.isArray(analysis.tags) ? analysis.tags.slice(0, 3) : ["Refleksi"],
+            chatbot_highlight: analysis.chatbot_highlight || "Insight jurnal harianmu.",
+            chatbot_suggestion: analysis.chatbot_suggestion || "Terima kasih sudah berbagi cerita hari ini.",
+            chatbot_strategy: analysis.chatbot_strategy || "Istirahatlah sejenak untuk menenangkan pikiran."
+        };
+
     } catch (error) {
-        console.error("Gemini Insight Error:", error);
-        throw new ResponseError(500, "Gagal menghasilkan insight AI.");
+        console.error("Gemini Text Analysis Error:", error.message);
+        return null;
     }
 };
 
@@ -248,7 +249,7 @@ const generatePersonalizedReminder = async (lastJournal, userName) => {
 
 export default {
     enhanceJournalText,
-    analyzeSentiment,
+    analyzeVideo,
     chatWithJournalContext,
     generateJournalInsights,
     generatePersonalizedReminder

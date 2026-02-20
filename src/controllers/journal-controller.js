@@ -1,17 +1,79 @@
 import journalService from "../services/journal-service.js";
+import uploadService from "../services/upload-service.js";
+import deleteService from "../services/delete-service.js";
+
+const uploadEditorImage = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const file = req.files['image'] ? req.files['image'][0] : null;
+
+        const result = await uploadService.uploadEditorImage(user, file);
+        res.status(200).json({ data: result });
+    } catch (e) {
+        next(e);
+    }
+};
+
+const deleteEditorImage = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const { file_url } = req.body; 
+
+        if (!file_url) {
+            return res.status(400).json({ errors: "URL file wajib disertakan." });
+        }
+
+        const result = await deleteService.removeFile(user, file_url);
+        res.status(200).json({ data: result });
+    } catch (e) {
+        next(e);
+    }
+};
 
 const createJournal = async (req, res, next) => {
     try {
         const user = req.user;
         const request = req.body;
         const files = req.files || {};
-        
-        const videoArray = files['video'];
-        const videoFile = videoArray ? videoArray[0] : null;
+        const videoFile = files['video'] ? files['video'][0] : null;
 
         const result = await journalService.createJournal(user, request, videoFile);
+        res.status(201).json({ data: result });
+    } catch (e) {
+        next(e);
+    }
+}
+
+const createJournalDraft = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const request = req.body;
+        
+        const files = req.files || {};
+        const videoFile = files['video'] ? files['video'][0] : null;
+
+        const result = await journalService.createJournalDraft(user, request, videoFile);
 
         res.status(201).json({
+            data: result
+        });
+    } catch (e) {
+        next(e);
+    }
+}
+
+const updateJournal = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const id = req.params.id;
+        const request = req.body;
+
+        const files = req.files || {};
+        const videoFile = files['video'] ? files['video'][0] : null;
+
+        const result = await journalService.updateJournal(user, request, id, videoFile);
+
+        res.status(200).json({
             data: result
         });
     } catch (e) {
@@ -71,13 +133,29 @@ const getDailyInsight = async (req, res, next) => {
     }
 };
 
-const updateJournal = async (req, res, next) => {
+const toggleFavorite = async (req, res, next) => {
     try {
         const user = req.user;
         const id = req.params.id;
         const request = req.body;
 
-        const result = await journalService.updateJournal(user, request, id);
+        const result = await journalService.toggleFavorite(user, id, request);
+
+        res.status(200).json({
+            data: result
+        });
+    } catch (e) {
+        next(e);
+    }
+}
+
+const toggleDraft = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const id = req.params.id;
+        const request = req.body;
+
+        const result = await journalService.toggleDraft(user, id, request);
 
         res.status(200).json({
             data: result
@@ -157,12 +235,17 @@ const getMoodCalendar = async (req, res, next) => {
 }
 
 export default {
+    uploadEditorImage,
+    deleteEditorImage,
     createJournal,
+    createJournalDraft,
     listJournal,
     getDetailJournal,
     getLatestJournal,
     getDailyInsight,
     updateJournal,
+    toggleFavorite,
+    toggleDraft,
     deleteJournal,
     enhanceText,
     chat,
