@@ -1,0 +1,87 @@
+.
+├── Dockerfile
+├── README.md
+├── docker-compose.yaml
+├── env.example
+├── firebase-debug.log
+├── firebase.json
+├── functions
+│   ├── index.js
+│   └── package.json
+├── index.js
+├── package-lock.json
+├── package.json
+├── service-account-key.json
+├── src
+│   ├── applications
+│   │   ├── database.js
+│   │   ├── firebase.js
+│   │   ├── gemini.js
+│   │   ├── google-storage.js
+│   │   ├── logging.js
+│   │   ├── swagger.js
+│   │   └── web.js
+│   ├── controllers
+│   │   ├── auth-controller.js
+│   │   ├── feeling-controller.js
+│   │   ├── journal-controller.js
+│   │   ├── notification-controller.js
+│   │   └── user-controller.js
+│   ├── docs
+│   │   ├── auth-doc.js
+│   │   ├── feeling-doc.js
+│   │   ├── journal-doc.js
+│   │   ├── notification-doc.js
+│   │   ├── public-doc.js
+│   │   └── user-doc.js
+│   ├── error
+│   │   └── response-error.js
+│   ├── jobs
+│   │   └── checkInactiveUsers.js
+│   ├── main.js
+│   ├── middlewares
+│   │   ├── auth-middleware.js
+│   │   ├── error-middleware.js
+│   │   ├── multipart-middleware.js
+│   │   ├── security-middleware.js
+│   │   ├── validation-middleware.js
+│   │   └── verified-middleware.js
+│   ├── routes
+│   │   ├── auth-api.js
+│   │   ├── feeling-api.js
+│   │   ├── journal-api.js
+│   │   ├── notification-api.js
+│   │   ├── public-api.js
+│   │   └── user-api.js
+│   ├── services
+│   │   ├── ai-helper-service.js
+│   │   ├── auth-service.js
+│   │   ├── delete-service.js
+│   │   ├── email-service.js
+│   │   ├── feeling-service.js
+│   │   ├── journal-service.js
+│   │   ├── notification-service.js
+│   │   ├── upload-service.js
+│   │   └── user-service.js
+│   ├── templates
+│   │   └── emails
+│   │       ├── change-email.html
+│   │       ├── delete-account.html
+│   │       ├── reset-password.html
+│   │       ├── update-password.html
+│   │       └── verification-email.html
+│   ├── utils
+│   │   ├── email-utils.js
+│   │   ├── journal-util.js
+│   │   ├── multipart-parser.js
+│   │   ├── security-util.js
+│   │   └── textFormatter.js
+│   └── validations
+│       ├── auth-validation.js
+│       ├── feeling-validation.js
+│       ├── journal-validation.js
+│       ├── user-validation.js
+│       └── validation.js
+└── struktur_proyek.txt
+
+15 directories, 70 files
