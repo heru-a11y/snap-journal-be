@@ -353,6 +353,42 @@ const getDailyInsight = async (user) => {
     };
 };
 
+const getPeriodicInsight = async (user, request) => {
+    const startDate = new Date(request.start_date).toISOString();
+    const endDate = new Date(request.end_date).toISOString();
+
+    const snapshot = await database.collection("journals")
+        .where("user_id", "==", user.uid)
+        .where("is_draft", "==", false)
+        .where("created_at", ">=", startDate)
+        .where("created_at", "<=", endDate)
+        .orderBy("created_at", "asc")
+        .get();
+
+    if (snapshot.empty) {
+        throw new ResponseError(404, "Tidak ada data jurnal pada periode ini.");
+    }
+
+    const periodicData = [];
+    snapshot.forEach(doc => {
+        const data = doc.data();
+        periodicData.push({
+            expression: data.expression,
+            highlight: data.chatbot_highlight,
+            created_at: data.created_at
+        });
+    });
+
+    const analysisResult = await aiHelperService.generatePeriodicJournalInsight(periodicData);
+
+    return {
+        start_date: request.start_date,
+        end_date: request.end_date,
+        expression: analysisResult?.expression || "😐",
+        highlight: analysisResult?.highlight || "Belum ada insight."
+    };
+};
+
 const toggleFavorite = async (user, journalId, request) => {
     const docRef = database.collection("journals").doc(journalId);
     const doc = await docRef.get();
@@ -528,6 +564,7 @@ export default {
     getDetailJournal,
     getLatestJournal,
     getDailyInsight,
+    getPeriodicInsight,
     updateJournal,
     toggleFavorite,
     toggleDraft, 

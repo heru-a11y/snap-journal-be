@@ -51,6 +51,10 @@ journalRouter.get('/api/v1/journals/daily-insight',
     journalController.getDailyInsight
 );
 
+journalRouter.get('/api/v1/journals/periodic-insight', 
+    journalController.getPeriodicInsight
+)
+
 journalRouter.get('/api/v1/journals/mood-calendar', 
     journalController.getMoodCalendar
 );

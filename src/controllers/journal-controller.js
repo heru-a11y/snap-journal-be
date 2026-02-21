@@ -163,6 +163,21 @@ const getDailyInsight = async (req, res, next) => {
     }
 };
 
+const getPeriodicInsight = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const request = req.query; 
+
+        const result = await journalService.getPeriodicInsight(user, request);
+
+        res.status(200).json({
+            data: result
+        });
+    } catch (e) {
+        next(e);
+    }
+};
+
 const toggleFavorite = async (req, res, next) => {
     try {
         const user = req.user;
@@ -276,6 +291,7 @@ export default {
     getDetailJournal,
     getLatestJournal,
     getDailyInsight,
+    getPeriodicInsight,
     updateJournal,
     toggleFavorite,
     toggleDraft,

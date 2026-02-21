@@ -48,6 +48,18 @@ const searchJournalValidation = Joi.object({
     keyword: Joi.string().allow('').optional()
 });
 
+const getPeriodicInsightValidation = Joi.object({
+    start_date: Joi.date().iso().required().messages({
+        'date.format': 'Format tanggal mulai salah, gunakan YYYY-MM-DD',
+        'any.required': 'Tanggal mulai wajib diisi'
+    }),
+    end_date: Joi.date().iso().required().min(Joi.ref('start_date')).messages({
+        'date.format': 'Format tanggal akhir salah, gunakan YYYY-MM-DD',
+        'any.required': 'Tanggal akhir wajib diisi',
+        'date.min': 'Tanggal akhir tidak boleh lebih kecil dari tanggal mulai'
+    })
+});
+
 const favoriteJournalValidation = Joi.object({
     is_favorite: Joi.boolean().required().messages({
         'boolean.base': 'Status favorite harus berupa boolean (true/false)',
@@ -66,6 +78,7 @@ export {
     createJournalValidation,
     updateJournalValidation,
     searchJournalValidation,
+    getPeriodicInsightValidation,
     favoriteJournalValidation,
     draftJournalValidation
 };

@@ -206,6 +206,44 @@ const generateJournalInsights = async (journalData) => {
     }
 };
 
+const generatePeriodicJournalInsight = async (periodicData) => {
+    if (!model || !periodicData || periodicData.length === 0) return null;
+
+    const dataString = periodicData.map(d => 
+        `Tanggal: ${d.created_at}, Ekspresi: ${d.expression || "-"}, Highlight: ${d.highlight || "-"}`
+    ).join("\n");
+
+    const prompt = `
+        Tugas: Analisis riwayat jurnal pengguna dalam periode tertentu.
+
+        Data Jurnal:
+        ${dataString}
+
+        Instruksi:
+        1. Tentukan satu emoji tunggal yang paling dominan ("expression").
+        2. Buat satu kalimat pendek dan bermakna (maksimal 15 kata) berupa insight atau saran bijak ("highlight").
+
+        Output WAJIB JSON Valid tanpa markdown dengan format:
+        {
+            "expression": "String (1 emoji)",
+            "highlight": "String"
+        }
+    `;
+
+    try {
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        let jsonText = response.text().replace(/```json|```/g, "").trim();
+        
+        return JSON.parse(jsonText);
+    } catch (error) {
+        return {
+            expression: "😐",
+            highlight: "Terus pantau perasaan Anda melalui jurnal."
+        };
+    }
+};
+
 /**
  * Membuat pesan reminder personal (Title & Body) berdasarkan konteks jurnal terakhir
  */
@@ -252,5 +290,6 @@ export default {
     analyzeVideo,
     chatWithJournalContext,
     generateJournalInsights,
+    generatePeriodicJournalInsight,
     generatePersonalizedReminder
 };
