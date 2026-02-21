@@ -15,93 +15,93 @@ const journalRouter = new express.Router();
 
 journalRouter.use(authMiddleware);
 
-journalRouter.post('/api/v1/journals', 
+journalRouter.post('/journals', 
     multipartMiddleware,
     runValidation(createJournalValidation),
     journalController.createJournal
 );
 
-journalRouter.post('/api/v1/journals/draft', 
+journalRouter.post('/journals/draft', 
     multipartMiddleware,
     journalController.createJournalDraft
 );
 
-journalRouter.get('/api/v1/journals', 
+journalRouter.get('/journals', 
     journalController.listJournal
 );
 
-journalRouter.get('/api/v1/journals/search',
+journalRouter.get('/journals/search',
     runValidation(searchJournalValidation),
     journalController.searchJournal
 );
 
-journalRouter.get('/api/v1/journals/draft',
+journalRouter.get('/journals/draft',
     journalController.getDraftJournal
 );
 
-journalRouter.get('/api/v1/journals/favorite',
+journalRouter.get('/journals/favorite',
     journalController.getFavoriteJournal
 );
 
-journalRouter.get('/api/v1/journals/latest',
+journalRouter.get('/journals/latest',
     journalController.getLatestJournal
 );
 
-journalRouter.get('/api/v1/journals/daily-insight', 
+journalRouter.get('/journals/daily-insight', 
     journalController.getDailyInsight
 );
 
-journalRouter.get('/api/v1/journals/periodic-insight', 
+journalRouter.get('/journals/periodic-insight', 
     journalController.getPeriodicInsight
-)
+);
 
-journalRouter.get('/api/v1/journals/mood-calendar', 
+journalRouter.get('/journals/mood-calendar', 
     journalController.getMoodCalendar
 );
 
-journalRouter.post('/api/v1/journals/editor-image',
-    multipartMiddleware,
-    journalController.uploadEditorImage
+journalRouter.post('/journals/enhance', 
+    journalController.enhanceText
 );
 
-journalRouter.delete('/api/v1/journals/editor-image',
-    journalController.deleteEditorImage
-);
-
-journalRouter.get('/api/v1/journals/:id', 
+journalRouter.get('/journals/:id', 
     journalController.getDetailJournal
 );
 
-journalRouter.put('/api/v1/journals/:id', 
+journalRouter.put('/journals/:id', 
     multipartMiddleware,
     runValidation(updateJournalValidation),
     journalController.updateJournal
 );
 
-journalRouter.patch('/api/v1/journals/:id/favorite',
+journalRouter.patch('/journals/:id/favorite',
     runValidation(favoriteJournalValidation),
     journalController.toggleFavorite
 );
 
-journalRouter.patch('/api/v1/journals/:id/draft',
+journalRouter.patch('/journals/:id/draft',
     runValidation(draftJournalValidation),
     journalController.toggleDraft
 );
 
-journalRouter.post('/api/v1/journals/enhance', 
-    journalController.enhanceText
-);
-
-journalRouter.post('/api/v1/journals/:id/chat', 
+journalRouter.post('/journals/:id/chat', 
     journalController.chat
 );
 
-journalRouter.post('/api/v1/journals/:id/analyze', 
+journalRouter.post('/journals/:id/analyze', 
     journalController.analyze
 );
 
-journalRouter.delete('/api/v1/journals/:id', 
+journalRouter.delete('/journals/:id', 
     journalController.deleteJournal
+);
+
+journalRouter.post('/media/editor-image',
+    multipartMiddleware,
+    journalController.uploadEditorImage
+);
+
+journalRouter.delete('/media/editor-image',
+    journalController.deleteEditorImage
 );
 
 export { journalRouter };

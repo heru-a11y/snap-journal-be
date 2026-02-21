@@ -7,12 +7,12 @@
 
 /**
  * @swagger
- * /api/v1/journals/editor-image:
+ * /api/v1/media/editor-image:
  *   post:
  *     summary: Mengunggah gambar dari Rich Text Editor
  *     description: Mengunggah gambar secara langsung saat disisipkan ke dalam editor. Mengembalikan URL gambar dari GCS.
  *     tags:
- *       - Journal
+ *       - Media
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -37,12 +37,12 @@
 
 /**
  * @swagger
- * /api/v1/journals/editor-image:
+ * /api/v1/media/editor-image:
  *   delete:
  *     summary: Menghapus gambar dari Rich Text Editor
  *     description: Menghapus gambar dari GCS ketika dihapus dari editor.
  *     tags:
- *       - Journal
+ *       - Media
  *     security:
  *       - bearerAuth: []
  *     requestBody:
