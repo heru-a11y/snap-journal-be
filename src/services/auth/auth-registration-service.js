@@ -3,7 +3,7 @@ import { admin } from "../../applications/firebase.js";
 import { ResponseError } from "../../error/response-error.js";
 import emailService from "../email/email-service.js";
 import { generateOtp, checkCooldown, checkLockout, validateOtpAndLockout } from "../../utils/security-util.js";
-import { AUTH_ERROR_MESSAGES, AUTH_SUCCESS_MESSAGES } from "./auth-constant.js";
+import { AUTH_ERROR_MESSAGES, AUTH_SUCCESS_MESSAGES } from "../../constants/auth-constant.js";
 import { logger } from "../../applications/logging.js";
 
 const register = async (request) => {

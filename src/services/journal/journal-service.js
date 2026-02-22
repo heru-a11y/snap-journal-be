@@ -4,7 +4,7 @@ import journalRepository from "../../repositories/journal-repository.js";
 import journalAccessService from "./journal-access-service.js";
 import journalMediaService from "./journal-media-service.js";
 import journalAiService from "./journal-ai-service.js";
-import { JOURNAL_MESSAGES, JOURNAL_DEFAULTS } from "./journal-constants.js";
+import { JOURNAL_MESSAGES, JOURNAL_DEFAULTS } from "../../constants/journal-constants.js";
 
 const validatePublishRequest = (title, hasVideo) => {
     if (!title || title.trim() === "" || title === JOURNAL_DEFAULTS.DRAFT_TITLE) {

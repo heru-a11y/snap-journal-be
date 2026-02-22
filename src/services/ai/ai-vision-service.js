@@ -1,6 +1,5 @@
-import fs from "fs/promises";
 import aiClient from "./ai-client.js";
-import { AI_PROMPTS, FALLBACKS, EMOTIONS } from "./ai-constants.js";
+import { AI_PROMPTS, FALLBACKS, EMOTIONS } from "../../constants/ai-constants.js";
 import { logger } from "../../applications/logging.js";
 
 const analyzeVideo = async (fileInput) => {

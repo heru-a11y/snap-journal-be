@@ -3,7 +3,7 @@ import { admin } from "../../applications/firebase.js";
 import { ResponseError } from "../../error/response-error.js";
 import uploadService from "../upload-service.js";
 import deleteService from "../delete-service.js";
-import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "./user-constant.js";
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../../constants/user-constant.js";
 import { logger } from "../../applications/logging.js";
 
 const updateProfilePicture = async (user, file) => {

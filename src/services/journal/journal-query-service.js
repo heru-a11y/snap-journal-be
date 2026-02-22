@@ -1,7 +1,7 @@
 import journalRepository from "../../repositories/journal-repository.js";
 import { ResponseError } from "../../error/response-error.js";
 import journalAiService from "./journal-ai-service.js";
-import { JOURNAL_MESSAGES, JOURNAL_DEFAULTS, JOURNAL_CATEGORIES, SORT_ORDER } from "./journal-constants.js";
+import { JOURNAL_MESSAGES, JOURNAL_DEFAULTS, JOURNAL_CATEGORIES, SORT_ORDER } from "../../constants/journal-constants.js";
 import { logger } from "../../applications/logging.js";
 
 // --- HELPER FUNCTIONS ---

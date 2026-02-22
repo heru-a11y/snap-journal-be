@@ -1,5 +1,5 @@
 import { database } from "../applications/database.js";
-import { FEELING_CONSTANTS } from "../services/feeling/feeling-constant.js";
+import { FEELING_CONSTANTS } from "../constants/feeling-constant.js";
 
 const getFeelingCollection = (uid) => {
     return database.collection(FEELING_CONSTANTS.COLLECTION.USERS).doc(uid).collection(FEELING_CONSTANTS.COLLECTION.FEELINGS);

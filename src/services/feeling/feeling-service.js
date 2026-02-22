@@ -1,5 +1,5 @@
 import feelingRepository from "../../repositories/feeling-repository.js";
-import { FEELING_CONSTANTS, getTodayDateString, getNowISOString } from "./feeling-constant.js";
+import { FEELING_CONSTANTS, getTodayDateString, getNowISOString } from "../../constants/feeling-constant.js";
 
 const setTodayFeeling = async (user, request) => {
     const today = getTodayDateString();

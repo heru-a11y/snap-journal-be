@@ -1,5 +1,5 @@
 import aiClient from "./ai-client.js";
-import { AI_PROMPTS } from "./ai-constants.js";
+import { AI_PROMPTS } from "../../constants/ai-constants.js";
 import { ResponseError } from "../../error/response-error.js";
 import { aiFormat } from "../../utils/textFormatter.js";
 

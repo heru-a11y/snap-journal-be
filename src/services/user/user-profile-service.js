@@ -1,7 +1,7 @@
 import userRepository from "../../repositories/user-repository.js";
 import { admin } from "../../applications/firebase.js";
 import { ResponseError } from "../../error/response-error.js";
-import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "./user-constant.js";
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../../constants/user-constant.js";
 import { logger } from "../../applications/logging.js";
 
 const getProfile = async (user) => {

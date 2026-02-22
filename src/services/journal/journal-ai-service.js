@@ -4,8 +4,8 @@ import aiChatService from "../ai/ai-chat-service.js";
 import aiTextService from "../ai/ai-text-service.js";
 import journalAccessService from "./journal-access-service.js";
 import journalRepository from "../../repositories/journal-repository.js";
-import { JOURNAL_MESSAGES, } from "./journal-constants.js";
-import { FALLBACKS } from "../ai/ai-constants.js";
+import { JOURNAL_MESSAGES, } from "../../constants/journal-constants.js";
+import { FALLBACKS } from "../../constants/ai-constants.js";
 import { logger } from "../../applications/logging.js";
 import { ResponseError } from "../../error/response-error.js";
 

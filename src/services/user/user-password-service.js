@@ -4,7 +4,7 @@ import { ResponseError } from "../../error/response-error.js";
 import emailService from "../email/email-service.js";
 import axios from "axios";
 import { generateOtp, checkLockout, validateOtpAndLockout } from "../../utils/security-util.js";
-import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "./user-constant.js";
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../../constants/user-constant.js";
 import { logger } from "../../applications/logging.js";
 
 const GOOGLE_API_KEY = process.env.GOOGLE_CLIENT_API_KEY;

@@ -1,5 +1,5 @@
 import aiClient from "./ai-client.js";
-import { AI_PROMPTS, FALLBACKS } from "./ai-constants.js";
+import { AI_PROMPTS, FALLBACKS } from "../../constants/ai-constants.js";
 import { logger } from "../../applications/logging.js";
 
 const generateJournalInsights = async (journalData) => {
