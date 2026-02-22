@@ -1,4 +1,4 @@
-import feelingService from "../services/feeling-service.js";
+import feelingService from "../services/feeling/feeling-service.js";
 
 const setToday = async (req, res, next) => {
     try {
