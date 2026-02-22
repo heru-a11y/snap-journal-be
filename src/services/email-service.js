@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
-import { getHtmlTemplate } from "../../utils/email-utils.js";
-import { LOG_PREFIX, EMAIL_CONFIG } from "../../constants/email-constant.js";
-import { logger } from "../../applications/logging.js";
+import { getHtmlTemplate } from "../utils/email-utils.js";
+import { LOG_PREFIX, EMAIL_CONFIG } from "../constants/email-constant.js";
+import { logger } from "../applications/logging.js";
 
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,

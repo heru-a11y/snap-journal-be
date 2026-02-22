@@ -1,7 +1,7 @@
 import userRepository from "../../repositories/user-repository.js";
 import { admin } from "../../applications/firebase.js";
 import { ResponseError } from "../../error/response-error.js";
-import emailService from "../email/email-service.js";
+import emailService from "../email-service.js";
 import { generateOtp, checkLockout, validateOtpAndLockout } from "../../utils/security-util.js";
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../../constants/user-constant.js";
 import { logger } from "../../applications/logging.js";

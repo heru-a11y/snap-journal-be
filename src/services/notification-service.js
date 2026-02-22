@@ -1,138 +1,105 @@
-import { database } from "../applications/database.js";
+import notificationRepository from "../repositories/notification-repository.js";
 import { ResponseError } from "../error/response-error.js";
+import { logger } from "../applications/logging.js";
+import { 
+    NOTIFICATION_FIELDS, 
+    NOTIFICATION_QUERY, 
+    NOTIFICATION_MESSAGES 
+} from "../constants/notification-constant.js";
 
-/**
- * Mengambil daftar notifikasi user
- * @param {Object} user - User object dari token
- * @param {Object} request - Query params (limit)
- */
-const list = async (user, request) => {
-    const limit = request.limit ? parseInt(request.limit) : 50;
-    
-    const notificationsRef = database.collection("notifications");
-    const snapshot = await notificationsRef
-        .where("notifiable_id", "==", user.uid)
-        .orderBy("created_at", "desc")
-        .limit(limit)
-        .get();
+const getAndValidateNotification = async (userId, notificationId) => {
+    const doc = await notificationRepository.findById(userId, notificationId);
 
-    if (snapshot.empty) {
-        return [];
+    if (!doc.exists) {
+        throw new ResponseError(404, NOTIFICATION_MESSAGES.NOT_FOUND);
     }
 
-    const notifications = snapshot.docs.map(doc => {
-        const rawData = doc.data();
-        let parsedData = {};
+    return doc.data();
+};
 
-        try {
-            if (typeof rawData.data === 'string') {
-                parsedData = JSON.parse(rawData.data);
-            } else {
-                parsedData = rawData.data || {};
-            }
-        } catch (e) {
-            console.error(`Gagal parsing JSON notifikasi ${doc.id}:`, e);
-            parsedData = { title: "Notification", message: "Failed to load content" };
+const list = async (user, request) => {
+    try {
+        const requestedLimit = request.limit ? parseInt(request.limit) : NOTIFICATION_QUERY.DEFAULT_LIMIT;
+        const limit = Math.min(requestedLimit, NOTIFICATION_QUERY.MAX_LIMIT);
+        
+        const snapshot = await notificationRepository.findByUserId(user.uid, limit);
+
+        if (snapshot.empty) {
+            return [];
         }
 
-        return {
-            id: doc.id,
-            title: parsedData.title || "No Title",
-            message: parsedData.message || rawData.type || "No Message", 
-            read_at: rawData.read_at,
-            created_at: rawData.created_at 
-        };
-    });
+        return snapshot.docs.map(doc => {
+            const rawData = doc.data();
+            const content = rawData[NOTIFICATION_FIELDS.DATA] || {};
 
-    return notifications;
+            return {
+                id: doc.id,
+                title: content.title || NOTIFICATION_MESSAGES.DEFAULT_TITLE,
+                message: content.message || rawData[NOTIFICATION_FIELDS.TYPE] || NOTIFICATION_MESSAGES.DEFAULT_MESSAGE, 
+                read_at: rawData[NOTIFICATION_FIELDS.READ_AT] || null,
+                created_at: rawData[NOTIFICATION_FIELDS.CREATED_AT] 
+            };
+        });
+    } catch (e) {
+        if (e instanceof ResponseError) throw e;
+        logger.error(`Error in notification list service: ${e.message}`);
+        throw new ResponseError(500, "Internal Server Error");
+    }
 };
 
-/**
- * Menandai satu notifikasi sebagai sudah dibaca
- * @param {Object} user - User object
- * @param {String} notificationId - UUID Notifikasi
- */
 const markAsRead = async (user, notificationId) => {
-    const docRef = database.collection("notifications").doc(notificationId);
-    const doc = await docRef.get();
+    try {
+        const data = await getAndValidateNotification(user.uid, notificationId);
 
-    if (!doc.exists) {
-        throw new ResponseError(404, "Notifikasi tidak ditemukan");
+        if (data[NOTIFICATION_FIELDS.READ_AT]) {
+            return {
+                id: notificationId,
+                read_at: data[NOTIFICATION_FIELDS.READ_AT],
+                message: NOTIFICATION_MESSAGES.MARKED_AS_READ
+            };
+        }
+
+        const now = new Date().toISOString();
+        await notificationRepository.updateReadStatus(user.uid, notificationId, now);
+
+        return {
+            id: notificationId,
+            read_at: now,
+            message: NOTIFICATION_MESSAGES.MARKED_AS_READ
+        };
+    } catch (e) {
+        if (e instanceof ResponseError) throw e;
+        logger.error(`Error in notification markAsRead service: ${e.message}`);
+        throw new ResponseError(500, "Internal Server Error");
     }
-
-    const data = doc.data();
-
-    if (data.notifiable_id !== user.uid) {
-        throw new ResponseError(404, "Notifikasi tidak ditemukan"); 
-    }
-
-    const now = new Date().toISOString();
-    
-    await docRef.update({
-        read_at: now,
-        updated_at: now
-    });
-
-    return {
-        id: notificationId,
-        read_at: now,
-        message: "Notifikasi ditandai sudah dibaca"
-    };
 };
 
-/**
- * Menghapus seluruh riwayat notifikasi milik user
- * Menggunakan Batch Delete untuk efisiensi.
- * @param {Object} user - User object dari token
- */
 const deleteAll = async (user) => {
-    const notificationsRef = database.collection("notifications");
+    try {
+        const hasDeleted = await notificationRepository.deleteBatchByUserId(user.uid);
 
-    const snapshot = await notificationsRef
-        .where("notifiable_id", "==", user.uid)
-        .get();
+        if (!hasDeleted) {
+            return { message: NOTIFICATION_MESSAGES.NONE_TO_DELETE };
+        }
 
-    if (snapshot.empty) {
-        return { message: "Tidak ada notifikasi yang perlu dihapus" };
+        return { message: NOTIFICATION_MESSAGES.ALL_DELETED };
+    } catch (e) {
+        logger.error(`Error in notification deleteAll service: ${e.message}`);
+        throw new ResponseError(500, "Internal Server Error");
     }
-
-    const batch = database.batch();
-    
-    snapshot.docs.forEach((doc) => {
-        batch.delete(doc.ref);
-    });
-
-    await batch.commit();
-
-    return {
-        message: "Seluruh notifikasi berhasil dihapus"
-    };
 };
 
-/**
- * Menghapus satu notifikasi spesifik
- * @param {Object} user - User object dari token
- * @param {String} notificationId - ID Notifikasi
- */
 const deleteById = async (user, notificationId) => {
-    const docRef = database.collection("notifications").doc(notificationId);
-    const doc = await docRef.get();
+    try {
+        await getAndValidateNotification(user.uid, notificationId);
+        await notificationRepository.deleteById(user.uid, notificationId);
 
-    if (!doc.exists) {
-        throw new ResponseError(404, "Notifikasi tidak ditemukan");
+        return { message: NOTIFICATION_MESSAGES.ID_DELETED };
+    } catch (e) {
+        if (e instanceof ResponseError) throw e;
+        logger.error(`Error in notification deleteById service: ${e.message}`);
+        throw new ResponseError(500, "Internal Server Error");
     }
-
-    const data = doc.data();
-
-    if (data.notifiable_id !== user.uid) {
-        throw new ResponseError(404, "Notifikasi tidak ditemukan");
-    }
-
-    await docRef.delete();
-
-    return {
-        message: "Notifikasi berhasil dihapus"
-    };
 };
 
 export default {
