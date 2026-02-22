@@ -1,19 +1,9 @@
 import { ResponseError } from "../error/response-error.js";
 
-/**
- * 1. GENERATOR OTP
- * Menghasilkan string angka 4 digit acak.
- */
 export const generateOtp = () => {
     return Math.floor(1000 + Math.random() * 9000).toString();
 };
 
-/**
- * 2. VALIDASI LOCKOUT (KUNCI SEMENTARA)
- * Digunakan saat user SALAH memasukkan password/OTP berkali-kali.
- * * @param {string|null} lockedUntilStr - String ISO Date dari database (misal: user.locked_until)
- * @throws {ResponseError} 429 jika waktu kunci belum habis
- */
 export const checkLockout = (lockedUntilStr) => {
     if (lockedUntilStr) {
         const lockedUntil = new Date(lockedUntilStr);
@@ -26,15 +16,6 @@ export const checkLockout = (lockedUntilStr) => {
     }
 };
 
-/**
- * 3. VALIDASI COOLDOWN (JEDA REQUEST)
- * Digunakan untuk membatasi Spam (misal: tombol Resend OTP maksimal 3x per jam).
- * * @param {string|null} lastAttemptStr - Waktu terakhir request dilakukan
- * @param {number} currentCount - Jumlah percobaan saat ini
- * @param {number} maxAttempts - Maksimal percobaan (default: 3)
- * @param {number} cooldownMs - Durasi cooldown dalam ms (default: 1 jam)
- * @returns {Object} { newCount, newTimestamp } untuk disimpan ke DB
- */
 export const checkCooldown = (lastAttemptStr, currentCount, maxAttempts = 3, cooldownMs = 3600000) => {
     const now = new Date();
     const lastAttempt = lastAttemptStr ? new Date(lastAttemptStr) : new Date(0);
@@ -59,13 +40,6 @@ export const checkCooldown = (lastAttemptStr, currentCount, maxAttempts = 3, coo
     };
 };
 
-/**
- * 4. HITUNG LOGIC LOGIN GAGAL
- * Menghitung counter gagal dan menentukan apakah harus dikunci.
- * * @param {number} currentFailCount - Jumlah gagal saat ini dari DB
- * @param {number} maxAttempts - Batas maksimal gagal (default: 5)
- * @param {number} lockDurationMinutes - Durasi kunci (default: 15 menit)
- */
 export const calculateLoginLockout = (currentFailCount, maxAttempts = 5, lockDurationMinutes = 15) => {
     const newCount = (currentFailCount || 0) + 1;
     let lockedUntil = null;
@@ -88,4 +62,29 @@ export const calculateLoginLockout = (currentFailCount, maxAttempts = 5, lockDur
         isLocked,
         message
     };
+};
+
+export const validateOtpAndLockout = async (updateCallback, requestOtp, dbOtp, expiresAtStr, currentFailCount, fields) => {
+    if (!dbOtp) {
+        throw new ResponseError(400, "Tidak ada permintaan OTP yang aktif.");
+    }
+
+    if (dbOtp !== requestOtp) {
+        const failCount = (currentFailCount || 0) + 1;
+        let updateData = { [fields.failCountField]: failCount };
+
+        if (failCount >= 3) {
+            updateData[fields.lockedUntilField] = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+            updateData[fields.otpField] = null;
+            await updateCallback(updateData);
+            throw new ResponseError(429, "Anda salah memasukkan OTP 3 kali. Fitur dikunci sementara selama 1 jam.");
+        }
+
+        await updateCallback(updateData);
+        throw new ResponseError(400, `Kode OTP salah. Sisa percobaan: ${3 - failCount}`);
+    }
+
+    if (new Date() > new Date(expiresAtStr)) {
+        throw new ResponseError(400, "Kode OTP sudah kadaluarsa.");
+    }
 };

@@ -1,8 +1,10 @@
-import authService from "../services/auth-service.js";
+import authRegistrationService from "../services/auth/auth-registration-service.js";
+import authLoginService from "../services/auth/auth-login-service.js";
+import authPasswordResetService from "../services/auth/auth-password-reset-service.js";
 
 const register = async (req, res, next) => {
     try {
-        const result = await authService.register(req.body);
+        const result = await authRegistrationService.register(req.body);
         res.status(200).json({
             data: result
         });
@@ -13,7 +15,7 @@ const register = async (req, res, next) => {
 
 const login = async (req, res, next) => {
     try {
-        const result = await authService.login(req.body);
+        const result = await authLoginService.login(req.body);
         res.status(200).json({
             data: result
         });
@@ -24,7 +26,7 @@ const login = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
     try {        
-        const result = await authService.logout(req.user);
+        const result = await authLoginService.logout(req.user);
         res.status(200).json({
             data: result
         });
@@ -35,7 +37,7 @@ const logout = async (req, res, next) => {
 
 const sendVerificationOtp = async (req, res, next) => {
     try {
-        const result = await authService.sendVerificationOtp(req.body);
+        const result = await authRegistrationService.sendVerificationOtp(req.body);
         res.status(200).json({
             data: result
         });
@@ -46,7 +48,7 @@ const sendVerificationOtp = async (req, res, next) => {
 
 const verifyOtp = async (req, res, next) => {
     try {
-        const result = await authService.verifyOtp(req.body);
+        const result = await authRegistrationService.verifyOtp(req.body);
         res.status(200).json({
             data: result
         });
@@ -57,7 +59,7 @@ const verifyOtp = async (req, res, next) => {
 
 const forgotPassword = async (req, res, next) => {
     try {
-        const result = await authService.forgotPassword(req.body);
+        const result = await authPasswordResetService.forgotPassword(req.body);
         res.status(200).json({
             data: result
         });
@@ -68,7 +70,7 @@ const forgotPassword = async (req, res, next) => {
 
 const verifyResetOtp = async (req, res, next) => {
     try {
-        const result = await authService.verifyResetOtp(req.body);
+        const result = await authPasswordResetService.verifyResetOtp(req.body);
         res.status(200).json({
             data: result
         });
@@ -79,7 +81,7 @@ const verifyResetOtp = async (req, res, next) => {
 
 const resetPassword = async (req, res, next) => {
     try {
-        const result = await authService.resetPassword(req.body);
+        const result = await authPasswordResetService.resetPassword(req.body);
         res.status(200).json({
             data: result
         });

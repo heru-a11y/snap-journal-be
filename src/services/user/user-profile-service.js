@@ -1,0 +1,67 @@
+import userRepository from "../../repositories/user-repository.js";
+import { admin } from "../../applications/firebase.js";
+import { ResponseError } from "../../error/response-error.js";
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "./user-constant.js";
+import { logger } from "../../applications/logging.js";
+
+const getProfile = async (user) => {
+    const userData = await userRepository.findById(user.uid);
+    if (!userData) throw new ResponseError(404, ERROR_MESSAGES.USER_NOT_FOUND);
+
+    return {
+        uid: user.uid,
+        name: userData.name,
+        email: userData.email,
+        bio: userData.bio || null,
+        photoUrl: userData.photoUrl || null,
+        fcm_token: userData.fcm_token || null
+    };
+}
+
+const updateProfile = async (user, request) => {
+    const userData = await userRepository.findById(user.uid);
+    if (!userData) throw new ResponseError(404, ERROR_MESSAGES.USER_NOT_FOUND);
+
+    const updateData = { updated_at: new Date().toISOString() };
+    const authUpdates = {};
+
+    if (request.name) {
+        updateData.name = request.name;
+        authUpdates.displayName = request.name;
+    }
+    if (request.bio) {
+        updateData.bio = request.bio;
+    }
+
+    if (Object.keys(authUpdates).length > 0) {
+        try {
+            await admin.auth().updateUser(user.uid, authUpdates);
+        } catch (error) {
+            logger.error(`[UserProfileService] Gagal update data di Firebase Auth: ${error.message}`);
+        }
+    }
+
+    await userRepository.update(user.uid, updateData);
+    return await userRepository.findById(user.uid);
+}
+
+const setFcmToken = async (user, request) => {
+    const userData = await userRepository.findById(user.uid);
+    if (!userData) throw new ResponseError(404, ERROR_MESSAGES.USER_NOT_FOUND);
+
+    await userRepository.update(user.uid, {
+        fcm_token: request.token,
+        updated_at: new Date().toISOString()
+    });
+
+    return {
+        message: SUCCESS_MESSAGES.FCM_SAVED,
+        user_id: user.uid
+    };
+}
+
+export default { 
+    getProfile, 
+    updateProfile, 
+    setFcmToken 
+}
