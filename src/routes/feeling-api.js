@@ -8,11 +8,11 @@ const feelingRouter = new express.Router();
 
 feelingRouter.use(authMiddleware); 
 
-feelingRouter.get('/api/v1/feelings/today', feelingController.getToday);
-feelingRouter.post('/api/v1/feelings', 
+feelingRouter.get('/feelings/today', feelingController.getToday);
+feelingRouter.post('/feelings', 
     runValidation(createFeelingValidation), 
     feelingController.setToday
 );
-feelingRouter.get('/api/v1/feelings/history', feelingController.getHistory);
+feelingRouter.get('/feelings/history', feelingController.getHistory);
 
 export { feelingRouter };

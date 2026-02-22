@@ -19,70 +19,70 @@ const userRouter = new express.Router();
 userRouter.use(authMiddleware);
 
 userRouter.get(
-    '/api/v1/user/profile', 
+    '/user/profile', 
     userController.getProfile
 );
 
 userRouter.put(
-    '/api/v1/user/profile', 
+    '/user/profile', 
     runValidation(updateUserValidation), 
     userController.updateProfile
 );
 
 userRouter.patch(
-    '/api/v1/user/profile/picture', 
+    '/user/profile/picture', 
     multipartMiddleware, 
     userController.updateProfilePicture
 );
 
 userRouter.delete(
-    '/api/v1/user/profile/picture', 
+    '/user/profile/picture', 
     userController.removeProfilePicture
 );
 
 userRouter.post(
-    '/api/v1/user/email/change-request', 
+    '/user/email/change-request', 
     runValidation(requestEmailChangeValidation), 
     userController.requestEmailChange
 );
 
 userRouter.post(
-    '/api/v1/user/email/change-verify', 
+    '/user/email/change-verify', 
     runValidation(verifyEmailChangeValidation), 
     userController.verifyEmailChange
 );
 
 userRouter.post(
-    '/api/v1/user/password/change-request', 
+    '/user/password/change-request', 
     runValidation(requestPasswordChangeValidation), 
     userController.requestPasswordChange
 );
 
 userRouter.post(
-    '/api/v1/user/password/change-validate', 
+    '/user/password/change-validate', 
     runValidation(validatePasswordChangeOtpValidation), 
     userController.validatePasswordChangeOtp
 );
 
 userRouter.post(
-    '/api/v1/user/password/change-verify', 
+    '/user/password/change-verify', 
     runValidation(verifyPasswordChangeValidation), 
     userController.verifyPasswordChange
 );
 
 userRouter.post(
-    '/api/v1/user/delete-request',
+    '/user/delete-request',
     userController.requestDeleteAccount
 );
 
 userRouter.delete(
-    '/api/v1/user/delete', 
+    '/user/delete', 
     runValidation(deleteAccountValidation),
     userController.deleteAccount
 );
 
 userRouter.post(
-    '/api/v1/fcm/token', 
+    '/fcm/token', 
     runValidation(fcmTokenValidation), 
     userController.setFcmToken
 );

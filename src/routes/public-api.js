@@ -14,11 +14,7 @@ import { checkInactiveUsers } from "../jobs/checkInactiveUsers.js";
 
 const publicRouter = new express.Router();
 
-/**
- * [TESTING ONLY] Endpoint untuk memicu Reminder AI secara manual
- * Akses: GET /api/v1/test/reminder-job
- */
-publicRouter.get('/api/v1/test/reminder-job', async (req, res) => {
+publicRouter.get('/test/reminder-job', async (req, res) => {
     try {
         await checkInactiveUsers();
         res.status(200).json({ 
@@ -33,43 +29,43 @@ publicRouter.get('/api/v1/test/reminder-job', async (req, res) => {
 });
 
 publicRouter.post(
-    "/api/v1/auth/register",
+    "/auth/register",
     runValidation(registerUserValidation),
     authController.register
 );
 
 publicRouter.post(
-    "/api/v1/auth/login",
+    "/auth/login",
     runValidation(loginUserValidation),
     authController.login
 );
 
 publicRouter.post(
-    '/api/v1/auth/email/verify', 
+    '/auth/email/verify', 
     runValidation(verifyOtpValidation), 
     authController.verifyOtp
 );
 
 publicRouter.post(
-    '/api/v1/auth/email/send-otp', 
+    '/auth/email/send-otp', 
     runValidation(sendOtpValidation), 
     authController.sendVerificationOtp
 );
 
 publicRouter.post(
-    '/api/v1/auth/forgot-password', 
+    '/auth/forgot-password', 
     runValidation(forgotPasswordValidation), 
     authController.forgotPassword
 );
 
 publicRouter.post(
-    '/api/v1/auth/forgot-password/verify', 
+    '/auth/forgot-password/verify', 
     runValidation(verifyResetOtpValidation), 
     authController.verifyResetOtp
 );
 
 publicRouter.post(
-    '/api/v1/auth/reset-password', 
+    '/auth/reset-password', 
     runValidation(resetPasswordValidation), 
     authController.resetPassword
 );

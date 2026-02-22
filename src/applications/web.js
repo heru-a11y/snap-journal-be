@@ -21,20 +21,13 @@ web.use(express.json());
 swaggerDocs(web);
 web.use("/public", express.static("public"));
 
-web.use(publicRouter);
-web.use(authRouter);
-web.use(userRouter);
-web.use('/api/v1', journalRouter);
-web.use(notificationRouter);
-web.use(feelingRouter);
+const apiPrefix = '/api/v1';
 
-// const apiPrefix = '/api/v1';
-
-// web.use(apiPrefix, publicRouter);
-// web.use(apiPrefix, authRouter);
-// web.use(apiPrefix, userRouter);
-// web.use(apiPrefix, journalRouter);
-// web.use(apiPrefix, notificationRouter);
-// web.use(apiPrefix, feelingRouter);
+web.use(apiPrefix, publicRouter);
+web.use(apiPrefix, authRouter);
+web.use(apiPrefix, userRouter);
+web.use(apiPrefix, journalRouter);
+web.use(apiPrefix, notificationRouter);
+web.use(apiPrefix, feelingRouter);
 
 web.use(errorMiddleware);
