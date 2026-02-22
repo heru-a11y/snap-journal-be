@@ -35,10 +35,9 @@ const createJournal = async (req, res, next) => {
     try {
         const user = req.user;
         const request = req.body;
-        const files = req.files || {};
-        const videoFile = files['video'] ? files['video'][0] : null;
-
+        const videoFile = req.files?.['video'] ? req.files['video'][0] : null;
         const result = await journalService.createJournal(user, request, videoFile);
+        
         res.status(201).json({ data: result });
     } catch (e) {
         next(e);

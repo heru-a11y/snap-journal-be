@@ -83,10 +83,21 @@ const createJournal = async (user, request, videoFile) => {
     const journalId = uuidv4();
     const now = new Date().toISOString();
     
-    const videoUrl = await journalMediaService.handleVideoUpload(user, videoFile);
-    const aiAnalysis = await journalAiService.analyzeVideo(videoFile);
+    let aiAnalysis = null;
+    if (videoFile) {
+        aiAnalysis = await journalAiService.analyzeVideo(videoFile);
+    }
     
-    const journalData = buildJournalData(journalId, user.uid, request, videoUrl, aiAnalysis, false, now);
+    const videoUrl = await journalMediaService.handleVideoUpload(user, videoFile);
+    const journalData = buildJournalData(
+        journalId, 
+        user.uid, 
+        request, 
+        videoUrl, 
+        aiAnalysis, 
+        false, 
+        now
+    );
 
     await journalRepository.save(journalData);
     await journalRepository.updateUserLastEntry(user.uid, now);

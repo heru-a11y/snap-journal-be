@@ -3,11 +3,7 @@
 ├── README.md
 ├── docker-compose.yaml
 ├── env.example
-├── firebase-debug.log
 ├── firebase.json
-├── functions
-│   ├── index.js
-│   └── package.json
 ├── index.js
 ├── package-lock.json
 ├── package.json
@@ -46,6 +42,9 @@
 │   │   ├── security-middleware.js
 │   │   ├── validation-middleware.js
 │   │   └── verified-middleware.js
+│   ├── repositories
+│   │   ├── journal-repository.js
+│   │   └── user-repository.js
 │   ├── routes
 │   │   ├── auth-api.js
 │   │   ├── feeling-api.js
@@ -54,15 +53,38 @@
 │   │   ├── public-api.js
 │   │   └── user-api.js
 │   ├── services
-│   │   ├── ai-helper-service.js
-│   │   ├── auth-service.js
+│   │   ├── ai
+│   │   │   ├── ai-chat-service.js
+│   │   │   ├── ai-client.js
+│   │   │   ├── ai-constants.js
+│   │   │   ├── ai-insight-service.js
+│   │   │   ├── ai-reminder-service.js
+│   │   │   ├── ai-text-service.js
+│   │   │   └── ai-vision-service.js
+│   │   ├── auth
+│   │   │   ├── auth-constant.js
+│   │   │   ├── auth-login-service.js
+│   │   │   ├── auth-password-reset-service.js
+│   │   │   └── auth-registration-service.js
 │   │   ├── delete-service.js
 │   │   ├── email-service.js
 │   │   ├── feeling-service.js
-│   │   ├── journal-service.js
+│   │   ├── journal
+│   │   │   ├── journal-access-service.js
+│   │   │   ├── journal-ai-service.js
+│   │   │   ├── journal-constants.js
+│   │   │   ├── journal-media-service.js
+│   │   │   ├── journal-query-service.js
+│   │   │   └── journal-service.js
 │   │   ├── notification-service.js
 │   │   ├── upload-service.js
-│   │   └── user-service.js
+│   │   └── user
+│   │       ├── user-account-service.js
+│   │       ├── user-constant.js
+│   │       ├── user-email-service.js
+│   │       ├── user-media-service.js
+│   │       ├── user-password-service.js
+│   │       └── user-profile-service.js
 │   ├── templates
 │   │   └── emails
 │   │       ├── change-email.html
@@ -72,7 +94,7 @@
 │   │       └── verification-email.html
 │   ├── utils
 │   │   ├── email-utils.js
-│   │   ├── journal-util.js
+│   │   ├── html-parser-util.js
 │   │   ├── multipart-parser.js
 │   │   ├── security-util.js
 │   │   └── textFormatter.js
@@ -84,4 +106,4 @@
 │       └── validation.js
 └── struktur_proyek.txt
 
-15 directories, 70 files
+19 directories, 88 files

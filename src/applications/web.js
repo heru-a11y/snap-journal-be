@@ -12,14 +12,13 @@ import swaggerDocs from "./swagger.js";
 
 export const web = express();
 
-web.set('trust proxy', true);
-web.use(limiter);
-web.use(corsOptions);
+web.set('trust proxy', 1);
 
+web.use(corsOptions);
+web.use(limiter);
 web.use(express.json());
 
 swaggerDocs(web);
-
 web.use("/public", express.static("public"));
 
 web.use(publicRouter);
@@ -29,10 +28,13 @@ web.use('/api/v1', journalRouter);
 web.use(notificationRouter);
 web.use(feelingRouter);
 
-// web.use('/api/v1', publicRouter);
-// web.use('/api/v1', authRouter);
-// web.use('/api/v1', userRouter);
-// web.use('/api/v1', notificationRouter);
-// web.use('/api/v1', feelingRouter);
+// const apiPrefix = '/api/v1';
+
+// web.use(apiPrefix, publicRouter);
+// web.use(apiPrefix, authRouter);
+// web.use(apiPrefix, userRouter);
+// web.use(apiPrefix, journalRouter);
+// web.use(apiPrefix, notificationRouter);
+// web.use(apiPrefix, feelingRouter);
 
 web.use(errorMiddleware);

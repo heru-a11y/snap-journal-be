@@ -1,27 +1,33 @@
-import aiHelperService from "../ai-helper-service.js";
+import aiVisionService from "../ai/ai-vision-service.js";
+import aiInsightService from "../ai/ai-insight-service.js";
+import aiChatService from "../ai/ai-chat-service.js";
+import aiTextService from "../ai/ai-text-service.js";
 import journalAccessService from "./journal-access-service.js";
 import journalRepository from "../../repositories/journal-repository.js";
-import { JOURNAL_MESSAGES } from "./journal-constants.js";
+import { JOURNAL_MESSAGES, } from "./journal-constants.js";
+import { FALLBACKS } from "../ai/ai-constants.js";
 import { logger } from "../../applications/logging.js";
 import { ResponseError } from "../../error/response-error.js";
 
-const analyzeVideo = async (videoFile) => {
-    let aiAnalysis = { emotion: null, expression: null, confidence: null };
+const analyzeVideo = async (localPath) => {
+    let aiAnalysis = { ...FALLBACKS.VISION }; 
+
     try {
-        if (videoFile) {
-            const result = await aiHelperService.analyzeVideo(videoFile);
+        if (localPath) {
+            const result = await aiVisionService.analyzeVideo(localPath);
             if (result) aiAnalysis = result;
         }
     } catch (e) {
-        logger.error(e.message);
+        logger.error(`Journal AI Service Error: ${e.message}`);
     }
+
     return aiAnalysis;
 };
 
 const analyze = async (user, journalId) => {
     const data = await journalAccessService.checkAccess(user.uid, journalId);
     
-    const insights = await aiHelperService.generateJournalInsights(data);
+    const insights = await aiInsightService.generateJournalInsights(data);
     if (!insights) throw new ResponseError(503, JOURNAL_MESSAGES.AI_BUSY); 
 
     const updateData = {
@@ -38,20 +44,20 @@ const analyze = async (user, journalId) => {
 
 const chat = async (user, journalId, request) => {
     const data = await journalAccessService.checkAccess(user.uid, journalId);
-    const aiReply = await aiHelperService.chatWithJournalContext(data, request.message);
+    const aiReply = await aiChatService.chatWithJournalContext(data, request.message);
     return { journal_id: journalId, question: request.message, reply: aiReply };
 };
 
 const generateJournalInsights = async (journalData) => {
-    return await aiHelperService.generateJournalInsights(journalData);
+    return await aiInsightService.generateJournalInsights(journalData);
 };
 
 const generatePeriodicJournalInsight = async (periodicData) => {
-    return await aiHelperService.generatePeriodicJournalInsight(periodicData);
+    return await aiInsightService.generatePeriodicJournalInsight(periodicData);
 };
 
 const enhanceJournalText = async (request) => {
-    return await aiHelperService.enhanceJournalText(request);
+    return await aiTextService.enhanceJournalText(request);
 };
 
 export default {

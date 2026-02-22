@@ -1,10 +1,11 @@
 import { database } from "../applications/database.js";
 import admin from "firebase-admin"; 
 import { v4 as uuidv4 } from "uuid";
-import aiHelperService from "../services/ai-helper-service.js";
+import aiReminderService from "../services/ai/ai-reminder-service.js";
+import { logger } from "../applications/logging.js";
 
 export const checkInactiveUsers = async () => {
-    console.log("--- Starting Job: Inactive User Reminder ---");
+    logger.info("Starting Job: Inactive User Reminder");
 
     try {
         const usersRef = database.collection("users");
@@ -20,7 +21,10 @@ export const checkInactiveUsers = async () => {
             .where("last_entry", "<", cutoffISO)
             .get();
 
-        if (snapshot.empty) return;
+        if (snapshot.empty) {
+            logger.info("Job Finished: No inactive users found");
+            return;
+        }
 
         let batch = database.batch();
         let processedCount = 0;
@@ -34,9 +38,7 @@ export const checkInactiveUsers = async () => {
 
             if (user.last_reminder_at) {
                 const lastReminded = new Date(user.last_reminder_at);
-                if (lastReminded > cooldownTime) {
-                    continue; 
-                }
+                if (lastReminded > cooldownTime) continue; 
             }
 
             const lastJournalSnap = await journalsRef
@@ -52,12 +54,13 @@ export const checkInactiveUsers = async () => {
                 const lastJournalData = lastJournalSnap.docs[0].data();
 
                 try {
-                    const aiResponse = await aiHelperService.generatePersonalizedReminder(lastJournalData, user.name);
+                    const aiResponse = await aiReminderService.generatePersonalizedReminder(lastJournalData, user.name);
                     if (aiResponse && aiResponse.title && aiResponse.body) {
                         reminderTitle = aiResponse.title;
                         reminderBody = aiResponse.body;
                     }
                 } catch (e) {
+                    logger.warn(`Failed to generate AI reminder for user ${userId}: ${e.message}`);
                 }
             }
 
@@ -73,6 +76,7 @@ export const checkInactiveUsers = async () => {
                     data: { type: "reminder" }
                 });
             } catch (fcmError) {
+                logger.error(`FCM Error for user ${userId}: ${fcmError.message}`);
                 if (fcmError.code === 'messaging/registration-token-not-registered' || 
                     fcmError.code === 'messaging/invalid-argument') {
                     batch.update(usersRef.doc(userId), { fcm_token: null });
@@ -106,13 +110,11 @@ export const checkInactiveUsers = async () => {
             }
         }
 
-        if (batchCount > 0) {
-            await batch.commit();
-        }
+        if (batchCount > 0) await batch.commit();
 
-        console.log(`--- Job Finished: Sent ${processedCount} personalized reminders ---`);
+        logger.info(`Job Finished: Sent ${processedCount} personalized reminders`);
 
     } catch (error) {
-        console.error("Job Error (Inactive Users):", error);
+        logger.error(`Job Error (Inactive Users): ${error.message}`);
     }
 };
