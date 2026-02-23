@@ -1,14 +1,17 @@
 import { database } from "../applications/database.js";
+import { USER_COLLECTION } from "../constants/user-constant.js";
 import { 
     NOTIFICATION_COLLECTION, 
     NOTIFICATION_FIELDS, 
     NOTIFICATION_QUERY 
 } from "../constants/notification-constant.js";
 
-const USER_COLLECTION = "users";
-
 const getCollection = (userId) => {
     return database.collection(USER_COLLECTION).doc(userId).collection(NOTIFICATION_COLLECTION);
+};
+
+const create = async (userId, notificationId, data) => {
+    await getCollection(userId).doc(notificationId).set(data);
 };
 
 const findByUserId = async (userId, limit) => {
@@ -57,5 +60,6 @@ export default {
     findById,
     updateReadStatus,
     deleteBatchByUserId,
-    deleteById
+    deleteById,
+    create
 };

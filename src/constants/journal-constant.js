@@ -1,3 +1,10 @@
+export const JOURNAL_COLLECTION = "journals";
+
+export const JOURNAL_FIELDS = {
+    USER_ID: "user_id",
+    CREATED_AT: "created_at"
+};
+
 export const JOURNAL_MESSAGES = {
     NOT_FOUND: "Jurnal tidak ditemukan",
     FORBIDDEN: "Akses ditolak",

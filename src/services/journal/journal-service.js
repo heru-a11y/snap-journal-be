@@ -1,10 +1,12 @@
 import { ResponseError } from "../../error/response-error.js";
 import { v4 as uuidv4 } from "uuid";
 import journalRepository from "../../repositories/journal-repository.js";
+import userRepository from "../../repositories/user-repository.js";
 import journalAccessService from "./journal-access-service.js";
 import journalMediaService from "./journal-media-service.js";
 import journalAiService from "./journal-ai-service.js";
-import { JOURNAL_MESSAGES, JOURNAL_DEFAULTS } from "../../constants/journal-constants.js";
+import { JOURNAL_MESSAGES, JOURNAL_DEFAULTS } from "../../constants/journal-constant.js";
+import { USER_FIELDS } from "../../constants/user-constant.js";
 
 const validatePublishRequest = (title, hasVideo) => {
     if (!title || title.trim() === "" || title === JOURNAL_DEFAULTS.DRAFT_TITLE) {
@@ -100,7 +102,6 @@ const createJournal = async (user, request, videoFile) => {
     );
 
     await journalRepository.save(journalData);
-    await journalRepository.updateUserLastEntry(user.uid, now);
 
     return journalData;
 };
@@ -161,7 +162,12 @@ const toggleDraft = async (user, journalId, request) => {
     const updates = { is_draft: isDraft, updated_at: now };
 
     if (currentData.is_draft === true && isDraft === false) {
-        await journalRepository.updateUserLastEntry(user.uid, now);
+        await userRepository.update(user.uid, {
+            [USER_FIELDS.LAST_ENTRY]: now,
+            [USER_FIELDS.LAST_JOURNAL_ID]: journalId,
+            [USER_FIELDS.LAST_JOURNAL_SUMMARY]: currentData.summary || null,
+            [USER_FIELDS.LAST_JOURNAL_EMOTION]: currentData.emotion || null
+        });
     }
 
     await journalRepository.update(journalId, updates);

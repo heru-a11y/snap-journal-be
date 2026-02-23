@@ -1,6 +1,6 @@
 import journalRepository from "../../repositories/journal-repository.js";
 import { ResponseError } from "../../error/response-error.js";
-import { JOURNAL_MESSAGES } from "../../constants/journal-constants.js";
+import { JOURNAL_MESSAGES } from "../../constants/journal-constant.js";
 
 const checkAccess = async (userId, journalId) => {
     const data = await journalRepository.findById(journalId);

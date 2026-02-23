@@ -1,3 +1,17 @@
+export const USER_COLLECTION = "users";
+
+export const USER_FIELDS = {
+    ID: "id",
+    NAME: "name",
+    EMAIL: "email",
+    FCM_TOKEN: "fcm_token",
+    LAST_ENTRY: "last_entry",
+    LAST_REMINDER_AT: "last_reminder_at",
+    LAST_JOURNAL_ID: "last_journal_id",
+    LAST_JOURNAL_SUMMARY: "last_journal_summary",
+    LAST_JOURNAL_EMOTION: "last_journal_emotion"
+};
+
 export const ERROR_MESSAGES = {
     USER_NOT_FOUND: "User tidak ditemukan",
     FILE_REQUIRED: "File foto wajib diupload.",

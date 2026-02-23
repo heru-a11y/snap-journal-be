@@ -1,7 +1,22 @@
 import { database } from "../applications/database.js";
+import { JOURNAL_COLLECTION } from "../constants/journal-constant.js";
+import { USER_COLLECTION, USER_FIELDS } from "../constants/user-constant.js";
 
 const save = async (journalData) => {
-    await database.collection("journals").doc(journalData.id).set(journalData);
+    const batch = database.batch();
+
+    const journalRef = database.collection(JOURNAL_COLLECTION).doc(journalData.id);
+    batch.set(journalRef, journalData);
+
+    const userRef = database.collection(USER_COLLECTION).doc(journalData.user_id);
+    batch.update(userRef, {
+        [USER_FIELDS.LAST_ENTRY]: journalData.created_at,
+        [USER_FIELDS.LAST_JOURNAL_ID]: journalData.id,
+        [USER_FIELDS.LAST_JOURNAL_SUMMARY]: journalData.summary || null,
+        [USER_FIELDS.LAST_JOURNAL_EMOTION]: journalData.emotion || null
+    });
+
+    await batch.commit();
 };
 
 const update = async (journalId, updates) => {
@@ -35,8 +50,4 @@ const find = async (userId, filters = {}, sort = "desc", limitCount = null) => {
     return data;
 };
 
-const updateUserLastEntry = async (userId, timestamp) => {
-    await database.collection("users").doc(userId).update({ last_entry: timestamp });
-};
-
-export default { save, update, findById, deleteById, find, updateUserLastEntry };
+export default { save, update, findById, deleteById, find };

@@ -1,6 +1,7 @@
 import aiClient from "./ai-client.js";
 import { AI_PROMPTS, FALLBACKS, EMOTIONS } from "../../constants/ai-constants.js";
 import { logger } from "../../applications/logging.js";
+import fs from "fs";
 
 const analyzeVideo = async (fileInput) => {
     logger.info("[AI Vision] Menyiapkan analisis video...");
@@ -14,6 +15,18 @@ const analyzeVideo = async (fileInput) => {
         let videoData;
         let mimeType = "video/webm";
 
+        if (typeof fileInput === 'string') {
+            videoData = fs.readFileSync(fileInput);
+        } else if (fileInput.buffer) {
+            videoData = fileInput.buffer;
+            if (fileInput.mimetype) mimeType = fileInput.mimetype;
+        } else if (fileInput.path) {
+            videoData = fs.readFileSync(fileInput.path);
+            if (fileInput.mimetype) mimeType = fileInput.mimetype;
+        } else {
+            throw new Error("Format fileInput tidak valid");
+        }
+
         const filePart = {
             inlineData: {
                 data: videoData.toString("base64"),
@@ -21,7 +34,7 @@ const analyzeVideo = async (fileInput) => {
             }
         };
 
-        logger.info("[AI Vision] Mengirim data video ke Gemini 3...");
+        logger.info("[AI Vision] Mengirim data video ke Gemini...");
         const analysis = await aiClient.generateJSON([AI_PROMPTS.VISION_ANALYSIS, filePart], FALLBACKS.VISION);
         
         logger.info(`[AI Vision] Hasil AI: ${JSON.stringify(analysis)}`);

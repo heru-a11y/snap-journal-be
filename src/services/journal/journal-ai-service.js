@@ -4,17 +4,19 @@ import aiChatService from "../ai/ai-chat-service.js";
 import aiTextService from "../ai/ai-text-service.js";
 import journalAccessService from "./journal-access-service.js";
 import journalRepository from "../../repositories/journal-repository.js";
-import { JOURNAL_MESSAGES, } from "../../constants/journal-constants.js";
+import { JOURNAL_MESSAGES, } from "../../constants/journal-constant.js";
 import { FALLBACKS } from "../../constants/ai-constants.js";
 import { logger } from "../../applications/logging.js";
 import { ResponseError } from "../../error/response-error.js";
 
-const analyzeVideo = async (localPath) => {
+const analyzeVideo = async (videoFile) => {
     let aiAnalysis = { ...FALLBACKS.VISION }; 
 
     try {
-        if (localPath) {
-            const result = await aiVisionService.analyzeVideo(localPath);
+        const filePath = videoFile?.path || videoFile; 
+        
+        if (filePath) {
+            const result = await aiVisionService.analyzeVideo(filePath);
             if (result) aiAnalysis = result;
         }
     } catch (e) {
