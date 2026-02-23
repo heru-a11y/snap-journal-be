@@ -55,6 +55,10 @@ journalRouter.get('/journals/periodic-insight',
     journalController.getPeriodicInsight
 );
 
+journalRouter.get('/journals/top-mood', 
+    journalController.getTopMood
+)
+
 journalRouter.get('/journals/mood-calendar', 
     journalController.getMoodCalendar
 );

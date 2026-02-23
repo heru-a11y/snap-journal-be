@@ -392,6 +392,54 @@
 
 /**
  * @swagger
+ * /api/v1/journals/top-mood:
+ *   get:
+ *     summary: Mengambil Top Mood
+ *     description: Menganalisis riwayat jurnal pengguna dalam periode waktu tertentu untuk menemukan emosi yang paling sering muncul (terbanyak).
+ *     tags:
+ *       - Journal
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: start_date
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Tanggal mulai periode analisis (format ISO 8601, contoh YYYY-MM-DD)
+ *       - in: query
+ *         name: end_date
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Tanggal akhir periode analisis (format ISO 8601, contoh YYYY-MM-DD)
+ *     responses:
+ *       200:
+ *         description: Data top mood berhasil diambil.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     start_date:
+ *                       type: string
+ *                     end_date:
+ *                       type: string
+ *                     top_mood:
+ *                       type: string
+ *                     count:
+ *                       type: integer
+ *       404:
+ *         description: Tidak ada data jurnal pada periode waktu yang diminta.
+ */
+
+/**
+ * @swagger
  * /api/v1/journals/{id}:
  *   get:
  *     summary: Mengambil detail satu jurnal

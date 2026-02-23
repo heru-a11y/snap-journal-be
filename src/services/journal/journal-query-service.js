@@ -159,6 +159,39 @@ const getPeriodicInsight = async (user, request) => {
     };
 };
 
+const getTopMood = async (user, request) => {
+    const filters = {
+        start_date: new Date(request.start_date).toISOString(),
+        end_date: new Date(request.end_date).toISOString()
+    };
+
+    const data = await journalRepository.find(user.uid, filters);
+
+    if (data.length === 0) throw new ResponseError(404, JOURNAL_MESSAGES.NO_DATA_PERIOD);
+
+    const moodCounts = {};
+    let topMood = null;
+    let maxCount = 0;
+
+    data.forEach(journal => {
+        if (!journal.is_draft && journal.emotion) {
+            moodCounts[journal.emotion] = (moodCounts[journal.emotion] || 0) + 1;
+            
+            if (moodCounts[journal.emotion] > maxCount) {
+                maxCount = moodCounts[journal.emotion];
+                topMood = journal.emotion;
+            }
+        }
+    });
+
+    return {
+        start_date: request.start_date,
+        end_date: request.end_date,
+        top_mood: topMood,
+        count: maxCount
+    };
+};
+
 const getMoodCalendar = async (user, request) => {
     const now = new Date();
     const year = request.year ? parseInt(request.year) : now.getFullYear();
@@ -195,5 +228,6 @@ export default {
     getLatestJournal,
     getDailyInsight,
     getPeriodicInsight,
+    getTopMood,
     getMoodCalendar
 };
