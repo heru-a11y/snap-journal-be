@@ -322,3 +322,24 @@
  *                   type: string
  *                   example: "Job manual berhasil dijalankan. Silakan periksa log terminal backend."
  */
+
+/**
+ * @swagger
+ * /api/v1/test/media-cleanup:
+ *   get:
+ *     summary: "[TEST] Pemicu Manual Media Cleanup"
+ *     description: "Memicu background job untuk menghapus file gambar di storage yang tidak memiliki relasi di database (orphaned files) dan sudah berusia lebih dari 24 jam."
+ *     tags:
+ *       - Testing
+ *     responses:
+ *       200:
+ *         description: Job berhasil dijalankan
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Job manual media cleanup berhasil dijalankan. Silakan periksa log terminal backend."
+ */

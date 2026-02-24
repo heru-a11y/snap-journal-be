@@ -2,15 +2,15 @@
  * @swagger
  * tags:
  *   - name: Media
- *     description: Manajemen media independen untuk jurnal.
+ *     description: Manajemen media independen untuk jurnal (Upload/Hapus secara asinkron sebelum disubmit ke jurnal).
  */
 
 /**
  * @swagger
  * /api/v1/media/editor-image:
  *   post:
- *     summary: Mengunggah gambar dari Rich Text Editor
- *     description: Mengunggah gambar secara langsung saat disisipkan ke dalam editor. Mengembalikan URL gambar dari GCS.
+ *     summary: Mengunggah gambar jurnal
+ *     description: Mengunggah gambar untuk ditautkan ke jurnal. Mengembalikan URL gambar dari GCS. URL ini nantinya disertakan dalam array `images` (Maksimal 3 per jurnal) saat menyimpan jurnal.
  *     tags:
  *       - Media
  *     security:
@@ -27,7 +27,7 @@
  *               image:
  *                 type: string
  *                 format: binary
- *                 description: File gambar yang disisipkan melalui editor.
+ *                 description: File gambar jurnal.
  *     responses:
  *       200:
  *         description: Berhasil mengunggah gambar.
@@ -39,8 +39,8 @@
  * @swagger
  * /api/v1/media/editor-image:
  *   delete:
- *     summary: Menghapus gambar dari Rich Text Editor
- *     description: Menghapus gambar dari GCS ketika dihapus dari editor.
+ *     summary: Menghapus gambar jurnal
+ *     description: Menghapus gambar dari GCS jika pengguna membatalkan (unattach) gambar tersebut sebelum jurnal disimpan.
  *     tags:
  *       - Media
  *     security:
@@ -61,5 +61,5 @@
  *       200:
  *         description: Berhasil menghapus gambar.
  *       400:
- *         description: Validasi gagal.
+ *         description: Validasi gagal atau URL tidak ditemukan.
  */

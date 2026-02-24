@@ -13,7 +13,8 @@
  *     description: |
  *       Membuat jurnal baru dengan status **Published**.
  *       - `note` menerima teks murni (string).
- *       - `images` menerima array berisi string URL gambar hasil dari endpoint `/media/editor-image`.
+ *       - `images` menerima array berisi string URL gambar (Maksimal 3 foto).
+ *       - `video` menerima 1 file video.
  *     tags:
  *       - Journal
  *     security:
@@ -34,12 +35,14 @@
  *                 type: string
  *               images:
  *                 type: array
+ *                 maxItems: 3
  *                 items:
  *                   type: string
- *                 description: Daftar URL gambar yang disertakan dalam jurnal.
+ *                 description: Daftar URL gambar yang disertakan dalam jurnal (Maksimal 3).
  *               video:
  *                 type: string
  *                 format: binary
+ *                 description: File video jurnal (Maksimal 1).
  *     responses:
  *       201:
  *         description: Berhasil membuat jurnal.
@@ -55,7 +58,8 @@
  *     description: |
  *       Menyimpan jurnal dengan status **Draft**.
  *       - `note` menerima teks murni (string).
- *       - `images` menerima array berisi string URL gambar hasil dari endpoint `/media/editor-image`.
+ *       - `images` menerima array berisi string URL gambar (Maksimal 3 foto).
+ *       - `video` menerima maksimal 1 file video (opsional untuk draf).
  *     tags:
  *       - Journal
  *     security:
@@ -73,6 +77,7 @@
  *                 type: string
  *               images:
  *                 type: array
+ *                 maxItems: 3
  *                 items:
  *                   type: string
  *               video:
@@ -90,6 +95,8 @@
  *     summary: Mengupdate konten jurnal
  *     description: |
  *       Memperbarui data konten (Judul, Note, Images, Video).
+ *       - Array `images` akan menggantikan gambar lama (Maksimal 3 foto).
+ *       - File `video` akan menimpa video lama (Maksimal 1 video).
  *     tags:
  *       - Journal
  *     security:
@@ -112,6 +119,7 @@
  *                 type: string
  *               images:
  *                 type: array
+ *                 maxItems: 3
  *                 items:
  *                   type: string
  *               video:
@@ -342,33 +350,8 @@
  *     responses:
  *       200:
  *         description: Analisis insight periodik berhasil diambil.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 data:
- *                   type: object
- *                   properties:
- *                     start_date:
- *                       type: string
- *                     end_date:
- *                       type: string
- *                     insight:
- *                       type: object
- *                       properties:
- *                         summary:
- *                           type: string
- *                         dominant_emotion:
- *                           type: string
- *                         recurring_themes:
- *                           type: array
- *                           items:
- *                             type: string
- *                         advice:
- *                           type: string
  *       400:
- *         description: Validasi parameter gagal (contoh format tanggal salah atau end_date lebih kecil dari start_date).
+ *         description: Validasi parameter gagal.
  *       404:
  *         description: Tidak ada data jurnal pada periode waktu yang diminta.
  */
@@ -401,22 +384,6 @@
  *     responses:
  *       200:
  *         description: Data top mood berhasil diambil.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 data:
- *                   type: object
- *                   properties:
- *                     start_date:
- *                       type: string
- *                     end_date:
- *                       type: string
- *                     top_mood:
- *                       type: string
- *                     count:
- *                       type: integer
  *       404:
  *         description: Tidak ada data jurnal pada periode waktu yang diminta.
  */
@@ -511,7 +478,7 @@
  * /api/v1/journals/{id}:
  *   delete:
  *     summary: Menghapus jurnal
- *     description: Menghapus database, video, dan seluruh gambar yang ada di dalam note secara otomatis.
+ *     description: Menghapus data jurnal, video, dan seluruh gambar terkait secara otomatis.
  *     tags:
  *       - Journal
  *     security:

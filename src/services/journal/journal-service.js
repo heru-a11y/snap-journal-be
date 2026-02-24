@@ -17,14 +17,12 @@ const validatePublishRequest = (title, hasVideo) => {
     }
 };
 
-const buildJournalData = (id, userId, request, videoUrl, aiAnalysis, isDraft, timestamp) => {
+const buildJournalData = (id, userId, request, aiAnalysis, isDraft, timestamp) => {
     return {
         id,
         user_id: userId,
         title: request.title || (isDraft ? JOURNAL_DEFAULTS.DRAFT_TITLE : ""),
         note: request.note || "",
-        images: Array.isArray(request.images) ? request.images : [],
-        video_url: videoUrl,
         is_favorite: false,
         is_draft: isDraft,
         emotion: aiAnalysis?.emotion || null,
@@ -39,50 +37,21 @@ const buildJournalData = (id, userId, request, videoUrl, aiAnalysis, isDraft, ti
     };
 };
 
-const buildUpdatePayload = (currentData, request, videoData, timestamp) => {
-    const updates = { updated_at: timestamp };
-    let isChanged = false;
-
-    if (request.title !== undefined && request.title.trim() !== "") {
-        updates.title = request.title;
-        if (request.title !== currentData.title) isChanged = true;
+const buildMediaData = (journalId, videoUrl, images, timestamp) => {
+    const mediaList = [];
+    if (videoUrl) {
+        mediaList.push({
+            id: uuidv4(), journal_id: journalId, type: 'video', url: videoUrl, created_at: timestamp
+        });
     }
-    
-    if (request.note !== undefined) {
-        updates.note = request.note;
-        if (request.note !== currentData.note) isChanged = true;
+    if (images && Array.isArray(images)) {
+        images.slice(0, 3).forEach(url => {
+            mediaList.push({
+                id: uuidv4(), journal_id: journalId, type: 'image', url: url, created_at: timestamp
+            });
+        });
     }
-
-    if (request.images !== undefined) {
-        updates.images = Array.isArray(request.images) ? request.images : [];
-        isChanged = true;
-    }
-    
-    if (videoData) {
-        updates.video_url = videoData.url;
-        if (videoData.ai && videoData.ai.emotion) {
-            updates.emotion = videoData.ai.emotion;
-            updates.expression = videoData.ai.expression;
-            updates.confidence = videoData.ai.confidence;
-        }
-        isChanged = true;
-    }
-
-    if (isChanged) {
-        updates.tags = null;
-        updates.chatbot_highlight = null;
-        updates.chatbot_suggestion = null;
-        updates.chatbot_strategy = null;
-    }
-
-    return updates;
-};
-
-const processVideoUpdate = async (user, currentVideoUrl, newVideoFile) => {
-    await journalMediaService.handleVideoDelete(user, currentVideoUrl); 
-    const url = await journalMediaService.handleVideoUpload(user, newVideoFile);
-    const ai = await journalAiService.analyzeVideo(newVideoFile);
-    return { url, ai };
+    return mediaList;
 };
 
 const createJournal = async (user, request, videoFile) => {
@@ -97,19 +66,12 @@ const createJournal = async (user, request, videoFile) => {
     }
     
     const videoUrl = await journalMediaService.handleVideoUpload(user, videoFile);
-    const journalData = buildJournalData(
-        journalId, 
-        user.uid, 
-        request, 
-        videoUrl, 
-        aiAnalysis, 
-        false, 
-        now
-    );
+    const journalData = buildJournalData(journalId, user.uid, request, aiAnalysis, false, now);
+    const mediaList = buildMediaData(journalId, videoUrl, request.images, now);
 
-    await journalRepository.save(journalData);
+    await journalRepository.save(journalData, mediaList);
 
-    return journalData;
+    return { ...journalData, media: mediaList };
 };
 
 const createJournalDraft = async (user, request, videoFile) => {
@@ -117,27 +79,81 @@ const createJournalDraft = async (user, request, videoFile) => {
     const now = new Date().toISOString();
     
     const videoUrl = await journalMediaService.handleVideoUpload(user, videoFile);
-    const journalData = buildJournalData(journalId, user.uid, request, videoUrl, null, true, now);
+    const journalData = buildJournalData(journalId, user.uid, request, null, true, now);
+    const mediaList = buildMediaData(journalId, videoUrl, request.images, now);
 
-    await journalRepository.save(journalData);
+    await journalRepository.save(journalData, mediaList);
     
-    return journalData;
+    return { ...journalData, media: mediaList };
 };
 
 const updateJournal = async (user, request, journalId, videoFile) => {
     const currentData = await journalAccessService.checkAccess(user.uid, journalId);
     
     const now = new Date().toISOString();
-    let videoData = null;
+    const currentMedia = currentData.media || [];
+    const currentImages = currentMedia.filter(m => m.type === 'image');
+    const currentVideo = currentMedia.find(m => m.type === 'video');
+
+    const updates = { updated_at: now };
+    let newMediaList = [];
+    let deleteMediaIds = [];
+    let isContentChanged = false;
+
+    if (request.title !== undefined && request.title !== currentData.title) {
+        updates.title = request.title;
+        isContentChanged = true;
+    }
     
-    if (videoFile) {
-        videoData = await processVideoUpdate(user, currentData.video_url, videoFile);
+    if (request.note !== undefined && request.note !== currentData.note) {
+        updates.note = request.note;
+        isContentChanged = true;
     }
 
-    const updates = buildUpdatePayload(currentData, request, videoData, now);
-    await journalRepository.update(journalId, updates);
+    if (videoFile) {
+        if (currentVideo) {
+            await journalMediaService.handleVideoDelete(user, currentVideo.url);
+            deleteMediaIds.push(currentVideo.id);
+        }
+        const url = await journalMediaService.handleVideoUpload(user, videoFile);
+        const ai = await journalAiService.analyzeVideo(videoFile);
+        
+        updates.emotion = ai.emotion;
+        updates.expression = ai.expression;
+        updates.confidence = ai.confidence;
+        
+        newMediaList.push({ id: uuidv4(), journal_id: journalId, type: 'video', url: url, created_at: now });
+        isContentChanged = true;
+    }
+
+    if (request.images && Array.isArray(request.images)) {
+        const requestedUrls = request.images.slice(0, 3);
+        const currentUrls = currentImages.map(img => img.url);
+        
+        const deletedImages = currentImages.filter(img => !requestedUrls.includes(img.url));
+        if (deletedImages.length > 0) {
+            await journalMediaService.handleJournalImagesDelete(user, deletedImages.map(d => d.url));
+            deleteMediaIds.push(...deletedImages.map(d => d.id));
+            isContentChanged = true;
+        }
+        
+        const addedUrls = requestedUrls.filter(url => !currentUrls.includes(url));
+        addedUrls.forEach(url => {
+            newMediaList.push({ id: uuidv4(), journal_id: journalId, type: 'image', url: url, created_at: now });
+            isContentChanged = true;
+        });
+    }
+
+    if (isContentChanged) {
+        updates.tags = null;
+        updates.chatbot_highlight = null;
+        updates.chatbot_suggestion = null;
+        updates.chatbot_strategy = null;
+    }
+
+    await journalRepository.update(journalId, updates, newMediaList, deleteMediaIds);
     
-    return { ...currentData, ...updates };
+    return await journalAccessService.checkAccess(user.uid, journalId);
 };
 
 const getDetailJournal = async (user, journalId) => {
@@ -162,7 +178,8 @@ const toggleDraft = async (user, journalId, request) => {
     const now = new Date().toISOString();
 
     if (isDraft === false) {
-        validatePublishRequest(currentData.title, !!currentData.video_url);
+        const hasVideo = currentData.media && currentData.media.some(m => m.type === 'video');
+        validatePublishRequest(currentData.title, hasVideo);
     }
 
     const updates = { is_draft: isDraft, updated_at: now };
@@ -188,8 +205,13 @@ const toggleDraft = async (user, journalId, request) => {
 const deleteJournal = async (user, journalId) => {
     const journalData = await journalAccessService.checkAccess(user.uid, journalId);
 
-    await journalMediaService.handleVideoDelete(user, journalData.video_url);
-    await journalMediaService.handleJournalImagesDelete(user, journalData.images);
+    const media = journalData.media || [];
+    const imagesUrl = media.filter(m => m.type === 'image').map(m => m.url);
+    const videoObj = media.find(m => m.type === 'video');
+
+    if (videoObj) await journalMediaService.handleVideoDelete(user, videoObj.url);
+    if (imagesUrl.length > 0) await journalMediaService.handleJournalImagesDelete(user, imagesUrl);
+    
     await journalRepository.deleteById(journalId);
 
     return { message: JOURNAL_MESSAGES.DELETED };

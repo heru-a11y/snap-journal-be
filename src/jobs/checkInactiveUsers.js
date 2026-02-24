@@ -6,7 +6,7 @@ import userRepository from "../repositories/user-repository.js";
 import { logger } from "../applications/logging.js";
 import { USER_COLLECTION, USER_FIELDS } from "../constants/user-constant.js";
 import { NOTIFICATION_COLLECTION, NOTIFICATION_FIELDS } from "../constants/notification-constant.js";
-import { INACTIVE_USER_JOB } from "../constants/job-constant.js";
+import { INACTIVE_USER_JOB } from "../constants/inactiveUserJob-constant.js";
 
 export const checkInactiveUsers = async () => {
     logger.info("Starting Job: Inactive User Reminder");

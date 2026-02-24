@@ -9,6 +9,7 @@ import {
     draftJournalValidation
 } from "../validations/journal-validation.js";
 import { multipartMiddleware } from "../middlewares/multipart-middleware.js";
+import { parseImagesMiddleware } from "../middlewares/parse-images-middleware.js";
 import journalController from "../controllers/journal-controller.js";
 
 const journalRouter = new express.Router();
@@ -17,12 +18,14 @@ journalRouter.use(authMiddleware);
 
 journalRouter.post('/journals', 
     multipartMiddleware,
+    parseImagesMiddleware,
     runValidation(createJournalValidation),
     journalController.createJournal
 );
 
 journalRouter.post('/journals/draft', 
     multipartMiddleware,
+    parseImagesMiddleware,
     journalController.createJournalDraft
 );
 
@@ -57,7 +60,7 @@ journalRouter.get('/journals/periodic-insight',
 
 journalRouter.get('/journals/top-mood', 
     journalController.getTopMood
-)
+);
 
 journalRouter.get('/journals/mood-calendar', 
     journalController.getMoodCalendar
@@ -73,6 +76,7 @@ journalRouter.get('/journals/:id',
 
 journalRouter.put('/journals/:id', 
     multipartMiddleware,
+    parseImagesMiddleware,
     runValidation(updateJournalValidation),
     journalController.updateJournal
 );

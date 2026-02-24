@@ -11,6 +11,7 @@ import {
     verifyResetOtpValidation
 } from "../validations/auth-validation.js"; 
 import { checkInactiveUsers } from "../jobs/checkInactiveUsers.js";
+import { cleanupOrphanedImages } from "../jobs/mediaCleanupJob.js";
 
 const publicRouter = new express.Router();
 
@@ -23,6 +24,20 @@ publicRouter.get('/test/reminder-job', async (req, res) => {
     } catch (error) {
         res.status(500).json({ 
             error: "Gagal menjalankan job manual", 
+            details: error.message 
+        });
+    }
+});
+
+publicRouter.get('/test/media-cleanup', async (req, res) => {
+    try {
+        await cleanupOrphanedImages();
+        res.status(200).json({ 
+            message: "Job manual media cleanup berhasil dijalankan. Silakan periksa log terminal backend untuk detail penghapusan file." 
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            error: "Gagal menjalankan job manual media cleanup", 
             details: error.message 
         });
     }

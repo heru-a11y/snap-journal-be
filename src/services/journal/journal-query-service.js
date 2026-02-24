@@ -73,7 +73,10 @@ const paginateData = (data, pageParam, sizeParam) => {
 // --- MAIN SERVICES ---
 const listJournal = async (user) => {
     const data = await journalRepository.find(user.uid, { is_draft: false });
-    return { meta: { total_data: data.length }, data };
+    return { 
+        meta: { total_data: data.length }, 
+        data 
+    };
 };
 
 const searchJournal = async (user, request) => {
@@ -87,12 +90,18 @@ const searchJournal = async (user, request) => {
 
 const getDraftJournal = async (user) => {
     const data = await journalRepository.find(user.uid, { is_draft: true });
-    return { meta: { total_data: data.length }, data };
+    return { 
+        meta: { total_data: data.length }, 
+        data 
+    };
 };
 
 const getFavoriteJournal = async (user) => {
     const data = await journalRepository.find(user.uid, { is_draft: false, is_favorite: true });
-    return { meta: { total_data: data.length }, data };
+    return { 
+        meta: { total_data: data.length }, 
+        data 
+    };
 };
 
 const getLatestJournal = async (user) => {

@@ -10,7 +10,9 @@ const createJournalValidation = Joi.object({
     note: Joi.string().optional().allow('').messages({
         'string.base': 'Catatan harus berupa teks'
     }),
-    images: Joi.any().optional(),
+    images: Joi.array().items(Joi.string()).max(3).messages({
+        'array.max': 'Maksimal 3 foto yang diperbolehkan'
+    }).optional(),
     is_favorite: Joi.boolean().optional(),
     is_draft: Joi.boolean().optional(),
     video: Joi.any().optional()
@@ -24,7 +26,9 @@ const updateJournalValidation = Joi.object({
     note: Joi.string().optional().allow('').messages({
         'string.base': 'Catatan harus berupa teks'
     }),
-    images: Joi.any().optional(),
+    images: Joi.array().items(Joi.string()).max(3).messages({
+        'array.max': 'Maksimal 3 foto yang diperbolehkan'
+    }).optional(),
     is_favorite: Joi.boolean().optional(),
     is_draft: Joi.boolean().optional(),
     video: Joi.any().optional()
