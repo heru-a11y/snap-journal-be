@@ -35,7 +35,7 @@ const uploadProfilePicture = async (user, file) => {
     }
 };
 
-const uploadEditorImage = async (user, file) => {
+const uploadJournalImage = async (user, file) => {
     if (!file) return null;
 
     try {
@@ -129,6 +129,6 @@ function cleanup(inFiles, outFiles) {
 
 export default {
     uploadProfilePicture,
-    uploadEditorImage, 
+    uploadJournalImage, 
     uploadJournalVideo
 };

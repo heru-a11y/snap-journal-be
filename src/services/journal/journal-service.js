@@ -23,6 +23,7 @@ const buildJournalData = (id, userId, request, videoUrl, aiAnalysis, isDraft, ti
         user_id: userId,
         title: request.title || (isDraft ? JOURNAL_DEFAULTS.DRAFT_TITLE : ""),
         note: request.note || "",
+        images: Array.isArray(request.images) ? request.images : [],
         video_url: videoUrl,
         is_favorite: false,
         is_draft: isDraft,
@@ -50,6 +51,11 @@ const buildUpdatePayload = (currentData, request, videoData, timestamp) => {
     if (request.note !== undefined) {
         updates.note = request.note;
         if (request.note !== currentData.note) isChanged = true;
+    }
+
+    if (request.images !== undefined) {
+        updates.images = Array.isArray(request.images) ? request.images : [];
+        isChanged = true;
     }
     
     if (videoData) {
@@ -183,7 +189,7 @@ const deleteJournal = async (user, journalId) => {
     const journalData = await journalAccessService.checkAccess(user.uid, journalId);
 
     await journalMediaService.handleVideoDelete(user, journalData.video_url);
-    await journalMediaService.handleEmbeddedImagesDelete(user, journalData.note);
+    await journalMediaService.handleJournalImagesDelete(user, journalData.images);
     await journalRepository.deleteById(journalId);
 
     return { message: JOURNAL_MESSAGES.DELETED };

@@ -7,74 +7,13 @@
 
 /**
  * @swagger
- * /api/v1/media/editor-image:
- *   post:
- *     summary: Mengunggah gambar dari Rich Text Editor
- *     description: Mengunggah gambar secara langsung saat disisipkan ke dalam editor. Mengembalikan URL gambar dari GCS.
- *     tags:
- *       - Media
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             required:
- *               - image
- *             properties:
- *               image:
- *                 type: string
- *                 format: binary
- *                 description: File gambar yang disisipkan melalui editor.
- *     responses:
- *       200:
- *         description: Berhasil mengunggah gambar.
- *       400:
- *         description: Validasi gagal.
- */
-
-/**
- * @swagger
- * /api/v1/media/editor-image:
- *   delete:
- *     summary: Menghapus gambar dari Rich Text Editor
- *     description: Menghapus gambar dari GCS ketika dihapus dari editor.
- *     tags:
- *       - Media
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - file_url
- *             properties:
- *               file_url:
- *                 type: string
- *                 description: URL gambar GCS yang akan dihapus.
- *     responses:
- *       200:
- *         description: Berhasil menghapus gambar.
- *       400:
- *         description: Validasi gagal.
- */
-
-/**
- * @swagger
  * /api/v1/journals:
  *   post:
  *     summary: Membuat jurnal baru (Publish)
  *     description: |
  *       Membuat jurnal baru dengan status **Published**.
- *       * **Logika Rich Text:** Field `note` menerima HTML murni yang sudah berisi tag `<img>` dengan URL GCS langsung dari endpoint `/editor-image`.
- *       * **Logika AI:**
- *         1. **Visual Analysis (Otomatis):** Sistem menganalisis video untuk mendeteksi `emotion` dan `expression`.
- *         2. **Text Insight (Pending):** Insight teks (saran, strategi) di-set `null` untuk kecepatan upload. Gunakan endpoint `/analyze` untuk memicunya.
+ *       - `note` menerima teks murni (string).
+ *       - `images` menerima array berisi string URL gambar hasil dari endpoint `/media/editor-image`.
  *     tags:
  *       - Journal
  *     security:
@@ -91,14 +30,16 @@
  *             properties:
  *               title:
  *                 type: string
- *                 description: Judul jurnal.
  *               note:
  *                 type: string
- *                 description: Catatan teks dalam format HTML.
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Daftar URL gambar yang disertakan dalam jurnal.
  *               video:
  *                 type: string
  *                 format: binary
- *                 description: File video rekaman wajah.
  *     responses:
  *       201:
  *         description: Berhasil membuat jurnal.
@@ -113,8 +54,8 @@
  *     summary: Menyimpan jurnal sebagai Draft
  *     description: |
  *       Menyimpan jurnal dengan status **Draft**.
- *       - Video dan Title bersifat opsional.
- *       - AI Visual dan Teks tidak dijalankan.
+ *       - `note` menerima teks murni (string).
+ *       - `images` menerima array berisi string URL gambar hasil dari endpoint `/media/editor-image`.
  *     tags:
  *       - Journal
  *     security:
@@ -130,13 +71,55 @@
  *                 default: "Untitled Draft"
  *               note:
  *                 type: string
- *                 description: Catatan teks dalam format HTML.
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
  *               video:
  *                 type: string
  *                 format: binary
  *     responses:
  *       201:
  *         description: Berhasil menyimpan draft.
+ */
+
+/**
+ * @swagger
+ * /api/v1/journals/{id}:
+ *   put:
+ *     summary: Mengupdate konten jurnal
+ *     description: |
+ *       Memperbarui data konten (Judul, Note, Images, Video).
+ *     tags:
+ *       - Journal
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               note:
+ *                 type: string
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               video:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Berhasil update.
  */
 
 /**
@@ -456,44 +439,6 @@
  *     responses:
  *       200:
  *         description: Detail ditemukan.
- */
-
-/**
- * @swagger
- * /api/v1/journals/{id}:
- *   put:
- *     summary: Mengupdate konten jurnal
- *     description: |
- *       Memperbarui data konten (Judul, Note, Media).
- *       - Field `note` menerima HTML murni dengan URL GCS.
- *       - AI Teks Insight akan di-reset (null) jika konten berubah.
- *     tags:
- *       - Journal
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             properties:
- *               title:
- *                 type: string
- *               note:
- *                 type: string
- *                 description: Catatan teks dalam format HTML.
- *               video:
- *                 type: string
- *                 format: binary
- *     responses:
- *       200:
- *         description: Berhasil update.
  */
 
 /**

@@ -4,18 +4,30 @@ import journalAiService from "../services/journal/journal-ai-service.js";
 import uploadService from "../services/upload-service.js";
 import deleteService from "../services/delete-service.js";
 
-const uploadEditorImage = async (req, res, next) => {
+// Helper untuk memastikan images selalu berupa array
+const parseImagesField = (images) => {
+    if (!images) return [];
+    if (Array.isArray(images)) return images;
+    try {
+        const parsed = JSON.parse(images);
+        return Array.isArray(parsed) ? parsed : [parsed];
+    } catch (e) {
+        return [images];
+    }
+};
+
+const uploadJournalImage = async (req, res, next) => {
     try {
         const user = req.user;
         const file = req.files['image'] ? req.files['image'][0] : null;
-        const result = await uploadService.uploadEditorImage(user, file);
+        const result = await uploadService.uploadJournalImage(user, file);
         res.status(200).json({ data: result });
     } catch (e) {
         next(e);
     }
 };
 
-const deleteEditorImage = async (req, res, next) => {
+const deleteJournalImage = async (req, res, next) => {
     try {
         const user = req.user;
         const { file_url } = req.body; 
@@ -35,6 +47,8 @@ const createJournal = async (req, res, next) => {
     try {
         const user = req.user;
         const request = req.body;
+        request.images = parseImagesField(request.images);
+
         const videoFile = req.files?.['video'] ? req.files['video'][0] : null;
         const result = await journalService.createJournal(user, request, videoFile);
         
@@ -48,6 +62,8 @@ const createJournalDraft = async (req, res, next) => {
     try {
         const user = req.user;
         const request = req.body;
+        request.images = parseImagesField(request.images);
+
         const files = req.files || {};
         const videoFile = files['video'] ? files['video'][0] : null;
 
@@ -63,6 +79,8 @@ const updateJournal = async (req, res, next) => {
         const user = req.user;
         const id = req.params.id;
         const request = req.body;
+        request.images = parseImagesField(request.images);
+
         const files = req.files || {};
         const videoFile = files['video'] ? files['video'][0] : null;
 
@@ -242,8 +260,8 @@ const getMoodCalendar = async (req, res, next) => {
 };
 
 export default {
-    uploadEditorImage,
-    deleteEditorImage,
+    uploadJournalImage,
+    deleteJournalImage,
     createJournal,
     createJournalDraft,
     listJournal,

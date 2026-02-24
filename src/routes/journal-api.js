@@ -101,11 +101,11 @@ journalRouter.delete('/journals/:id',
 
 journalRouter.post('/media/editor-image',
     multipartMiddleware,
-    journalController.uploadEditorImage
+    journalController.uploadJournalImage
 );
 
 journalRouter.delete('/media/editor-image',
-    journalController.deleteEditorImage
+    journalController.deleteJournalImage
 );
 
 export { journalRouter };
