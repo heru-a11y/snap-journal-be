@@ -33,32 +33,26 @@ Ikuti langkah-langkah berikut untuk menjalankan proyek di komputer lokal Anda:
    git clone https://github.com/purnomoht17/snap-journal-be.git
    ```
 
-2. **Masuk ke Direktori**
-
-   ```bash
-   cd backend
-   ```
-
-3. **Konfigurasi Environment Variable**
+2. **Konfigurasi Environment Variable**
    Salin file contoh konfigurasi ke file `.env` baru:
 
    ```bash
    cp .env.example .env
    ```
 
-4. **Install Dependencies**
+3. **Install Dependencies**
 
    ```bash
    npm install
    ```
 
-5. **Jalankan Aplikasi**
+4. **Jalankan Aplikasi**
 
    ```bash
    npm run dev
    ```
 
-Server akan berjalan di `http://localhost:3000`.
+Server akan berjalan di `http://localhost:3001`.
 
 ---
 
@@ -171,6 +165,6 @@ docker-compose down
 
 Dokumentasi lengkap endpoint API tersedia via Swagger UI:
 
-👉 [http://localhost:3000/api-docs](http://localhost:3000/api-docs)
+👉 [http://localhost:3001/api-docs](http://localhost:3001/api-docs)
 
 ---
