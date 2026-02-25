@@ -1,51 +1,55 @@
 import { MEDIA_CLEANUP_CONFIG } from '../constants/mediaCleanupJob-constant.js';
 import { logger } from '../applications/logging.js';
-import admin from 'firebase-admin';
-
-const db = admin.firestore();
+import { db, bucket } from '../applications/firebase.js';
 
 export const cleanupOrphanedImages = async () => {
-    const bucketName = process.env.GOOGLE_BUCKET_NAME;
-
-    if (!bucketName) {
-        logger.error('[Media Cleanup Job] GOOGLE_BUCKET_NAME is not defined in environment variables');
-        return;
-    }
-
     try {
-        const bucket = admin.storage().bucket(bucketName);
-        logger.info('[Media Cleanup Job] Starting orphaned images cleanup...');
-        
+        logger.info(`[Media Cleanup Job] Memulai pengecekan di bucket: ${bucket.name}`);
         const [files] = await bucket.getFiles({ prefix: MEDIA_CLEANUP_CONFIG.STORAGE_PATH_PREFIX });
+        logger.info(`[Media Cleanup Job] Ditemukan ${files.length} file di path prefix. Memproses analisis...`);
+        
         const now = new Date();
         let deletedCount = 0;
 
         for (const file of files) {
-            if (!file.name.includes(MEDIA_CLEANUP_CONFIG.STORAGE_PATH_SUFFIX)) continue;
+            try {
+                if (file.name.endsWith('/')) continue;
+                if (!file.name.includes(MEDIA_CLEANUP_CONFIG.STORAGE_PATH_SUFFIX)) continue;
 
-            const [metadata] = await file.getMetadata();
-            const createdAt = new Date(metadata.timeCreated);
-            const ageInHours = (now - createdAt) / (1000 * 60 * 60);
+                const timeCreatedStr = file.metadata?.timeCreated;
+                if (!timeCreatedStr) continue; 
 
-            if (ageInHours > MEDIA_CLEANUP_CONFIG.RETENTION_HOURS) {
-                const fileUrl = `https://storage.googleapis.com/${bucketName}/${file.name}`;
+                const createdAt = new Date(timeCreatedStr);
+                const ageInHours = (now - createdAt) / (1000 * 60 * 60);
 
-                const mediaSnapshot = await db.collection('journal_media')
-                    .where('url', '==', fileUrl)
-                    .limit(1)
-                    .get();
+                if (ageInHours > MEDIA_CLEANUP_CONFIG.RETENTION_HOURS) {
+                    const bucketName = bucket.name.trim();
+                    const gcsUrl = `https://storage.googleapis.com/${bucketName}/${file.name}`;
+                    const firebaseUrl = `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${encodeURIComponent(file.name)}?alt=media`;
 
-                if (mediaSnapshot.empty) {
-                    await file.delete();
-                    deletedCount++;
-                    logger.debug(`[Media Cleanup Job] File deleted: ${file.name}`);
+                    const [mediaSnapshotGcs, mediaSnapshotFirebase] = await Promise.all([
+                        db.collection('journal_media').where('url', '==', gcsUrl).limit(1).get(),
+                        db.collection('journal_media').where('url', '==', firebaseUrl).limit(1).get()
+                    ]);
+
+                    if (mediaSnapshotGcs.empty && mediaSnapshotFirebase.empty) {
+                        await bucket.file(file.name).delete({ ignoreNotFound: true });
+                        deletedCount++;
+                        logger.info(`[Media Cleanup Job] File yatim berhasil dihapus: ${file.name}`);
+                    }
+                }
+            } catch (fileError) {
+                if (fileError.code === 5 || fileError.message?.includes('NOT_FOUND')) {
+                    logger.info(`[Media Cleanup Job] File dilewati (sudah terhapus dari GCS): ${file.name}`);
+                } else {
+                    logger.warn(`[Media Cleanup Job] Gagal memproses ${file.name}: ${fileError.message}`);
                 }
             }
         }
 
-        logger.info(`[Media Cleanup Job] Finished. Total files deleted: ${deletedCount}`);
+        logger.info(`[Media Cleanup Job] Selesai. Total file yang berhasil dihapus: ${deletedCount}`);
     } catch (error) {
-        logger.error(`[Media Cleanup Job] Error execution failed: ${error.message}`);
+        logger.error(`[Media Cleanup Job] Error Utama: ${error.message}`);
     }
 };
 
