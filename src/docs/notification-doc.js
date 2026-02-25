@@ -15,6 +15,13 @@
  *     security:
  *       - bearerAuth: []
  *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         description: Preferensi bahasa respons
  *       - in: query
  *         name: limit
  *         schema:
@@ -27,28 +34,31 @@
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: string
- *                     description: ID Notifikasi
- *                   title:
- *                     type: string
- *                     example: "Pengingat Harian"
- *                   message:
- *                     type: string
- *                     example: "Jangan lupa mengisi jurnal hari ini!"
- *                   read_at:
- *                     type: string
- *                     format: date-time
- *                     nullable: true
- *                     description: Tanggal dibaca (Null jika belum dibaca)
- *                   created_at:
- *                     type: string
- *                     format: date-time
- *                     description: Tanggal notifikasi dibuat
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         description: ID Notifikasi
+ *                       title:
+ *                         type: string
+ *                         example: "Pengingat Harian"
+ *                       message:
+ *                         type: string
+ *                         example: "Jangan lupa mengisi jurnal hari ini!"
+ *                       read_at:
+ *                         type: string
+ *                         format: date-time
+ *                         nullable: true
+ *                         description: Tanggal dibaca (Null jika belum dibaca)
+ *                       created_at:
+ *                         type: string
+ *                         format: date-time
+ *                         description: Tanggal notifikasi dibuat
  */
 
 /**
@@ -61,6 +71,13 @@
  *     security:
  *       - bearerAuth: []
  *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         description: Preferensi bahasa respons
  *       - in: path
  *         name: id
  *         required: true
@@ -98,6 +115,14 @@
  *       - Notification
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         description: Preferensi bahasa respons
  *     responses:
  *       200:
  *         description: Seluruh notifikasi berhasil dihapus
@@ -106,9 +131,12 @@
  *             schema:
  *               type: object
  *               properties:
- *                 message:
- *                   type: string
- *                   example: Seluruh notifikasi berhasil dihapus
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: Seluruh notifikasi berhasil dihapus
  *       401:
  *         description: Unauthorized
  */
@@ -123,6 +151,13 @@
  *     security:
  *       - bearerAuth: []
  *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         description: Preferensi bahasa respons
  *       - in: path
  *         name: id
  *         required: true
@@ -137,9 +172,12 @@
  *             schema:
  *               type: object
  *               properties:
- *                 message:
- *                   type: string
- *                   example: Notifikasi berhasil dihapus
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: Notifikasi berhasil dihapus
  *       404:
  *         description: Notifikasi tidak ditemukan atau bukan milik user
  *       401:

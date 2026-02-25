@@ -3,14 +3,17 @@ import { AI_INSTRUCTIONS, AI_PROMPTS } from "../../constants/ai-constants.js";
 import { ResponseError } from "../../error/response-error.js";
 import { aiFormat } from "../../utils/textFormatter.js";
 
-const enhanceJournalText = async (request) => {
+const enhanceJournalText = async (request, lang = 'id') => {
     const { text, instruction } = request;
-    if (!text) throw new ResponseError(400, "Teks jurnal wajib diisi.");
+    
+    const errorMsg = lang === 'en' ? "Journal text is required." : "Teks jurnal wajib diisi.";
+    if (!text) throw new ResponseError(400, errorMsg);
 
-    const systemInstruction = AI_PROMPTS.TEXT_ENHANCEMENT[instruction] || AI_PROMPTS.TEXT_ENHANCEMENT[AI_INSTRUCTIONS.GENERAL];
-    const prompt = `${systemInstruction}\n\n---\nTeks Asli: "${text}"\n---`;
+    const systemInstruction = AI_PROMPTS.TEXT_ENHANCEMENT(instruction, lang);
+    const textLabel = lang === 'en' ? 'Original Text' : 'Teks Asli';
+    const prompt = `${systemInstruction}\n\n---\n${textLabel}: "${text}"\n---`;
 
-    const aiOutputText = await aiClient.generateText(prompt);
+    const aiOutputText = await aiClient.generateText(prompt, lang);
     return {
         original_text: text,
         enhanced_text: aiFormat(aiOutputText),

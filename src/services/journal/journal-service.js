@@ -8,20 +8,22 @@ import journalAiService from "./journal-ai-service.js";
 import { JOURNAL_MESSAGES, JOURNAL_DEFAULTS } from "../../constants/journal-constant.js";
 import { USER_FIELDS } from "../../constants/user-constant.js";
 
-const validatePublishRequest = (title, hasVideo) => {
-    if (!title || title.trim() === "" || title === JOURNAL_DEFAULTS.DRAFT_TITLE) {
-        throw new ResponseError(400, JOURNAL_MESSAGES.TITLE_REQUIRED);
+const validatePublishRequest = (title, hasVideo, lang = 'id') => {
+    const defaultTitle = JOURNAL_DEFAULTS[lang].DRAFT_TITLE;
+    
+    if (!title || title.trim() === "" || title === defaultTitle) {
+        throw new ResponseError(400, JOURNAL_MESSAGES[lang].TITLE_REQUIRED);
     }
     if (!hasVideo) {
-        throw new ResponseError(400, JOURNAL_MESSAGES.VIDEO_REQUIRED);
+        throw new ResponseError(400, JOURNAL_MESSAGES[lang].VIDEO_REQUIRED);
     }
 };
 
-const buildJournalData = (id, userId, request, aiAnalysis, isDraft, timestamp) => {
+const buildJournalData = (id, userId, request, aiAnalysis, isDraft, timestamp, lang = 'id') => {
     return {
         id,
         user_id: userId,
-        title: request.title || (isDraft ? JOURNAL_DEFAULTS.DRAFT_TITLE : ""),
+        title: request.title || (isDraft ? JOURNAL_DEFAULTS[lang].DRAFT_TITLE : ""),
         note: request.note || "",
         is_favorite: false,
         is_draft: isDraft,
@@ -54,8 +56,8 @@ const buildMediaData = (journalId, videoUrl, images, timestamp) => {
     return mediaList;
 };
 
-const createJournal = async (user, request, videoFile) => {
-    validatePublishRequest(request.title, !!videoFile);
+const createJournal = async (user, request, videoFile, lang = 'id') => {
+    validatePublishRequest(request.title, !!videoFile, lang);
 
     const journalId = uuidv4();
     const now = new Date().toISOString();
@@ -66,7 +68,7 @@ const createJournal = async (user, request, videoFile) => {
     }
     
     const videoUrl = await journalMediaService.handleVideoUpload(user, videoFile);
-    const journalData = buildJournalData(journalId, user.uid, request, aiAnalysis, false, now);
+    const journalData = buildJournalData(journalId, user.uid, request, aiAnalysis, false, now, lang);
     const mediaList = buildMediaData(journalId, videoUrl, request.images, now);
 
     await journalRepository.save(journalData, mediaList);
@@ -74,12 +76,12 @@ const createJournal = async (user, request, videoFile) => {
     return { ...journalData, media: mediaList };
 };
 
-const createJournalDraft = async (user, request, videoFile) => {
+const createJournalDraft = async (user, request, videoFile, lang = 'id') => {
     const journalId = uuidv4();
     const now = new Date().toISOString();
     
     const videoUrl = await journalMediaService.handleVideoUpload(user, videoFile);
-    const journalData = buildJournalData(journalId, user.uid, request, null, true, now);
+    const journalData = buildJournalData(journalId, user.uid, request, null, true, now, lang);
     const mediaList = buildMediaData(journalId, videoUrl, request.images, now);
 
     await journalRepository.save(journalData, mediaList);
@@ -87,8 +89,8 @@ const createJournalDraft = async (user, request, videoFile) => {
     return { ...journalData, media: mediaList };
 };
 
-const updateJournal = async (user, request, journalId, videoFile) => {
-    const currentData = await journalAccessService.checkAccess(user.uid, journalId);
+const updateJournal = async (user, request, journalId, videoFile, lang = 'id') => {
+    const currentData = await journalAccessService.checkAccess(user.uid, journalId, lang);
     
     const now = new Date().toISOString();
     const currentMedia = currentData.media || [];
@@ -153,15 +155,15 @@ const updateJournal = async (user, request, journalId, videoFile) => {
 
     await journalRepository.update(journalId, updates, newMediaList, deleteMediaIds);
     
-    return await journalAccessService.checkAccess(user.uid, journalId);
+    return await journalAccessService.checkAccess(user.uid, journalId, lang);
 };
 
-const getDetailJournal = async (user, journalId) => {
-    return await journalAccessService.checkAccess(user.uid, journalId);
+const getDetailJournal = async (user, journalId, lang = 'id') => {
+    return await journalAccessService.checkAccess(user.uid, journalId, lang);
 };
 
-const toggleFavorite = async (user, journalId, request) => {
-    await journalAccessService.checkAccess(user.uid, journalId);
+const toggleFavorite = async (user, journalId, request, lang = 'id') => {
+    await journalAccessService.checkAccess(user.uid, journalId, lang);
     const isFavorite = request.is_favorite === true || request.is_favorite === "true";
 
     await journalRepository.update(journalId, {
@@ -172,14 +174,14 @@ const toggleFavorite = async (user, journalId, request) => {
     return { id: journalId, is_favorite: isFavorite };
 };
 
-const toggleDraft = async (user, journalId, request) => {
-    const currentData = await journalAccessService.checkAccess(user.uid, journalId);
+const toggleDraft = async (user, journalId, request, lang = 'id') => {
+    const currentData = await journalAccessService.checkAccess(user.uid, journalId, lang);
     const isDraft = request.is_draft === true || request.is_draft === "true";
     const now = new Date().toISOString();
 
     if (isDraft === false) {
         const hasVideo = currentData.media && currentData.media.some(m => m.type === 'video');
-        validatePublishRequest(currentData.title, hasVideo);
+        validatePublishRequest(currentData.title, hasVideo, lang);
     }
 
     const updates = { is_draft: isDraft, updated_at: now };
@@ -198,12 +200,12 @@ const toggleDraft = async (user, journalId, request) => {
     return {
         id: journalId,
         is_draft: isDraft,
-        message: isDraft ? JOURNAL_MESSAGES.DRAFT_SAVED : JOURNAL_MESSAGES.PUBLISHED
+        message: isDraft ? JOURNAL_MESSAGES[lang].DRAFT_SAVED : JOURNAL_MESSAGES[lang].PUBLISHED
     };
 };
 
-const deleteJournal = async (user, journalId) => {
-    const journalData = await journalAccessService.checkAccess(user.uid, journalId);
+const deleteJournal = async (user, journalId, lang = 'id') => {
+    const journalData = await journalAccessService.checkAccess(user.uid, journalId, lang);
 
     const media = journalData.media || [];
     const imagesUrl = media.filter(m => m.type === 'image').map(m => m.url);
@@ -214,7 +216,7 @@ const deleteJournal = async (user, journalId) => {
     
     await journalRepository.deleteById(journalId);
 
-    return { message: JOURNAL_MESSAGES.DELETED };
+    return { message: JOURNAL_MESSAGES[lang].DELETED };
 };
 
 export default {

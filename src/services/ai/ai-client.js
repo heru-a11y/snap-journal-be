@@ -2,26 +2,27 @@ import provider from "../../applications/gemini.js";
 import { ResponseError } from "../../error/response-error.js";
 import { logger } from "../../applications/logging.js";
 
-const generateText = async (prompt) => {
+const generateText = async (prompt, lang = 'id') => {
     if (!provider.isConfigured) {
-        throw new ResponseError(500, "AI provider tidak tersedia.");
+        throw new ResponseError(500, lang === 'en' ? "AI provider is unavailable." : "AI provider tidak tersedia.");
     }
 
     try {
         return await provider.generateText(prompt);
     } catch (error) {
         logger.error(`AI generateText Error: ${error.message}`);
-        throw new ResponseError(500, "Gagal memproses teks via AI.");
+        throw new ResponseError(500, lang === 'en' ? "Failed to process text via AI." : "Gagal memproses teks via AI.");
     }
 };
 
-const generateJSON = async (prompt, fallback) => {
+const generateJSON = async (prompt, fallback, lang = 'id') => {
     if (!provider.isConfigured) {
         return fallback;
     }
 
+    let rawJson = '';
     try {
-        const rawJson = await provider.generateJSON(prompt);
+        rawJson = await provider.generateJSON(prompt);
         const cleanJson = rawJson.replace(/```json|```/g, "").trim();
         return JSON.parse(cleanJson);
     } catch (error) {

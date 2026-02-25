@@ -3,6 +3,7 @@ import journalQueryService from "../services/journal/journal-query-service.js";
 import journalAiService from "../services/journal/journal-ai-service.js";
 import uploadService from "../services/upload-service.js";
 import deleteService from "../services/delete-service.js";
+import { JOURNAL_MESSAGES } from "../constants/journal-constant.js";
 
 // Helper untuk memastikan images selalu berupa array
 const parseImagesField = (images) => {
@@ -50,7 +51,7 @@ const createJournal = async (req, res, next) => {
         request.images = parseImagesField(request.images);
 
         const videoFile = req.files?.['video'] ? req.files['video'][0] : null;
-        const result = await journalService.createJournal(user, request, videoFile);
+        const result = await journalService.createJournal(user, request, videoFile, req.lang);
         
         res.status(201).json({ data: result });
     } catch (e) {
@@ -67,7 +68,7 @@ const createJournalDraft = async (req, res, next) => {
         const files = req.files || {};
         const videoFile = files['video'] ? files['video'][0] : null;
 
-        const result = await journalService.createJournalDraft(user, request, videoFile);
+        const result = await journalService.createJournalDraft(user, request, videoFile, req.lang);
         res.status(201).json({ data: result });
     } catch (e) {
         next(e);
@@ -84,7 +85,7 @@ const updateJournal = async (req, res, next) => {
         const files = req.files || {};
         const videoFile = files['video'] ? files['video'][0] : null;
 
-        const result = await journalService.updateJournal(user, request, id, videoFile);
+        const result = await journalService.updateJournal(user, request, id, videoFile, req.lang);
         res.status(200).json({ data: result });
     } catch (e) {
         next(e);
@@ -132,7 +133,7 @@ const getFavoriteJournal = async (req, res, next) => {
 const getDetailJournal = async (req, res, next) => {
     try {
         const journalId = req.params.id;
-        const result = await journalService.getDetailJournal(req.user, journalId);
+        const result = await journalService.getDetailJournal(req.user, journalId, req.lang);
         res.status(200).json({ data: result });
     } catch (e) {
         next(e);
@@ -150,9 +151,12 @@ const getLatestJournal = async (req, res, next) => {
 
 const getDailyInsight = async (req, res, next) => {
     try {
-        const result = await journalQueryService.getDailyInsight(req.user);
+        const result = await journalQueryService.getDailyInsight(req.user, req.lang);
         if (!result) {
-            return res.status(200).json({ message: "Belum ada jurnal untuk dianalisis.", data: null });
+            return res.status(200).json({ 
+                message: JOURNAL_MESSAGES[req.lang].NO_INSIGHT, 
+                data: null 
+            });
         }
         res.status(200).json({ data: result });
     } catch (e) {
@@ -164,7 +168,7 @@ const getPeriodicInsight = async (req, res, next) => {
     try {
         const user = req.user;
         const request = req.query; 
-        const result = await journalQueryService.getPeriodicInsight(user, request);
+        const result = await journalQueryService.getPeriodicInsight(user, request, req.lang);
         res.status(200).json({ data: result });
     } catch (e) {
         next(e);
@@ -175,7 +179,7 @@ const getTopMood = async (req, res, next) => {
     try {
         const user = req.user;
         const request = req.query;
-        const result = await journalQueryService.getTopMood(user, request);
+        const result = await journalQueryService.getTopMood(user, request, req.lang);
         res.status(200).json({ data: result });
     } catch (e) {
         next(e);
@@ -187,7 +191,7 @@ const toggleFavorite = async (req, res, next) => {
         const user = req.user;
         const id = req.params.id;
         const request = req.body;
-        const result = await journalService.toggleFavorite(user, id, request);
+        const result = await journalService.toggleFavorite(user, id, request, req.lang);
         res.status(200).json({ data: result });
     } catch (e) {
         next(e);
@@ -199,7 +203,7 @@ const toggleDraft = async (req, res, next) => {
         const user = req.user;
         const id = req.params.id;
         const request = req.body;
-        const result = await journalService.toggleDraft(user, id, request);
+        const result = await journalService.toggleDraft(user, id, request, req.lang);
         res.status(200).json({ data: result });
     } catch (e) {
         next(e);
@@ -209,7 +213,7 @@ const toggleDraft = async (req, res, next) => {
 const deleteJournal = async (req, res, next) => {
     try {
         const journalId = req.params.id;
-        const result = await journalService.deleteJournal(req.user, journalId);
+        const result = await journalService.deleteJournal(req.user, journalId, req.lang);
         res.status(200).json({ data: result });
     } catch (e) {
         next(e);
@@ -218,7 +222,7 @@ const deleteJournal = async (req, res, next) => {
 
 const enhanceText = async (req, res, next) => {
     try {
-        const result = await journalAiService.enhanceJournalText(req.body);
+        const result = await journalAiService.enhanceJournalText(req.body, req.lang);
         res.status(200).json({ data: result });
     } catch (e) {
         next(e);
@@ -230,7 +234,7 @@ const chat = async (req, res, next) => {
         const user = req.user;
         const id = req.params.id;
         const request = req.body; 
-        const result = await journalAiService.chat(user, id, request);
+        const result = await journalAiService.chat(user, id, request, req.lang);
         res.status(200).json({ data: result });
     } catch (e) {
         next(e);
@@ -241,7 +245,7 @@ const analyze = async (req, res, next) => {
     try {
         const user = req.user;
         const id = req.params.id;
-        const result = await journalAiService.analyze(user, id);
+        const result = await journalAiService.analyze(user, id, req.lang);
         res.status(200).json({ data: result });
     } catch (e) {
         next(e);

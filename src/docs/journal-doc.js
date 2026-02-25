@@ -19,6 +19,14 @@
  *       - Journal
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         description: Preferensi bahasa respons API
  *     requestBody:
  *       required: true
  *       content:
@@ -64,6 +72,14 @@
  *       - Journal
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         description: Preferensi bahasa respons API
  *     requestBody:
  *       content:
  *         multipart/form-data:
@@ -102,6 +118,13 @@
  *     security:
  *       - bearerAuth: []
  *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         description: Preferensi bahasa respons API
  *       - in: path
  *         name: id
  *         required: true
@@ -140,6 +163,14 @@
  *       - Journal
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         description: Preferensi bahasa respons API
  *     responses:
  *       200:
  *         description: List jurnal berhasil diambil.
@@ -156,6 +187,13 @@
  *     security:
  *       - bearerAuth: []
  *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         description: Preferensi bahasa respons API
  *       - in: query
  *         name: keyword
  *         schema:
@@ -244,6 +282,14 @@
  *       - Journal
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         description: Preferensi bahasa respons API
  *     responses:
  *       200:
  *         description: List draf jurnal berhasil diambil.
@@ -275,6 +321,14 @@
  *       - Journal
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         description: Preferensi bahasa respons API
  *     responses:
  *       200:
  *         description: Daftar jurnal favorit berhasil diambil.
@@ -303,6 +357,14 @@
  *       - Journal
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         description: Preferensi bahasa respons API
  *     responses:
  *       200:
  *         description: Berhasil.
@@ -317,6 +379,14 @@
  *       - Journal
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         description: Preferensi bahasa respons API
  *     responses:
  *       200:
  *         description: Berhasil.
@@ -333,6 +403,13 @@
  *     security:
  *       - bearerAuth: []
  *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         description: Preferensi bahasa respons API
  *       - in: query
  *         name: start_date
  *         required: true
@@ -367,6 +444,13 @@
  *     security:
  *       - bearerAuth: []
  *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         description: Preferensi bahasa respons API
  *       - in: query
  *         name: start_date
  *         required: true
@@ -398,6 +482,13 @@
  *     security:
  *       - bearerAuth: []
  *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         description: Preferensi bahasa respons API
  *       - in: path
  *         name: id
  *         required: true
@@ -418,6 +509,13 @@
  *     security:
  *       - bearerAuth: []
  *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         description: Preferensi bahasa respons API
  *       - in: path
  *         name: id
  *         required: true
@@ -452,6 +550,13 @@
  *     security:
  *       - bearerAuth: []
  *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         description: Preferensi bahasa respons API
  *       - in: path
  *         name: id
  *         required: true
@@ -484,6 +589,13 @@
  *     security:
  *       - bearerAuth: []
  *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         description: Preferensi bahasa respons API
  *       - in: path
  *         name: id
  *         required: true
@@ -504,6 +616,13 @@
  *     security:
  *       - bearerAuth: []
  *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         description: Preferensi bahasa respons API
  *       - in: path
  *         name: id
  *         required: true
@@ -524,6 +643,13 @@
  *     security:
  *       - bearerAuth: []
  *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         description: Preferensi bahasa respons API
  *       - in: path
  *         name: id
  *         required: true
@@ -553,6 +679,14 @@
  *       - Journal
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         description: Preferensi bahasa respons API
  *     requestBody:
  *       content:
  *         application/json:
@@ -580,6 +714,14 @@
  *       - Journal
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         description: Preferensi bahasa respons API
  *     responses:
  *       200:
  *         description: Data mood berhasil diambil.

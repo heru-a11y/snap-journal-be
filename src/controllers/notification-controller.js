@@ -2,7 +2,7 @@ import notificationService from "../services/notification-service.js";
 
 const list = async (req, res, next) => {
     try {
-        const result = await notificationService.list(req.user, req.query);
+        const result = await notificationService.list(req.user, req.query, req.lang);
         res.status(200).json({
             data: result
         });
@@ -14,7 +14,7 @@ const list = async (req, res, next) => {
 const markAsRead = async (req, res, next) => {
     try {
         const notificationId = req.params.id;
-        const result = await notificationService.markAsRead(req.user, notificationId);
+        const result = await notificationService.markAsRead(req.user, notificationId, req.lang);
         
         res.status(200).json({
             data: result
@@ -26,7 +26,7 @@ const markAsRead = async (req, res, next) => {
 
 const deleteAll = async (req, res, next) => {
     try {
-        const result = await notificationService.deleteAll(req.user);
+        const result = await notificationService.deleteAll(req.user, req.lang);
         res.status(200).json({
             data: result
         });
@@ -38,7 +38,7 @@ const deleteAll = async (req, res, next) => {
 const deleteById = async (req, res, next) => {
     try {
         const notificationId = req.params.id;
-        const result = await notificationService.deleteById(req.user, notificationId);
+        const result = await notificationService.deleteById(req.user, notificationId, req.lang);
         
         res.status(200).json({
             data: result

@@ -48,8 +48,11 @@ export const checkInactiveUsers = async () => {
                     if (!user[USER_FIELDS.FCM_TOKEN]) return null;
                     if (user[USER_FIELDS.LAST_REMINDER_AT] && new Date(user[USER_FIELDS.LAST_REMINDER_AT]) > cooldownTime) return null;
 
-                    let reminderTitle = INACTIVE_USER_JOB.DEFAULT_TITLE;
-                    let reminderBody = INACTIVE_USER_JOB.DEFAULT_BODY(user[USER_FIELDS.NAME]);
+                    const userLang = user.language || 'id';
+                    const messages = INACTIVE_USER_JOB.MESSAGES[userLang] || INACTIVE_USER_JOB.MESSAGES.id;
+
+                    let reminderTitle = messages.TITLE;
+                    let reminderBody = messages.BODY(user[USER_FIELDS.NAME]);
                     const hasLastJournalData = user[USER_FIELDS.LAST_JOURNAL_SUMMARY] || user[USER_FIELDS.LAST_JOURNAL_EMOTION];
 
                     if (hasLastJournalData) {
@@ -59,7 +62,7 @@ export const checkInactiveUsers = async () => {
                                 emotion: user[USER_FIELDS.LAST_JOURNAL_EMOTION]
                             };
                             
-                            const aiPromise = aiReminderService.generatePersonalizedReminder(journalData, user[USER_FIELDS.NAME]);
+                            const aiPromise = aiReminderService.generatePersonalizedReminder(journalData, user[USER_FIELDS.NAME], userLang);
                             const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("AI Request Timeout")), 5000));
                             
                             const aiResponse = await Promise.race([aiPromise, timeoutPromise]);

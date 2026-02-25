@@ -109,7 +109,7 @@ const getLatestJournal = async (user) => {
     return data.length ? data[0] : null;
 };
 
-const getDailyInsight = async (user) => {
+const getDailyInsight = async (user, lang = 'id') => {
     const data = await journalRepository.find(user.uid, { is_draft: false }, SORT_ORDER.DESC, 1);
 
     if (data.length === 0) return null;
@@ -118,7 +118,7 @@ const getDailyInsight = async (user) => {
 
     if (!journalData.chatbot_highlight) {
         try {
-            const insights = await journalAiService.generateJournalInsights(journalData);
+            const insights = await journalAiService.generateJournalInsights(journalData, lang);
             if (insights) {
                 const updates = {
                     chatbot_highlight: insights.chatbot_highlight,
@@ -138,11 +138,11 @@ const getDailyInsight = async (user) => {
         journal_id: journalData.id,
         date: journalData.created_at,
         expression: journalData.expression || JOURNAL_DEFAULTS.EXPRESSION,
-        highlight: journalData.chatbot_highlight || JOURNAL_DEFAULTS.INSIGHT
+        highlight: journalData.chatbot_highlight || JOURNAL_DEFAULTS[lang].INSIGHT
     };
 };
 
-const getPeriodicInsight = async (user, request) => {
+const getPeriodicInsight = async (user, request, lang = 'id') => {
     const filters = {
         start_date: new Date(request.start_date).toISOString(),
         end_date: new Date(request.end_date).toISOString()
@@ -150,7 +150,7 @@ const getPeriodicInsight = async (user, request) => {
 
     const data = await journalRepository.find(user.uid, filters, SORT_ORDER.ASC);
 
-    if (data.length === 0) throw new ResponseError(404, JOURNAL_MESSAGES.NO_DATA_PERIOD);
+    if (data.length === 0) throw new ResponseError(404, JOURNAL_MESSAGES[lang].NO_DATA_PERIOD);
 
     const periodicData = data.map(journal => ({
         expression: journal.expression,
@@ -158,17 +158,17 @@ const getPeriodicInsight = async (user, request) => {
         created_at: journal.created_at
     }));
 
-    const analysisResult = await journalAiService.generatePeriodicJournalInsight(periodicData);
+    const analysisResult = await journalAiService.generatePeriodicJournalInsight(periodicData, lang);
 
     return {
         start_date: request.start_date,
         end_date: request.end_date,
         expression: analysisResult?.expression || JOURNAL_DEFAULTS.EXPRESSION,
-        highlight: analysisResult?.highlight || JOURNAL_DEFAULTS.INSIGHT
+        highlight: analysisResult?.highlight || JOURNAL_DEFAULTS[lang].INSIGHT
     };
 };
 
-const getTopMood = async (user, request) => {
+const getTopMood = async (user, request, lang = 'id') => {
     const filters = {
         start_date: new Date(request.start_date).toISOString(),
         end_date: new Date(request.end_date).toISOString()
@@ -176,7 +176,7 @@ const getTopMood = async (user, request) => {
 
     const data = await journalRepository.find(user.uid, filters);
 
-    if (data.length === 0) throw new ResponseError(404, JOURNAL_MESSAGES.NO_DATA_PERIOD);
+    if (data.length === 0) throw new ResponseError(404, JOURNAL_MESSAGES[lang].NO_DATA_PERIOD);
 
     const moodCounts = {};
     let topMood = null;

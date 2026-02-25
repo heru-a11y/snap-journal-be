@@ -1,10 +1,9 @@
 import aiClient from "./ai-client.js";
-import { FALLBACKS } from "../../constants/ai-constants.js";
+import { AI_PROMPTS, FALLBACKS } from "../../constants/ai-constants.js";
 
-const generatePersonalizedReminder = async (lastJournal, userName) => {
-    const prompt = `Tugas: Buat notifikasi push pengingat jurnal untuk ${userName}. Konteks: ${lastJournal.title}. Output JSON {"title": "", "body": ""}`;
-
-    return await aiClient.generateJSON(prompt, FALLBACKS.REMINDER(userName));
+const generatePersonalizedReminder = async (lastJournal, userName, lang = 'id') => {
+    const prompt = AI_PROMPTS.REMINDER(lastJournal, userName, lang);
+    return await aiClient.generateJSON(prompt, FALLBACKS.REMINDER(userName)[lang], lang);
 };
 
 export default { generatePersonalizedReminder };
