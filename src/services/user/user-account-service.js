@@ -6,11 +6,11 @@ import { generateOtp, checkLockout, validateOtpAndLockout } from "../../utils/se
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../../constants/user-constant.js";
 import { logger } from "../../applications/logging.js";
 
-const requestDeleteAccount = async (user) => {
+const requestDeleteAccount = async (user, lang = 'id') => {
     const userData = await userRepository.findById(user.uid);
-    if (!userData) throw new ResponseError(404, ERROR_MESSAGES.USER_NOT_FOUND);
+    if (!userData) throw new ResponseError(404, ERROR_MESSAGES[lang].USER_NOT_FOUND);
 
-    checkLockout(userData.delete_account_locked_until);
+    checkLockout(userData.delete_account_locked_until, lang);
 
     const otp = generateOtp();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
@@ -24,22 +24,22 @@ const requestDeleteAccount = async (user) => {
     });
 
     try {
-        await emailService.sendDeleteAccountOtp(userData.email, userData.name, otp);
+        await emailService.sendDeleteAccountOtp(userData.email, userData.name, otp, lang);
     } catch (error) {
         logger.error(`[UserAccountService] Gagal kirim OTP hapus akun ke ${userData.email}: ${error.message}`);
         throw new ResponseError(500, error.message);
     }
 
     return {
-        message: SUCCESS_MESSAGES.DELETE_OTP_SENT
+        message: SUCCESS_MESSAGES[lang].DELETE_OTP_SENT
     };
 }
 
-const deleteAccount = async (user, request) => {
+const deleteAccount = async (user, request, lang = 'id') => {
     const userData = await userRepository.findById(user.uid);
-    if (!userData) throw new ResponseError(404, ERROR_MESSAGES.USER_NOT_FOUND);
+    if (!userData) throw new ResponseError(404, ERROR_MESSAGES[lang].USER_NOT_FOUND);
 
-    checkLockout(userData.delete_account_locked_until);
+    checkLockout(userData.delete_account_locked_until, lang);
 
     await validateOtpAndLockout(
         (data) => userRepository.update(user.uid, data),
@@ -51,7 +51,8 @@ const deleteAccount = async (user, request) => {
             failCountField: "delete_account_fail_count",
             lockedUntilField: "delete_account_locked_until",
             otpField: "delete_account_otp"
-        }
+        },
+        lang
     );
 
     try {
@@ -59,10 +60,10 @@ const deleteAccount = async (user, request) => {
         await userRepository.deleteById(user.uid);
         
         logger.info(`[UserAccountService] Akun dengan UID ${user.uid} telah dihapus permanen.`);
-        return { message: SUCCESS_MESSAGES.ACCOUNT_DELETED };
+        return { message: SUCCESS_MESSAGES[lang].ACCOUNT_DELETED };
     } catch (error) {
         logger.error(`[UserAccountService] Kegagalan kritis saat menghapus akun UID ${user.uid}: ${error.message}`);
-        throw new ResponseError(500, `${ERROR_MESSAGES.ACCOUNT_DELETE_FAILED}: ${error.message}`);
+        throw new ResponseError(500, `${ERROR_MESSAGES[lang].ACCOUNT_DELETE_FAILED}: ${error.message}`);
     }
 }
 

@@ -13,6 +13,15 @@
  *     description: Setelah sukses, sistem akan mengirimkan kode OTP ke email. Jika email sudah terdaftar tapi belum verifikasi, sistem akan otomatis mengirim ulang OTP baru.
  *     tags:
  *       - Auth Public
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         required: false
+ *         description: Preferensi bahasa untuk pesan respons API
  *     requestBody:
  *       required: true
  *       content:
@@ -64,6 +73,15 @@
  *     description: User hanya bisa login jika sudah melakukan verifikasi OTP.
  *     tags:
  *       - Auth Public
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         required: false
+ *         description: Preferensi bahasa untuk pesan respons API
  *     requestBody:
  *       required: true
  *       content:
@@ -129,6 +147,15 @@
  *     summary: Verifikasi Email Registrasi (OTP)
  *     tags:
  *       - Auth Public
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         required: false
+ *         description: Preferensi bahasa untuk pesan respons API
  *     requestBody:
  *       required: true
  *       content:
@@ -158,6 +185,15 @@
  *     description: Mengirim ulang kode OTP ke email untuk user yang sudah mendaftar tetapi belum verifikasi. Terdapat pembatasan waktu (rate limit) antar permintaan.
  *     tags:
  *       - Auth Public
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         required: false
+ *         description: Preferensi bahasa untuk pesan respons API
  *     requestBody:
  *       required: true
  *       content:
@@ -203,6 +239,15 @@
  *     description: Mengirim kode OTP 4 digit ke email untuk memulai proses reset password.
  *     tags:
  *       - Auth Public
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         required: false
+ *         description: Preferensi bahasa untuk pesan respons API
  *     requestBody:
  *       required: true
  *       content:
@@ -228,6 +273,15 @@
  *     description: Validasi kode OTP sebelum pengguna diizinkan masuk ke form password baru.
  *     tags:
  *       - Auth Public
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         required: false
+ *         description: Preferensi bahasa untuk pesan respons API
  *     requestBody:
  *       required: true
  *       content:
@@ -271,6 +325,15 @@
  *     description: Mengubah password lama dengan yang baru menggunakan verifikasi email dan OTP.
  *     tags:
  *       - Auth Public
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         required: false
+ *         description: Preferensi bahasa untuk pesan respons API
  *     requestBody:
  *       required: true
  *       content:

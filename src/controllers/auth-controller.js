@@ -4,10 +4,8 @@ import authPasswordResetService from "../services/auth/auth-password-reset-servi
 
 const register = async (req, res, next) => {
     try {
-        const result = await authRegistrationService.register(req.body);
-        res.status(200).json({
-            data: result
-        });
+        const result = await authRegistrationService.register(req.body, req.lang);
+        res.status(200).json({ data: result });
     } catch (e) {
         next(e);
     }
@@ -15,10 +13,8 @@ const register = async (req, res, next) => {
 
 const login = async (req, res, next) => {
     try {
-        const result = await authLoginService.login(req.body);
-        res.status(200).json({
-            data: result
-        });
+        const result = await authLoginService.login(req.body, req.lang);
+        res.status(200).json({ data: result });
     } catch (e) {
         next(e);
     }
@@ -26,10 +22,8 @@ const login = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
     try {        
-        const result = await authLoginService.logout(req.user);
-        res.status(200).json({
-            data: result
-        });
+        const result = await authLoginService.logout(req.user, req.lang);
+        res.status(200).json({ data: result });
     } catch (e) {
         next(e);
     }
@@ -37,10 +31,8 @@ const logout = async (req, res, next) => {
 
 const sendVerificationOtp = async (req, res, next) => {
     try {
-        const result = await authRegistrationService.sendVerificationOtp(req.body);
-        res.status(200).json({
-            data: result
-        });
+        const result = await authRegistrationService.sendVerificationOtp(req.body, req.lang);
+        res.status(200).json({ data: result });
     } catch (e) {
         next(e);
     }
@@ -48,10 +40,8 @@ const sendVerificationOtp = async (req, res, next) => {
 
 const verifyOtp = async (req, res, next) => {
     try {
-        const result = await authRegistrationService.verifyOtp(req.body);
-        res.status(200).json({
-            data: result
-        });
+        const result = await authRegistrationService.verifyOtp(req.body, req.lang);
+        res.status(200).json({ data: result });
     } catch (e) {
         next(e);
     }
@@ -59,10 +49,8 @@ const verifyOtp = async (req, res, next) => {
 
 const forgotPassword = async (req, res, next) => {
     try {
-        const result = await authPasswordResetService.forgotPassword(req.body);
-        res.status(200).json({
-            data: result
-        });
+        const result = await authPasswordResetService.forgotPassword(req.body, req.lang);
+        res.status(200).json({ data: result });
     } catch (e) {
         next(e);
     }
@@ -70,10 +58,8 @@ const forgotPassword = async (req, res, next) => {
 
 const verifyResetOtp = async (req, res, next) => {
     try {
-        const result = await authPasswordResetService.verifyResetOtp(req.body);
-        res.status(200).json({
-            data: result
-        });
+        const result = await authPasswordResetService.verifyResetOtp(req.body, req.lang);
+        res.status(200).json({ data: result });
     } catch (e) {
         next(e);
     }
@@ -81,10 +67,8 @@ const verifyResetOtp = async (req, res, next) => {
 
 const resetPassword = async (req, res, next) => {
     try {
-        const result = await authPasswordResetService.resetPassword(req.body);
-        res.status(200).json({
-            data: result
-        });
+        const result = await authPasswordResetService.resetPassword(req.body, req.lang);
+        res.status(200).json({ data: result });
     } catch (e) {
         next(e);
     }

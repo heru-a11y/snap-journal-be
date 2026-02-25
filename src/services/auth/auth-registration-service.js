@@ -6,17 +6,18 @@ import { generateOtp, checkCooldown, checkLockout, validateOtpAndLockout } from 
 import { AUTH_ERROR_MESSAGES, AUTH_SUCCESS_MESSAGES } from "../../constants/auth-constant.js";
 import { logger } from "../../applications/logging.js";
 
-const register = async (request) => {
+const register = async (request, lang = 'id') => {
     const userData = await userRepository.findByEmail(request.email);
 
     if (userData) {
         if (userData.email_verified_at) {
-            throw new ResponseError(409, AUTH_ERROR_MESSAGES.EMAIL_ALREADY_VERIFIED);
+            throw new ResponseError(409, AUTH_ERROR_MESSAGES[lang].EMAIL_ALREADY_VERIFIED);
         }
 
         const { newCount, newTimestamp } = checkCooldown(
             userData.verification_last_sent_at, 
-            userData.verification_request_count
+            userData.verification_request_count,
+            3, 3600000, lang 
         );
 
         const newOtp = generateOtp();
@@ -33,7 +34,7 @@ const register = async (request) => {
         });
 
         try {
-            await emailService.sendVerificationOtp(userData.email, userData.name, newOtp);
+            await emailService.sendVerificationOtp(userData.email, userData.name, newOtp, lang);
         } catch (emailError) {
             logger.error(`[AuthRegistrationService] Gagal kirim email OTP ulang ke ${userData.email}: ${emailError.message}`);
         }
@@ -41,7 +42,7 @@ const register = async (request) => {
         return {
             email: userData.email,
             is_resend: true,
-            message: AUTH_SUCCESS_MESSAGES.RESEND_OTP_SUCCESS
+            message: AUTH_SUCCESS_MESSAGES[lang].RESEND_OTP_SUCCESS
         };
     }
 
@@ -53,7 +54,7 @@ const register = async (request) => {
             displayName: request.name
         });
     } catch (error) {
-        throw new ResponseError(400, `${AUTH_ERROR_MESSAGES.AUTH_REGISTER_FAILED}: ${error.message}`);
+        throw new ResponseError(400, `${AUTH_ERROR_MESSAGES[lang].AUTH_REGISTER_FAILED}: ${error.message}`);
     }
 
     const now = new Date().toISOString();
@@ -83,11 +84,11 @@ const register = async (request) => {
         await userRepository.create(userRecord.uid, newUserData);
     } catch (error) {
         await admin.auth().deleteUser(userRecord.uid);
-        throw new ResponseError(500, `${AUTH_ERROR_MESSAGES.DB_SAVE_FAILED}: ${error.message}`);
+        throw new ResponseError(500, `${AUTH_ERROR_MESSAGES[lang].DB_SAVE_FAILED}: ${error.message}`);
     }
 
     try {
-        await emailService.sendVerificationOtp(request.email, request.name, otpCode);
+        await emailService.sendVerificationOtp(request.email, request.name, otpCode, lang);
     } catch (emailError) {
         logger.error(`[AuthRegistrationService] Gagal kirim email registrasi ke ${request.email}: ${emailError.message}`);
     }
@@ -95,23 +96,23 @@ const register = async (request) => {
     return {
         email: newUserData.email,
         is_resend: false,
-        message: AUTH_SUCCESS_MESSAGES.REGISTER_SUCCESS
+        message: AUTH_SUCCESS_MESSAGES[lang].REGISTER_SUCCESS
     };
 }
 
-const verifyOtp = async (request) => {
+const verifyOtp = async (request, lang = 'id') => {
     const { email, otp } = request;
-    if (!email || !otp) throw new ResponseError(400, AUTH_ERROR_MESSAGES.EMAIL_OTP_REQUIRED);
+    if (!email || !otp) throw new ResponseError(400, AUTH_ERROR_MESSAGES[lang].EMAIL_OTP_REQUIRED);
 
     const userData = await userRepository.findByEmail(email);
-    if (!userData) throw new ResponseError(404, AUTH_ERROR_MESSAGES.EMAIL_NOT_REGISTERED);
+    if (!userData) throw new ResponseError(404, AUTH_ERROR_MESSAGES[lang].EMAIL_NOT_REGISTERED);
 
     const userId = userData.id;
 
-    checkLockout(userData.verification_locked_until);
+    checkLockout(userData.verification_locked_until, lang);
 
     if (userData.email_verified_at) {
-        return { message: AUTH_SUCCESS_MESSAGES.VERIFY_ALREADY_DONE };
+        return { message: AUTH_SUCCESS_MESSAGES[lang].VERIFY_ALREADY_DONE };
     }
 
     await validateOtpAndLockout(
@@ -124,7 +125,8 @@ const verifyOtp = async (request) => {
             failCountField: "verification_fail_count",
             lockedUntilField: "verification_locked_until",
             otpField: "otp_code"
-        }
+        },
+        lang
     );
 
     const verifyTime = new Date().toISOString();
@@ -145,31 +147,35 @@ const verifyOtp = async (request) => {
     }
 
     return { 
-        message: AUTH_SUCCESS_MESSAGES.VERIFY_SUCCESS,
+        message: AUTH_SUCCESS_MESSAGES[lang].VERIFY_SUCCESS,
         email: email
     };
 }
 
-const sendVerificationOtp = async (request) => {
+const sendVerificationOtp = async (request, lang = 'id') => {
     const { email } = request;
-    if (!email) throw new ResponseError(400, AUTH_ERROR_MESSAGES.EMAIL_REQUIRED);
+    if (!email) throw new ResponseError(400, AUTH_ERROR_MESSAGES[lang].EMAIL_REQUIRED);
 
     const userData = await userRepository.findByEmail(email);
+    const successMsg = lang === 'en' 
+        ? `A new OTP code has been sent to ${email}.` 
+        : `Kode OTP baru dikirim ke email ${email}.`;
     
     if (!userData) {
         return {
-            message: `Kode OTP baru dikirim ke email ${email}.`,
+            message: successMsg,
             expires_in: "5 minutes"
         }
     }
 
     if (userData.email_verified_at) {
-        throw new ResponseError(409, AUTH_ERROR_MESSAGES.ALREADY_VERIFIED);
+        throw new ResponseError(409, AUTH_ERROR_MESSAGES[lang].ALREADY_VERIFIED);
     }
 
     const { newCount, newTimestamp } = checkCooldown(
         userData.verification_last_sent_at, 
-        userData.verification_request_count
+        userData.verification_request_count,
+        3, 3600000, lang
     );
 
     const newOtp = generateOtp();
@@ -187,13 +193,13 @@ const sendVerificationOtp = async (request) => {
     });
 
     try {
-        await emailService.sendVerificationOtp(userData.email, userData.name, newOtp);
+        await emailService.sendVerificationOtp(userData.email, userData.name, newOtp, lang);
     } catch (error) {
         logger.error(`[AuthRegistrationService] Gagal kirim ulang OTP ke ${userData.email}: ${error.message}`);
     }
 
     return {
-        message: `Kode OTP baru dikirim ke email ${email}.`,
+        message: successMsg,
         expires_in: "5 minutes"
     };
 }

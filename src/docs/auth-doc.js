@@ -14,6 +14,15 @@
  *       - Auth
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         required: false
+ *         description: Preferensi bahasa untuk pesan respons API (id untuk Indonesia, en untuk Inggris)
  *     responses:
  *       200:
  *         description: Logout berhasil

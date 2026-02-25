@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Email Verification</title>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f3ff;">
+    
+    <div style="max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #ede9fe;">
+        
+        <div style="background: linear-gradient(180deg, #c4b5fd, #a78bfa); padding: 32px; text-align: center;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: bold;">
+                Snap Journal
+            </h1>
+            <p style="color: #ede9fe; margin-top: 6px; font-size: 14px;">
+                Email Verification
+            </p>
+        </div>
+
+        <div style="padding: 32px;">
+            <h2 style="color: #6d28d9; margin-top: 0;">Hello, {{name}}!</h2>
+            
+            <p style="color: #4b5563; line-height: 1.6;">
+                Thank you for registering. Please enter the following OTP code to activate your account:
+            </p>
+
+            <div style="text-align: center; margin: 36px 0;">
+                <div style="
+                    display: inline-block;
+                    padding: 24px 34px;
+                    border-radius: 14px;
+                    background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+                    border: 1px solid #c4b5fd;
+                    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.18);
+                ">
+                    <span style="
+                        font-size: 36px;
+                        font-weight: bold;
+                        letter-spacing: 10px;
+                        color: #7c3aed;
+                        font-family: 'Courier New', monospace;
+                    ">
+                        {{otp}}
+                    </span>
+                </div>
+            </div>
+
+            <p style="color: #6b7280; font-size: 14px;">
+                Valid for <strong>5 minutes</strong>.
+            </p>
+
+            <p style="color: #6b7280; font-size: 14px;">
+                Do not share this code with anyone.
+            </p>
+        </div>
+
+        <div style="background-color: #faf5ff; padding: 20px; text-align: center; border-top: 1px solid #ede9fe;">
+            <p style="color: #a78bfa; font-size: 12px; margin: 0;">
+                &copy; {{year}} Snap Journal Team
+            </p>
+        </div>
+
+    </div>
+
+</body>
+</html>

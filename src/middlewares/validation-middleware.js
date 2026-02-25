@@ -1,9 +1,10 @@
 import { validate } from "../validations/validation.js";
 
-// Untuk Validasi Body (POST/PUT)
-const runValidation = (schema) => {
+const runValidation = (schemaOrFactory) => {
     return (req, res, next) => {
         try {
+            const lang = req.lang || 'id';
+            const schema = typeof schemaOrFactory === 'function' ? schemaOrFactory(lang) : schemaOrFactory;
             const validatedData = validate(schema, req.body);
             req.body = validatedData;
             next();
@@ -13,10 +14,11 @@ const runValidation = (schema) => {
     }
 }
 
-// Untuk Validasi Query Params (GET)
-const runQueryValidation = (schema) => {
+const runQueryValidation = (schemaOrFactory) => {
     return (req, res, next) => {
         try {
+            const lang = req.lang || 'id';
+            const schema = typeof schemaOrFactory === 'function' ? schemaOrFactory(lang) : schemaOrFactory;
             const validatedData = validate(schema, req.query);
             req.query = validatedData;
             next();

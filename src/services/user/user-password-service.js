@@ -9,11 +9,11 @@ import { logger } from "../../applications/logging.js";
 
 const GOOGLE_API_KEY = process.env.GOOGLE_CLIENT_API_KEY;
 
-const requestPasswordChange = async (user, request) => {
+const requestPasswordChange = async (user, request, lang = 'id') => {
     const userData = await userRepository.findById(user.uid);
-    if (!userData) throw new ResponseError(404, ERROR_MESSAGES.USER_NOT_FOUND);
+    if (!userData) throw new ResponseError(404, ERROR_MESSAGES[lang].USER_NOT_FOUND);
 
-    checkLockout(userData.password_update_locked_until);
+    checkLockout(userData.password_update_locked_until, lang);
 
     const verifyUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${GOOGLE_API_KEY}`;
     try {
@@ -24,7 +24,7 @@ const requestPasswordChange = async (user, request) => {
         });
     } catch (error) {
         logger.warn(`[UserPasswordService] Percobaan password lama salah untuk UID ${user.uid}`);
-        throw new ResponseError(401, ERROR_MESSAGES.OLD_PASSWORD_INCORRECT);
+        throw new ResponseError(401, ERROR_MESSAGES[lang].OLD_PASSWORD_INCORRECT);
     }
 
     const otp = generateOtp();
@@ -39,20 +39,20 @@ const requestPasswordChange = async (user, request) => {
     });
 
     try {
-        await emailService.sendUpdatePasswordOtp(userData.email, userData.name, otp);
+        await emailService.sendUpdatePasswordOtp(userData.email, userData.name, otp, lang);
     } catch (error) {
         logger.error(`[UserPasswordService] Gagal kirim OTP password ke ${userData.email}: ${error.message}`);
         throw new ResponseError(500, error.message);
     }
 
-    return { message: SUCCESS_MESSAGES.PASSWORD_OTP_SENT };
+    return { message: SUCCESS_MESSAGES[lang].PASSWORD_OTP_SENT };
 }
 
-const validatePasswordChangeOtp = async (user, request) => {
+const validatePasswordChangeOtp = async (user, request, lang = 'id') => {
     const userData = await userRepository.findById(user.uid);
-    if (!userData) throw new ResponseError(404, ERROR_MESSAGES.USER_NOT_FOUND);
+    if (!userData) throw new ResponseError(404, ERROR_MESSAGES[lang].USER_NOT_FOUND);
 
-    checkLockout(userData.password_update_locked_until);
+    checkLockout(userData.password_update_locked_until, lang);
 
     await validateOtpAndLockout(
         (data) => userRepository.update(user.uid, data),
@@ -64,20 +64,21 @@ const validatePasswordChangeOtp = async (user, request) => {
             failCountField: "password_update_fail_count",
             lockedUntilField: "password_update_locked_until",
             otpField: "password_update_otp"
-        }
+        },
+        lang
     );
 
-    return { message: SUCCESS_MESSAGES.PASSWORD_OTP_VALID };
+    return { message: SUCCESS_MESSAGES[lang].PASSWORD_OTP_VALID };
 }
 
-const verifyPasswordChange = async (user, request) => {
+const verifyPasswordChange = async (user, request, lang = 'id') => {
     const { otp, newPassword, confirmPassword } = request;
-    if (newPassword !== confirmPassword) throw new ResponseError(400, ERROR_MESSAGES.PASSWORD_NOT_MATCH);
+    if (newPassword !== confirmPassword) throw new ResponseError(400, ERROR_MESSAGES[lang].PASSWORD_NOT_MATCH);
 
     const userData = await userRepository.findById(user.uid);
-    if (!userData) throw new ResponseError(404, ERROR_MESSAGES.USER_NOT_FOUND);
+    if (!userData) throw new ResponseError(404, ERROR_MESSAGES[lang].USER_NOT_FOUND);
 
-    checkLockout(userData.password_update_locked_until);
+    checkLockout(userData.password_update_locked_until, lang);
 
     await validateOtpAndLockout(
         (data) => userRepository.update(user.uid, data),
@@ -89,7 +90,8 @@ const verifyPasswordChange = async (user, request) => {
             failCountField: "password_update_fail_count",
             lockedUntilField: "password_update_locked_until",
             otpField: "password_update_otp"
-        }
+        },
+        lang
     );
 
     try {
@@ -97,7 +99,7 @@ const verifyPasswordChange = async (user, request) => {
         await admin.auth().revokeRefreshTokens(user.uid);
     } catch (error) {
         logger.error(`[UserPasswordService] Gagal update password di Auth untuk UID ${user.uid}: ${error.message}`);
-        throw new ResponseError(500, `${ERROR_MESSAGES.PASSWORD_UPDATE_FAILED}: ${error.message}`);
+        throw new ResponseError(500, `${ERROR_MESSAGES[lang].PASSWORD_UPDATE_FAILED}: ${error.message}`);
     }
 
     await userRepository.update(user.uid, {
@@ -108,7 +110,7 @@ const verifyPasswordChange = async (user, request) => {
         updated_at: new Date().toISOString()
     });
 
-    return { message: SUCCESS_MESSAGES.PASSWORD_UPDATED };
+    return { message: SUCCESS_MESSAGES[lang].PASSWORD_UPDATED };
 }
 
 export default { 

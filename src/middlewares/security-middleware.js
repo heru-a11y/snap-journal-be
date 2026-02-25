@@ -6,7 +6,14 @@ export const limiter = rateLimit({
     max: 100, 
     standardHeaders: true, 
     legacyHeaders: false, 
-    message: { errors: "Terlalu banyak request, silakan coba lagi nanti." }
+    handler: (req, res, next, options) => {
+        const lang = req.lang || 'id';
+        const errorMsg = lang === 'en' 
+            ? "Too many requests, please try again later." 
+            : "Terlalu banyak request, silakan coba lagi nanti.";
+        
+        res.status(options.statusCode).json({ errors: errorMsg });
+    }
 });
 
 const whitelist = [

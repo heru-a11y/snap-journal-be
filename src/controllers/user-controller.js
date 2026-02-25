@@ -6,10 +6,8 @@ import userAccountService from "../services/user/user-account-service.js";
 
 const getProfile = async (req, res, next) => {
     try {
-        const result = await userProfileService.getProfile(req.user);
-        res.status(200).json({
-            data: result
-        });
+        const result = await userProfileService.getProfile(req.user, req.lang);
+        res.status(200).json({ data: result });
     } catch (e) {
         next(e);
     }
@@ -17,10 +15,17 @@ const getProfile = async (req, res, next) => {
 
 const updateProfile = async (req, res, next) => {
     try {
-        const result = await userProfileService.updateProfile(req.user, req.body);
-        res.status(200).json({
-            data: result
-        });
+        const result = await userProfileService.updateProfile(req.user, req.body, req.lang);
+        res.status(200).json({ data: result });
+    } catch (e) {
+        next(e);
+    }
+}
+
+const updateLanguage = async (req, res, next) => {
+    try {
+        const result = await userProfileService.updateLanguage(req.user, req.body, req.lang);
+        res.status(200).json({ data: result });
     } catch (e) {
         next(e);
     }
@@ -28,7 +33,7 @@ const updateProfile = async (req, res, next) => {
 
 const requestEmailChange = async (req, res, next) => {
     try {
-        const result = await userEmailService.requestEmailChange(req.user, req.body);
+        const result = await userEmailService.requestEmailChange(req.user, req.body, req.lang);
         res.status(200).json({ data: result });
     } catch (e) {
         next(e);
@@ -37,7 +42,7 @@ const requestEmailChange = async (req, res, next) => {
 
 const verifyEmailChange = async (req, res, next) => {
     try {
-        const result = await userEmailService.verifyEmailChange(req.user, req.body);
+        const result = await userEmailService.verifyEmailChange(req.user, req.body, req.lang);
         res.status(200).json({ data: result });
     } catch (e) {
         next(e);
@@ -46,10 +51,8 @@ const verifyEmailChange = async (req, res, next) => {
 
 const updateProfilePicture = async (req, res, next) => {
     try {
-        const result = await userMediaService.updateProfilePicture(req.user, req.file);
-        res.status(200).json({
-            data: result
-        });
+        const result = await userMediaService.updateProfilePicture(req.user, req.file, req.lang);
+        res.status(200).json({ data: result });
     } catch (e) {
         next(e);
     }
@@ -57,10 +60,8 @@ const updateProfilePicture = async (req, res, next) => {
 
 const removeProfilePicture = async (req, res, next) => {
     try {
-        const result = await userMediaService.removeProfilePicture(req.user);
-        res.status(200).json({
-            data: result
-        });
+        const result = await userMediaService.removeProfilePicture(req.user, req.lang);
+        res.status(200).json({ data: result });
     } catch (e) {
         next(e);
     }
@@ -68,10 +69,8 @@ const removeProfilePicture = async (req, res, next) => {
 
 const requestPasswordChange = async (req, res, next) => {
     try {
-        const result = await userPasswordService.requestPasswordChange(req.user, req.body);
-        res.status(200).json({
-            data: result
-        });
+        const result = await userPasswordService.requestPasswordChange(req.user, req.body, req.lang);
+        res.status(200).json({ data: result });
     } catch (e) {
         next(e);
     }
@@ -79,10 +78,8 @@ const requestPasswordChange = async (req, res, next) => {
 
 const validatePasswordChangeOtp = async (req, res, next) => {
     try {
-        const result = await userPasswordService.validatePasswordChangeOtp(req.user, req.body);
-        res.status(200).json({
-            data: result
-        });
+        const result = await userPasswordService.validatePasswordChangeOtp(req.user, req.body, req.lang);
+        res.status(200).json({ data: result });
     } catch (e) {
         next(e);
     }
@@ -90,10 +87,8 @@ const validatePasswordChangeOtp = async (req, res, next) => {
 
 const verifyPasswordChange = async (req, res, next) => {
     try {
-        const result = await userPasswordService.verifyPasswordChange(req.user, req.body);
-        res.status(200).json({
-            data: result
-        });
+        const result = await userPasswordService.verifyPasswordChange(req.user, req.body, req.lang);
+        res.status(200).json({ data: result });
     } catch (e) {
         next(e);
     }
@@ -101,10 +96,8 @@ const verifyPasswordChange = async (req, res, next) => {
 
 const requestDeleteAccount = async (req, res, next) => {
     try {
-        const result = await userAccountService.requestDeleteAccount(req.user);
-        res.status(200).json({
-            data: result
-        });
+        const result = await userAccountService.requestDeleteAccount(req.user, req.lang);
+        res.status(200).json({ data: result });
     } catch (e) {
         next(e);
     }
@@ -112,10 +105,8 @@ const requestDeleteAccount = async (req, res, next) => {
 
 const deleteAccount = async (req, res, next) => {
     try {
-        const result = await userAccountService.deleteAccount(req.user, req.body);
-        res.status(200).json({
-            data: result
-        });
+        const result = await userAccountService.deleteAccount(req.user, req.body, req.lang);
+        res.status(200).json({ data: result });
     } catch (e) {
         next(e);
     }
@@ -123,10 +114,8 @@ const deleteAccount = async (req, res, next) => {
 
 const setFcmToken = async (req, res, next) => {
     try {
-        const result = await userProfileService.setFcmToken(req.user, req.body);
-        res.status(200).json({
-            data: result
-        });
+        const result = await userProfileService.setFcmToken(req.user, req.body, req.lang);
+        res.status(200).json({ data: result });
     } catch (e) {
         next(e);
     }
@@ -135,6 +124,7 @@ const setFcmToken = async (req, res, next) => {
 export default {
     getProfile,
     updateProfile,
+    updateLanguage,
     requestEmailChange,
     verifyEmailChange,
     updateProfilePicture,

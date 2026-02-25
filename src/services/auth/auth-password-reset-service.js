@@ -6,19 +6,20 @@ import { generateOtp, checkCooldown, checkLockout, validateOtpAndLockout } from 
 import { AUTH_ERROR_MESSAGES, AUTH_SUCCESS_MESSAGES } from "../../constants/auth-constant.js";
 import { logger } from "../../applications/logging.js";
 
-const forgotPassword = async (request) => {
+const forgotPassword = async (request, lang = 'id') => {
     const { email } = request;
-    if (!email) throw new ResponseError(400, AUTH_ERROR_MESSAGES.EMAIL_REQUIRED);
+    if (!email) throw new ResponseError(400, AUTH_ERROR_MESSAGES[lang].EMAIL_REQUIRED);
 
     const userData = await userRepository.findByEmail(email);
 
     if (!userData) {
-        return { message: AUTH_SUCCESS_MESSAGES.RESET_OTP_SENT_GENERIC };
+        return { message: AUTH_SUCCESS_MESSAGES[lang].RESET_OTP_SENT_GENERIC };
     }
 
     const { newCount, newTimestamp } = checkCooldown(
         userData.password_reset_last_sent_at, 
-        userData.password_reset_request_count
+        userData.password_reset_request_count,
+        3, 3600000, lang
     );
 
     const otpCode = generateOtp();
@@ -35,22 +36,22 @@ const forgotPassword = async (request) => {
     });
 
     try {
-        await emailService.sendResetPasswordOtp(email, userData.name, otpCode);
+        await emailService.sendResetPasswordOtp(email, userData.name, otpCode, lang);
     } catch (error) {
         logger.error(`[AuthPasswordResetService] Gagal kirim email reset password ke ${email}: ${error.message}`);
     }
 
-    return { message: AUTH_SUCCESS_MESSAGES.RESET_OTP_SENT };
+    return { message: AUTH_SUCCESS_MESSAGES[lang].RESET_OTP_SENT };
 }
 
-const verifyResetOtp = async (request) => {
+const verifyResetOtp = async (request, lang = 'id') => {
     const { email, otp } = request;
-    if (!email || !otp) throw new ResponseError(400, AUTH_ERROR_MESSAGES.EMAIL_OTP_REQUIRED);
+    if (!email || !otp) throw new ResponseError(400, AUTH_ERROR_MESSAGES[lang].EMAIL_OTP_REQUIRED);
 
     const userData = await userRepository.findByEmail(email);
-    if (!userData) throw new ResponseError(404, AUTH_ERROR_MESSAGES.USER_NOT_FOUND);
+    if (!userData) throw new ResponseError(404, AUTH_ERROR_MESSAGES[lang].USER_NOT_FOUND);
 
-    checkLockout(userData.password_reset_locked_until);
+    checkLockout(userData.password_reset_locked_until, lang);
     
     await validateOtpAndLockout(
         (data) => userRepository.update(userData.id, data),
@@ -62,27 +63,28 @@ const verifyResetOtp = async (request) => {
             failCountField: "password_reset_fail_count",
             lockedUntilField: "password_reset_locked_until",
             otpField: "password_reset_otp"
-        }
+        },
+        lang
     );
 
     return { 
-        message: AUTH_SUCCESS_MESSAGES.RESET_OTP_VALID,
+        message: AUTH_SUCCESS_MESSAGES[lang].RESET_OTP_VALID,
         email: email,
         otp: otp 
     };
 }
 
-const resetPassword = async (request) => {
+const resetPassword = async (request, lang = 'id') => {
     const { email, otp, password, password_confirmation } = request;
 
-    if (password !== password_confirmation) throw new ResponseError(400, AUTH_ERROR_MESSAGES.PASSWORD_NOT_MATCH);
+    if (password !== password_confirmation) throw new ResponseError(400, AUTH_ERROR_MESSAGES[lang].PASSWORD_NOT_MATCH);
 
     const userData = await userRepository.findByEmail(email);
-    if (!userData) throw new ResponseError(404, AUTH_ERROR_MESSAGES.USER_NOT_FOUND);
+    if (!userData) throw new ResponseError(404, AUTH_ERROR_MESSAGES[lang].USER_NOT_FOUND);
 
     const userId = userData.id;
 
-    checkLockout(userData.password_reset_locked_until);
+    checkLockout(userData.password_reset_locked_until, lang);
 
     await validateOtpAndLockout(
         (data) => userRepository.update(userId, data),
@@ -94,7 +96,8 @@ const resetPassword = async (request) => {
             failCountField: "password_reset_fail_count",
             lockedUntilField: "password_reset_locked_until",
             otpField: "password_reset_otp"
-        }
+        },
+        lang
     );
 
     try {
@@ -111,10 +114,10 @@ const resetPassword = async (request) => {
 
     } catch (error) {
         logger.error(`[AuthPasswordResetService] Gagal update password untuk UID ${userId}: ${error.message}`);
-        throw new ResponseError(500, `${AUTH_ERROR_MESSAGES.PASSWORD_UPDATE_FAILED}: ${error.message}`);
+        throw new ResponseError(500, `${AUTH_ERROR_MESSAGES[lang].PASSWORD_UPDATE_FAILED}: ${error.message}`);
     }
 
-    return { message: AUTH_SUCCESS_MESSAGES.PASSWORD_RESET_SUCCESS };
+    return { message: AUTH_SUCCESS_MESSAGES[lang].PASSWORD_RESET_SUCCESS };
 };
 
 export default {

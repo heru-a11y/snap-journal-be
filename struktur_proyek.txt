@@ -17,6 +17,16 @@
 │   │   ├── logging.js
 │   │   ├── swagger.js
 │   │   └── web.js
+│   ├── constants
+│   │   ├── ai-constants.js
+│   │   ├── auth-constant.js
+│   │   ├── email-constant.js
+│   │   ├── feeling-constant.js
+│   │   ├── inactiveUserJob-constant.js
+│   │   ├── journal-constant.js
+│   │   ├── mediaCleanupJob-constant.js
+│   │   ├── notification-constant.js
+│   │   └── user-constant.js
 │   ├── controllers
 │   │   ├── auth-controller.js
 │   │   ├── feeling-controller.js
@@ -27,23 +37,28 @@
 │   │   ├── auth-doc.js
 │   │   ├── feeling-doc.js
 │   │   ├── journal-doc.js
+│   │   ├── media-doc.js
 │   │   ├── notification-doc.js
 │   │   ├── public-doc.js
 │   │   └── user-doc.js
 │   ├── error
 │   │   └── response-error.js
 │   ├── jobs
-│   │   └── checkInactiveUsers.js
+│   │   ├── checkInactiveUsers.js
+│   │   └── mediaCleanupJob.js
 │   ├── main.js
 │   ├── middlewares
 │   │   ├── auth-middleware.js
 │   │   ├── error-middleware.js
 │   │   ├── multipart-middleware.js
+│   │   ├── parse-images-middleware.js
 │   │   ├── security-middleware.js
 │   │   ├── validation-middleware.js
 │   │   └── verified-middleware.js
 │   ├── repositories
+│   │   ├── feeling-repository.js
 │   │   ├── journal-repository.js
+│   │   ├── notification-repository.js
 │   │   └── user-repository.js
 │   ├── routes
 │   │   ├── auth-api.js
@@ -56,13 +71,11 @@
 │   │   ├── ai
 │   │   │   ├── ai-chat-service.js
 │   │   │   ├── ai-client.js
-│   │   │   ├── ai-constants.js
 │   │   │   ├── ai-insight-service.js
 │   │   │   ├── ai-reminder-service.js
 │   │   │   ├── ai-text-service.js
 │   │   │   └── ai-vision-service.js
 │   │   ├── auth
-│   │   │   ├── auth-constant.js
 │   │   │   ├── auth-login-service.js
 │   │   │   ├── auth-password-reset-service.js
 │   │   │   └── auth-registration-service.js
@@ -72,7 +85,6 @@
 │   │   ├── journal
 │   │   │   ├── journal-access-service.js
 │   │   │   ├── journal-ai-service.js
-│   │   │   ├── journal-constants.js
 │   │   │   ├── journal-media-service.js
 │   │   │   ├── journal-query-service.js
 │   │   │   └── journal-service.js
@@ -80,7 +92,6 @@
 │   │   ├── upload-service.js
 │   │   └── user
 │   │       ├── user-account-service.js
-│   │       ├── user-constant.js
 │   │       ├── user-email-service.js
 │   │       ├── user-media-service.js
 │   │       ├── user-password-service.js
@@ -97,7 +108,8 @@
 │   │   ├── html-parser-util.js
 │   │   ├── multipart-parser.js
 │   │   ├── security-util.js
-│   │   └── textFormatter.js
+│   │   ├── textFormatter.js
+│   │   └── video-processor.js
 │   └── validations
 │       ├── auth-validation.js
 │       ├── feeling-validation.js
@@ -106,4 +118,4 @@
 │       └── validation.js
 └── struktur_proyek.txt
 
-19 directories, 88 files
+20 directories, 99 files

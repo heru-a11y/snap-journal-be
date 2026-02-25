@@ -1,5 +1,6 @@
 import express from "express";
 import { limiter, corsOptions } from "../middlewares/security-middleware.js";
+import { langMiddleware } from "../middlewares/lang-middleware.js";
 
 import { errorMiddleware } from "../middlewares/error-middleware.js";
 import { publicRouter } from "../routes/public-api.js";
@@ -17,6 +18,7 @@ web.set('trust proxy', 1);
 web.use(corsOptions);
 web.use(limiter);
 web.use(express.json());
+web.use(langMiddleware);
 
 swaggerDocs(web);
 web.use("/public", express.static("public"));

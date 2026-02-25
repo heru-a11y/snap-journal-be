@@ -8,19 +8,19 @@ import { logger } from "../../applications/logging.js";
 
 const GOOGLE_API_KEY = process.env.GOOGLE_CLIENT_API_KEY;
 
-const login = async (request) => {
+const login = async (request, lang = 'id') => {
     const userData = await userRepository.findByEmail(request.email);
     
     if (!userData) {
-        throw new ResponseError(401, AUTH_ERROR_MESSAGES.INVALID_CREDENTIALS);
+        throw new ResponseError(401, AUTH_ERROR_MESSAGES[lang].INVALID_CREDENTIALS);
     }
 
     const userId = userData.id;
 
-    checkLockout(userData.login_locked_until);
+    checkLockout(userData.login_locked_until, lang);
 
     if (!userData.email_verified_at) {
-        throw new ResponseError(403, AUTH_ERROR_MESSAGES.UNVERIFIED_ACCOUNT);
+        throw new ResponseError(403, AUTH_ERROR_MESSAGES[lang].UNVERIFIED_ACCOUNT);
     }
 
     const loginUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${GOOGLE_API_KEY}`;
@@ -60,7 +60,8 @@ const login = async (request) => {
                 const { newCount, lockedUntil, isLocked, message } = calculateLoginLockout(
                     userData.login_fail_count, 
                     5, 
-                    15 
+                    15,
+                    lang
                 );
 
                 await userRepository.update(userId, {
@@ -75,26 +76,26 @@ const login = async (request) => {
                 }
 
             } else if (errorCode === "EMAIL_NOT_FOUND") {
-                throw new ResponseError(401, AUTH_ERROR_MESSAGES.INVALID_CREDENTIALS);
+                throw new ResponseError(401, AUTH_ERROR_MESSAGES[lang].INVALID_CREDENTIALS);
             } else if (errorCode === "USER_DISABLED") {
-                throw new ResponseError(403, AUTH_ERROR_MESSAGES.ACCOUNT_DISABLED);
+                throw new ResponseError(403, AUTH_ERROR_MESSAGES[lang].ACCOUNT_DISABLED);
             } else if (errorCode === "TOO_MANY_ATTEMPTS_TRY_LATER") {
-                throw new ResponseError(429, AUTH_ERROR_MESSAGES.TOO_MANY_ATTEMPTS);
+                throw new ResponseError(429, AUTH_ERROR_MESSAGES[lang].TOO_MANY_ATTEMPTS);
             }
         }
         
         logger.error(`[AuthLoginService] Login error untuk email ${request.email}: ${error.message}`);
-        throw new ResponseError(500, AUTH_ERROR_MESSAGES.LOGIN_SERVICE_ERROR);
+        throw new ResponseError(500, AUTH_ERROR_MESSAGES[lang].LOGIN_SERVICE_ERROR);
     }
 }
 
-const logout = async (user) => {
+const logout = async (user, lang = 'id') => {
     try {
         await admin.auth().revokeRefreshTokens(user.uid);
     } catch (error) {
         logger.warn(`[AuthLoginService] Gagal revoke token saat logout untuk UID ${user.uid}: ${error.message}`);
     }
-    return { message: AUTH_SUCCESS_MESSAGES.LOGOUT_SUCCESS };
+    return { message: AUTH_SUCCESS_MESSAGES[lang].LOGOUT_SUCCESS };
 }
 
 export default {

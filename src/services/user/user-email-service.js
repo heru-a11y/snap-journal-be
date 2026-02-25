@@ -6,20 +6,20 @@ import { generateOtp, checkLockout, validateOtpAndLockout } from "../../utils/se
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../../constants/user-constant.js";
 import { logger } from "../../applications/logging.js";
 
-const requestEmailChange = async (user, request) => {
+const requestEmailChange = async (user, request, lang = 'id') => {
     const { newEmail } = request;
     const userData = await userRepository.findById(user.uid);
-    if (!userData) throw new ResponseError(404, ERROR_MESSAGES.USER_NOT_FOUND);
+    if (!userData) throw new ResponseError(404, ERROR_MESSAGES[lang].USER_NOT_FOUND);
 
-    checkLockout(userData.email_change_locked_until);
+    checkLockout(userData.email_change_locked_until, lang);
 
     if (userData.email === newEmail) {
-        throw new ResponseError(400, ERROR_MESSAGES.EMAIL_SAME_AS_CURRENT);
+        throw new ResponseError(400, ERROR_MESSAGES[lang].EMAIL_SAME_AS_CURRENT);
     }
 
     const emailExists = await userRepository.isEmailExists(newEmail);
     if (emailExists) {
-        throw new ResponseError(409, ERROR_MESSAGES.EMAIL_ALREADY_USED);
+        throw new ResponseError(409, ERROR_MESSAGES[lang].EMAIL_ALREADY_USED);
     }
 
     const otp = generateOtp();
@@ -35,23 +35,23 @@ const requestEmailChange = async (user, request) => {
     });
 
     try {
-        await emailService.sendChangeEmailOtp(newEmail, userData.name, otp);
+        await emailService.sendChangeEmailOtp(newEmail, userData.name, otp, lang);
     } catch (error) {
         logger.error(`[UserEmailService] Gagal kirim OTP ke ${newEmail}: ${error.message}`);
         throw new ResponseError(500, error.message);
     }
 
     return {
-        message: SUCCESS_MESSAGES.EMAIL_OTP_SENT,
+        message: SUCCESS_MESSAGES[lang].EMAIL_OTP_SENT,
         target_email: newEmail
     };
 }
 
-const verifyEmailChange = async (user, request) => {
+const verifyEmailChange = async (user, request, lang = 'id') => {
     const userData = await userRepository.findById(user.uid);
-    if (!userData) throw new ResponseError(404, ERROR_MESSAGES.USER_NOT_FOUND);
+    if (!userData) throw new ResponseError(404, ERROR_MESSAGES[lang].USER_NOT_FOUND);
 
-    checkLockout(userData.email_change_locked_until);
+    checkLockout(userData.email_change_locked_until, lang);
 
     await validateOtpAndLockout(
         (data) => userRepository.update(user.uid, data),
@@ -63,7 +63,8 @@ const verifyEmailChange = async (user, request) => {
             failCountField: "email_change_fail_count",
             lockedUntilField: "email_change_locked_until",
             otpField: "pending_email_otp"
-        }
+        },
+        lang
     );
 
     const newEmail = userData.pending_email;
@@ -73,9 +74,9 @@ const verifyEmailChange = async (user, request) => {
     } catch (error) {
         logger.error(`[UserEmailService] Gagal update email di Auth untuk UID ${user.uid}: ${error.message}`);
         if (error.code === 'auth/email-already-exists') {
-            throw new ResponseError(409, ERROR_MESSAGES.AUTH_EMAIL_EXISTS);
+            throw new ResponseError(409, ERROR_MESSAGES[lang].AUTH_EMAIL_EXISTS);
         }
-        throw new ResponseError(500, ERROR_MESSAGES.AUTH_UPDATE_FAILED);
+        throw new ResponseError(500, ERROR_MESSAGES[lang].AUTH_UPDATE_FAILED);
     }
 
     await userRepository.update(user.uid, {
@@ -90,7 +91,7 @@ const verifyEmailChange = async (user, request) => {
     });
 
     return {
-        message: SUCCESS_MESSAGES.EMAIL_UPDATED,
+        message: SUCCESS_MESSAGES[lang].EMAIL_UPDATED,
         email: newEmail
     };
 }

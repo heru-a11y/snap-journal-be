@@ -1,10 +1,24 @@
 import { admin } from "../applications/firebase.js";
 
+const AUTH_MESSAGES = {
+    id: {
+        UNAUTHORIZED: "Unauthorized",
+        REVOKED: "Unauthorized (Token Revoked/Logout)",
+        INVALID: "Unauthorized (Invalid Token)"
+    },
+    en: {
+        UNAUTHORIZED: "Unauthorized",
+        REVOKED: "Unauthorized (Token Revoked/Logout)",
+        INVALID: "Unauthorized (Invalid Token)"
+    }
+};
+
 const authMiddleware = async (req, res, next) => {
+    const lang = req.lang || 'id';
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
-        res.status(401).json({ errors: "Unauthorized" }).end();
+        res.status(401).json({ errors: AUTH_MESSAGES[lang].UNAUTHORIZED }).end();
         return;
     }
 
@@ -16,9 +30,9 @@ const authMiddleware = async (req, res, next) => {
         next();
     } catch (error) {
         if (error.code === 'auth/id-token-revoked') {
-            res.status(401).json({ errors: "Unauthorized (Token Revoked/Logout)" }).end();
+            res.status(401).json({ errors: AUTH_MESSAGES[lang].REVOKED }).end();
         } else {
-            res.status(401).json({ errors: "Unauthorized (Invalid Token)" }).end();
+            res.status(401).json({ errors: AUTH_MESSAGES[lang].INVALID }).end();
         }
     }
 };

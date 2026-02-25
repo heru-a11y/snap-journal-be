@@ -14,6 +14,15 @@
  *       - User
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         required: false
+ *         description: Preferensi bahasa untuk pesan respons API
  *     responses:
  *       200:
  *         description: Berhasil mengambil data profil
@@ -54,6 +63,15 @@
  *       - User
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         required: false
+ *         description: Preferensi bahasa untuk pesan respons API
  *     requestBody:
  *       required: true
  *       content:
@@ -78,6 +96,63 @@
 
 /**
  * @swagger
+ * /api/v1/user/profile/language:
+ *   patch:
+ *     summary: Mengubah preferensi bahasa user
+ *     description: Menyimpan preferensi bahasa (id atau en) user ke database agar disinkronisasikan antar perangkat.
+ *     tags:
+ *       - User
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         required: false
+ *         description: Preferensi bahasa untuk pesan respons API
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - language
+ *             properties:
+ *               language:
+ *                 type: string
+ *                 enum: [id, en]
+ *                 example: "en"
+ *     responses:
+ *       200:
+ *         description: Bahasa berhasil diubah
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "Language updated successfully."
+ *                     language:
+ *                       type: string
+ *                       example: "en"
+ *       400:
+ *         description: Validasi input gagal
+ *       401:
+ *         description: Unauthorized (Token tidak valid atau tidak ada)
+ *       404:
+ *         description: User tidak ditemukan
+ */
+
+/**
+ * @swagger
  * /api/v1/user/email/change-request:
  *   post:
  *     summary: Request perubahan email (Kirim OTP)
@@ -86,6 +161,15 @@
  *       - User
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         required: false
+ *         description: Preferensi bahasa untuk pesan respons API
  *     requestBody:
  *       required: true
  *       content:
@@ -116,6 +200,15 @@
  *       - User
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         required: false
+ *         description: Preferensi bahasa untuk pesan respons API
  *     requestBody:
  *       required: true
  *       content:
@@ -144,6 +237,15 @@
  *       - User
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         required: false
+ *         description: Preferensi bahasa untuk pesan respons API
  *     requestBody:
  *       required: true
  *       content:
@@ -173,6 +275,15 @@
  *       - User
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         required: false
+ *         description: Preferensi bahasa untuk pesan respons API
  *     responses:
  *       200:
  *         description: Foto profil berhasil dihapus
@@ -190,6 +301,15 @@
  *       - User
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         required: false
+ *         description: Preferensi bahasa untuk pesan respons API
  *     requestBody:
  *       required: true
  *       content:
@@ -220,9 +340,17 @@
  *       - User
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         required: false
+ *         description: Preferensi bahasa untuk pesan respons API
  *     requestBody:
- *       required:
- *         true
+ *       required: true
  *       content:
  *         application/json:
  *           schema:
@@ -250,6 +378,15 @@
  *       - User
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         required: false
+ *         description: Preferensi bahasa untuk pesan respons API
  *     requestBody:
  *       required: true
  *       content:
@@ -289,6 +426,15 @@
  *       - User
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         required: false
+ *         description: Preferensi bahasa untuk pesan respons API
  *     responses:
  *       200:
  *         description: Kode OTP dikirim ke email
@@ -306,6 +452,15 @@
  *       - User
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         required: false
+ *         description: Preferensi bahasa untuk pesan respons API
  *     requestBody:
  *       required: true
  *       content:
@@ -334,6 +489,15 @@
  *       - User
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         required: false
+ *         description: Preferensi bahasa untuk pesan respons API
  *     requestBody:
  *       required: true
  *       content:

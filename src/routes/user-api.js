@@ -2,6 +2,7 @@ import express from "express";
 import userController from "../controllers/user-controller.js";
 import { 
     updateUserValidation, 
+    updateLanguageValidation,
     requestEmailChangeValidation,
     verifyEmailChangeValidation, 
     requestPasswordChangeValidation,
@@ -27,6 +28,12 @@ userRouter.put(
     '/user/profile', 
     runValidation(updateUserValidation), 
     userController.updateProfile
+);
+
+userRouter.patch(
+    '/user/profile/language',
+    runValidation(updateLanguageValidation),
+    userController.updateLanguage
 );
 
 userRouter.patch(

@@ -6,11 +6,11 @@ import deleteService from "../delete-service.js";
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../../constants/user-constant.js";
 import { logger } from "../../applications/logging.js";
 
-const updateProfilePicture = async (user, file) => {
-    if (!file) throw new ResponseError(400, ERROR_MESSAGES.FILE_REQUIRED);
+const updateProfilePicture = async (user, file, lang = 'id') => {
+    if (!file) throw new ResponseError(400, ERROR_MESSAGES[lang].FILE_REQUIRED);
 
     const userData = await userRepository.findById(user.uid);
-    if (!userData) throw new ResponseError(404, ERROR_MESSAGES.USER_NOT_FOUND);
+    if (!userData) throw new ResponseError(404, ERROR_MESSAGES[lang].USER_NOT_FOUND);
 
     if (userData.photoUrl) {
         try {
@@ -37,11 +37,11 @@ const updateProfilePicture = async (user, file) => {
     return { photoUrl: newPhotoUrl, updated_at: updateTime };
 }
 
-const removeProfilePicture = async (user) => {
+const removeProfilePicture = async (user, lang = 'id') => {
     const userData = await userRepository.findById(user.uid);
-    if (!userData) throw new ResponseError(404, ERROR_MESSAGES.USER_NOT_FOUND);
+    if (!userData) throw new ResponseError(404, ERROR_MESSAGES[lang].USER_NOT_FOUND);
 
-    if (!userData.photoUrl) throw new ResponseError(400, ERROR_MESSAGES.NO_PROFILE_PICTURE);
+    if (!userData.photoUrl) throw new ResponseError(400, ERROR_MESSAGES[lang].NO_PROFILE_PICTURE);
 
     try {
         await deleteService.removeFile(user, userData.photoUrl);
@@ -60,7 +60,7 @@ const removeProfilePicture = async (user) => {
         logger.error(`[UserMediaService] Gagal hapus photoURL di Auth: ${error.message}`);
     }
 
-    return { message: SUCCESS_MESSAGES.PROFILE_PICTURE_DELETED };
+    return { message: SUCCESS_MESSAGES[lang].PROFILE_PICTURE_DELETED };
 }
 
 export default { 

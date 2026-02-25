@@ -13,9 +13,13 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-const sendEmail = async ({ email, name, otp, config }) => {
+const sendEmail = async ({ email, name, otp, config, lang = 'id' }) => {
     try {
-        const html = getHtmlTemplate(config.templateFile, {
+        // Pilih konfigurasi berdasarkan bahasa (id atau en)
+        // Fallback ke 'id' jika konfigurasi bahasa tidak ditemukan
+        const localizedConfig = config[lang] || config['id'];
+
+        const html = getHtmlTemplate(localizedConfig.templateFile, {
             name,
             otp,
             year: new Date().getFullYear()
@@ -24,13 +28,13 @@ const sendEmail = async ({ email, name, otp, config }) => {
         const mailOptions = {
             from: `"${process.env.SMTP_FROM_NAME}" <${process.env.SMTP_USER}>`,
             to: email,
-            subject: config.subject,
+            subject: localizedConfig.subject,
             html
         };
 
         await transporter.sendMail(mailOptions);
         
-        logger.info(`${LOG_PREFIX} Berhasil mengirim ${config.logName}`, {
+        logger.info(`${LOG_PREFIX} Berhasil mengirim ${config.logName} (${lang})`, {
             email,
             action: config.logName
         });
@@ -45,11 +49,21 @@ const sendEmail = async ({ email, name, otp, config }) => {
     }
 };
 
-const sendVerificationOtp = (email, name, otp) => sendEmail({ email, name, otp, config: EMAIL_CONFIG.VERIFICATION });
-const sendResetPasswordOtp = (email, name, otp) => sendEmail({ email, name, otp, config: EMAIL_CONFIG.RESET_PASSWORD });
-const sendUpdatePasswordOtp = (email, name, otp) => sendEmail({ email, name, otp, config: EMAIL_CONFIG.UPDATE_PASSWORD });
-const sendChangeEmailOtp = (email, name, otp) => sendEmail({ email, name, otp, config: EMAIL_CONFIG.CHANGE_EMAIL });
-const sendDeleteAccountOtp = (email, name, otp) => sendEmail({ email, name, otp, config: EMAIL_CONFIG.DELETE_ACCOUNT });
+// Update fungsi wrapper untuk menerima parameter lang
+const sendVerificationOtp = (email, name, otp, lang = 'id') => 
+    sendEmail({ email, name, otp, config: EMAIL_CONFIG.VERIFICATION, lang });
+
+const sendResetPasswordOtp = (email, name, otp, lang = 'id') => 
+    sendEmail({ email, name, otp, config: EMAIL_CONFIG.RESET_PASSWORD, lang });
+
+const sendUpdatePasswordOtp = (email, name, otp, lang = 'id') => 
+    sendEmail({ email, name, otp, config: EMAIL_CONFIG.UPDATE_PASSWORD, lang });
+
+const sendChangeEmailOtp = (email, name, otp, lang = 'id') => 
+    sendEmail({ email, name, otp, config: EMAIL_CONFIG.CHANGE_EMAIL, lang });
+
+const sendDeleteAccountOtp = (email, name, otp, lang = 'id') => 
+    sendEmail({ email, name, otp, config: EMAIL_CONFIG.DELETE_ACCOUNT, lang });
 
 export default {
     sendVerificationOtp,
