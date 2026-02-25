@@ -16,7 +16,12 @@ export const FEELING_CONSTANTS = {
         UPDATED_AT: "updated_at"
     },
     MESSAGE: {
-        SUCCESS_SAVE: "Feeling hari ini berhasil disimpan."
+        id: {
+            SUCCESS_SAVE: "Feeling hari ini berhasil disimpan."
+        },
+        en: {
+            SUCCESS_SAVE: "Today's feeling saved successfully."
+        }
     }
 };
 

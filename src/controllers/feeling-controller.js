@@ -2,7 +2,7 @@ import feelingService from "../services/feeling-service.js";
 
 const setToday = async (req, res, next) => {
     try {
-        const result = await feelingService.setTodayFeeling(req.user, req.body);
+        const result = await feelingService.setTodayFeeling(req.user, req.body, req.lang);
         res.status(200).json({
             data: result
         });
@@ -13,7 +13,7 @@ const setToday = async (req, res, next) => {
 
 const getToday = async (req, res, next) => {
     try {
-        const result = await feelingService.getTodayFeeling(req.user);
+        const result = await feelingService.getTodayFeeling(req.user, req.lang);
         res.status(200).json({
             data: result
         });
@@ -24,7 +24,7 @@ const getToday = async (req, res, next) => {
 
 const getHistory = async (req, res, next) => {
     try {
-        const result = await feelingService.getFeelingHistory(req.user);
+        const result = await feelingService.getFeelingHistory(req.user, req.lang);
         res.status(200).json({
             data: result
         });

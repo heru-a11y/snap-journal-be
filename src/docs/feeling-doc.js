@@ -15,6 +15,14 @@
  *       - Feelings
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         description: Preferensi bahasa respons API
  *     requestBody:
  *       required: true
  *       content:
@@ -72,6 +80,14 @@
  *       - Feelings
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         description: Preferensi bahasa respons API
  *     responses:
  *       200:
  *         description: Berhasil mengambil data status feeling hari ini
@@ -110,6 +126,14 @@
  *       - Feelings
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Accept-Language
+ *         schema:
+ *           type: string
+ *           enum: [id, en]
+ *           default: id
+ *         description: Preferensi bahasa respons API
  *     responses:
  *       200:
  *         description: List riwayat feeling berhasil diambil

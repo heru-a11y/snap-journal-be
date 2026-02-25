@@ -1,7 +1,7 @@
 import feelingRepository from "../repositories/feeling-repository.js";
 import { FEELING_CONSTANTS, getTodayDateString, getNowISOString } from "../constants/feeling-constant.js";
 
-const setTodayFeeling = async (user, request) => {
+const setTodayFeeling = async (user, request, lang = 'id') => {
     const today = getTodayDateString();
     const now = getNowISOString();
 
@@ -22,16 +22,16 @@ const setTodayFeeling = async (user, request) => {
     return {
         [FEELING_CONSTANTS.FIELD.DATE]: today,
         [FEELING_CONSTANTS.FIELD.MOOD]: request.mood,
-        message: FEELING_CONSTANTS.MESSAGE.SUCCESS_SAVE
+        message: FEELING_CONSTANTS.MESSAGE[lang].SUCCESS_SAVE
     };
 };
 
-const getTodayFeeling = async (user) => {
+const getTodayFeeling = async (user, lang = 'id') => {
     const today = getTodayDateString();
     return await feelingRepository.getFeelingByDate(user.uid, today);
 };
 
-const getFeelingHistory = async (user) => {
+const getFeelingHistory = async (user, lang = 'id') => {
     return await feelingRepository.getFeelingHistory(user.uid);
 };
 

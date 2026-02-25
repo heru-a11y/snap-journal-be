@@ -675,6 +675,7 @@
  * /api/v1/journals/enhance:
  *   post:
  *     summary: Memperbaiki tata bahasa teks (AI)
+ *     description: Instruction (fix_grammar, paraphrase, elaboration, general)
  *     tags:
  *       - Journal
  *     security:
@@ -688,6 +689,7 @@
  *           default: id
  *         description: Preferensi bahasa respons API
  *     requestBody:
+ *       required: true
  *       content:
  *         application/json:
  *           schema:
@@ -697,9 +699,11 @@
  *             properties:
  *               text:
  *                 type: string
+ *                 example: Hari ini aku merasa lelah
  *               instruction:
  *                 type: string
- *                 enum: [fix_grammar, paraphrase, elaboration]
+ *                 enum: [fix_grammar, paraphrase, elaboration, general]
+ *                 example: fix_grammar
  *     responses:
  *       200:
  *         description: Teks hasil perbaikan.
