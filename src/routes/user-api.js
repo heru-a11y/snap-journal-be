@@ -5,9 +5,7 @@ import {
     updateLanguageValidation,
     requestEmailChangeValidation,
     verifyEmailChangeValidation, 
-    requestPasswordChangeValidation,
-    validatePasswordChangeOtpValidation,
-    verifyPasswordChangeValidation,
+    changePasswordValidation,
     deleteAccountValidation,
     fcmTokenValidation
 } from "../validations/user-validation.js";
@@ -59,22 +57,10 @@ userRouter.post(
     userController.verifyEmailChange
 );
 
-userRouter.post(
-    '/user/password/change-request', 
-    runValidation(requestPasswordChangeValidation), 
-    userController.requestPasswordChange
-);
-
-userRouter.post(
-    '/user/password/change-validate', 
-    runValidation(validatePasswordChangeOtpValidation), 
-    userController.validatePasswordChangeOtp
-);
-
-userRouter.post(
-    '/user/password/change-verify', 
-    runValidation(verifyPasswordChangeValidation), 
-    userController.verifyPasswordChange
+userRouter.put(
+    '/user/password', 
+    runValidation(changePasswordValidation), 
+    userController.changePassword
 );
 
 userRouter.post(

@@ -67,27 +67,9 @@ const removeProfilePicture = async (req, res, next) => {
     }
 }
 
-const requestPasswordChange = async (req, res, next) => {
+const changePassword = async (req, res, next) => {
     try {
-        const result = await userPasswordService.requestPasswordChange(req.user, req.body, req.lang);
-        res.status(200).json({ data: result });
-    } catch (e) {
-        next(e);
-    }
-}
-
-const validatePasswordChangeOtp = async (req, res, next) => {
-    try {
-        const result = await userPasswordService.validatePasswordChangeOtp(req.user, req.body, req.lang);
-        res.status(200).json({ data: result });
-    } catch (e) {
-        next(e);
-    }
-}
-
-const verifyPasswordChange = async (req, res, next) => {
-    try {
-        const result = await userPasswordService.verifyPasswordChange(req.user, req.body, req.lang);
+        const result = await userPasswordService.changePassword(req.user, req.body, req.lang);
         res.status(200).json({ data: result });
     } catch (e) {
         next(e);
@@ -129,9 +111,7 @@ export default {
     verifyEmailChange,
     updateProfilePicture,
     removeProfilePicture,
-    requestPasswordChange,
-    validatePasswordChangeOtp,
-    verifyPasswordChange, 
+    changePassword,
     requestDeleteAccount,
     deleteAccount,
     setFcmToken

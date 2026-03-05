@@ -293,10 +293,10 @@
 
 /**
  * @swagger
- * /api/v1/user/password/change-request:
- *   post:
- *     summary: Langkah 1 - Request Ganti Password
- *     description: Memverifikasi password lama. Jika benar, sistem akan mengirimkan kode OTP ke email user.
+ * /api/v1/user/password:
+ *   put:
+ *     summary: Mengganti Password
+ *     description: Mengganti password user secara langsung dengan memvalidasi password lama.
  *     tags:
  *       - User
  *     security:
@@ -318,89 +318,13 @@
  *             type: object
  *             required:
  *               - oldPassword
+ *               - newPassword
+ *               - confirmPassword
  *             properties:
  *               oldPassword:
  *                 type: string
  *                 format: password
  *                 example: "PasswordLama123!"
- *     responses:
- *       200:
- *         description: Password lama benar, OTP dikirim ke email
- *       401:
- *         description: Password lama salah
- */
-
-/**
- * @swagger
- * /api/v1/user/password/change-validate:
- *   post:
- *     summary: Langkah 2 - Validasi OTP Ganti Password
- *     description: Mengecek apakah OTP benar sebelum user diizinkan mengisi password baru.
- *     tags:
- *       - User
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: header
- *         name: Accept-Language
- *         schema:
- *           type: string
- *           enum: [id, en]
- *           default: id
- *         required: false
- *         description: Preferensi bahasa untuk pesan respons API
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - otp
- *             properties:
- *               otp:
- *                 type: string
- *                 example: "1234"
- *     responses:
- *       200:
- *         description: OTP Valid
- *       400:
- *         description: OTP Salah atau Kadaluarsa
- */
-
-/**
- * @swagger
- * /api/v1/user/password/change-verify:
- *   post:
- *     summary: Langkah 3 - Verifikasi OTP & Simpan Password Baru
- *     description: Memvalidasi OTP yang dikirim dan mengganti password di Firebase Auth.
- *     tags:
- *       - User
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: header
- *         name: Accept-Language
- *         schema:
- *           type: string
- *           enum: [id, en]
- *           default: id
- *         required: false
- *         description: Preferensi bahasa untuk pesan respons API
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - otp
- *               - newPassword
- *               - confirmPassword
- *             properties:
- *               otp:
- *                 type: string
- *                 example: "1234"
  *               newPassword:
  *                 type: string
  *                 format: password
@@ -413,7 +337,9 @@
  *       200:
  *         description: Password berhasil diperbarui
  *       400:
- *         description: OTP salah atau tidak valid
+ *         description: Validasi gagal atau konfirmasi password tidak cocok
+ *       401:
+ *         description: Password lama salah
  */
 
 /**

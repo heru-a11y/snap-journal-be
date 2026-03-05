@@ -33,21 +33,8 @@ const verifyEmailChangeValidation = (lang = 'id') => Joi.object({
     otp: Joi.string().length(4).required().label(lang === 'en' ? "OTP Code" : "Kode OTP")
 });
 
-const updatePasswordValidation = (lang = 'id') => Joi.object({
-    oldPassword: Joi.string().min(6).max(100).required().label(lang === 'en' ? "Old Password" : "Password Lama"),
-    newPassword: Joi.string().min(6).max(100).required().label(lang === 'en' ? "New Password" : "Password Baru")
-});
-
-const requestPasswordChangeValidation = (lang = 'id') => Joi.object({
-    oldPassword: Joi.string().required().label(lang === 'en' ? "Old Password" : "Password Lama")
-});
-
-const validatePasswordChangeOtpValidation = (lang = 'id') => Joi.object({
-    otp: Joi.string().length(4).required().label(lang === 'en' ? "OTP Code" : "Kode OTP")
-});
-
-const verifyPasswordChangeValidation = (lang = 'id') => Joi.object({
-    otp: Joi.string().length(4).required().label(lang === 'en' ? "OTP Code" : "Kode OTP"),
+const changePasswordValidation = (lang = 'id') => Joi.object({
+    oldPassword: Joi.string().required().label(lang === 'en' ? "Old Password" : "Password Lama"),
     newPassword: Joi.string().min(6).max(100).required().label(lang === 'en' ? "New Password" : "Password Baru"),
     confirmPassword: Joi.any().valid(Joi.ref('newPassword')).required().label(lang === 'en' ? "Confirm Password" : "Konfirmasi Password").messages({
         "any.only": lang === 'en' ? "Password confirmation does not match" : "Konfirmasi password tidak cocok"
@@ -74,10 +61,7 @@ export {
     updateLanguageValidation,
     requestEmailChangeValidation,
     verifyEmailChangeValidation,
-    updatePasswordValidation,
-    requestPasswordChangeValidation,
-    validatePasswordChangeOtpValidation,
-    verifyPasswordChangeValidation,
+    changePasswordValidation,
     deleteAccountValidation,
     fcmTokenValidation
 };
