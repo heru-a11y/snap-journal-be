@@ -19,7 +19,7 @@ export const limiter = rateLimit({
 const whitelist = [
     "http://localhost:5173", 
     "http://localhost:3001",
-    "http://localhost:63065",
+    "http://localhost:64493",
     "https://api-znp6gyu5hq-et.a.run.app"
 ];
 
