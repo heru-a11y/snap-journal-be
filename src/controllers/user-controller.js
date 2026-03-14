@@ -1,0 +1,118 @@
+import userProfileService from "../services/user/user-profile-service.js";
+import userEmailService from "../services/user/user-email-service.js";
+import userMediaService from "../services/user/user-media-service.js";
+import userPasswordService from "../services/user/user-password-service.js";
+import userAccountService from "../services/user/user-account-service.js";
+
+const getProfile = async (req, res, next) => {
+    try {
+        const result = await userProfileService.getProfile(req.user, req.lang);
+        res.status(200).json({ data: result });
+    } catch (e) {
+        next(e);
+    }
+}
+
+const updateProfile = async (req, res, next) => {
+    try {
+        const result = await userProfileService.updateProfile(req.user, req.body, req.lang);
+        res.status(200).json({ data: result });
+    } catch (e) {
+        next(e);
+    }
+}
+
+const updateLanguage = async (req, res, next) => {
+    try {
+        const result = await userProfileService.updateLanguage(req.user, req.body, req.lang);
+        res.status(200).json({ data: result });
+    } catch (e) {
+        next(e);
+    }
+}
+
+const requestEmailChange = async (req, res, next) => {
+    try {
+        const result = await userEmailService.requestEmailChange(req.user, req.body, req.lang);
+        res.status(200).json({ data: result });
+    } catch (e) {
+        next(e);
+    }
+}
+
+const verifyEmailChange = async (req, res, next) => {
+    try {
+        const result = await userEmailService.verifyEmailChange(req.user, req.body, req.lang);
+        res.status(200).json({ data: result });
+    } catch (e) {
+        next(e);
+    }
+}
+
+const updateProfilePicture = async (req, res, next) => {
+    try {
+        const result = await userMediaService.updateProfilePicture(req.user, req.file, req.lang);
+        res.status(200).json({ data: result });
+    } catch (e) {
+        next(e);
+    }
+}
+
+const removeProfilePicture = async (req, res, next) => {
+    try {
+        const result = await userMediaService.removeProfilePicture(req.user, req.lang);
+        res.status(200).json({ data: result });
+    } catch (e) {
+        next(e);
+    }
+}
+
+const changePassword = async (req, res, next) => {
+    try {
+        const result = await userPasswordService.changePassword(req.user, req.body, req.lang);
+        res.status(200).json({ data: result });
+    } catch (e) {
+        next(e);
+    }
+}
+
+const requestDeleteAccount = async (req, res, next) => {
+    try {
+        const result = await userAccountService.requestDeleteAccount(req.user, req.lang);
+        res.status(200).json({ data: result });
+    } catch (e) {
+        next(e);
+    }
+}
+
+const deleteAccount = async (req, res, next) => {
+    try {
+        const result = await userAccountService.deleteAccount(req.user, req.body, req.lang);
+        res.status(200).json({ data: result });
+    } catch (e) {
+        next(e);
+    }
+}
+
+const setFcmToken = async (req, res, next) => {
+    try {
+        const result = await userProfileService.setFcmToken(req.user, req.body, req.lang);
+        res.status(200).json({ data: result });
+    } catch (e) {
+        next(e);
+    }
+}
+
+export default {
+    getProfile,
+    updateProfile,
+    updateLanguage,
+    requestEmailChange,
+    verifyEmailChange,
+    updateProfilePicture,
+    removeProfilePicture,
+    changePassword,
+    requestDeleteAccount,
+    deleteAccount,
+    setFcmToken
+}

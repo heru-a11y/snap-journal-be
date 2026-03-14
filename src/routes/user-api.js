@@ -1,0 +1,83 @@
+import express from "express";
+import userController from "../controllers/user-controller.js";
+import { 
+    updateUserValidation, 
+    updateLanguageValidation,
+    requestEmailChangeValidation,
+    verifyEmailChangeValidation, 
+    changePasswordValidation,
+    deleteAccountValidation,
+    fcmTokenValidation
+} from "../validations/user-validation.js";
+import { authMiddleware } from "../middlewares/auth-middleware.js";
+import { runValidation } from "../middlewares/validation-middleware.js";
+import { multipartMiddleware } from "../middlewares/multipart-middleware.js";
+
+const userRouter = new express.Router();
+
+userRouter.use(authMiddleware);
+
+userRouter.get(
+    '/user/profile', 
+    userController.getProfile
+);
+
+userRouter.put(
+    '/user/profile', 
+    runValidation(updateUserValidation), 
+    userController.updateProfile
+);
+
+userRouter.patch(
+    '/user/profile/language',
+    runValidation(updateLanguageValidation),
+    userController.updateLanguage
+);
+
+userRouter.patch(
+    '/user/profile/picture', 
+    multipartMiddleware, 
+    userController.updateProfilePicture
+);
+
+userRouter.delete(
+    '/user/profile/picture', 
+    userController.removeProfilePicture
+);
+
+userRouter.post(
+    '/user/email/change-request', 
+    runValidation(requestEmailChangeValidation), 
+    userController.requestEmailChange
+);
+
+userRouter.post(
+    '/user/email/change-verify', 
+    runValidation(verifyEmailChangeValidation), 
+    userController.verifyEmailChange
+);
+
+userRouter.put(
+    '/user/password', 
+    runValidation(changePasswordValidation), 
+    userController.changePassword
+);
+
+userRouter.post(
+    '/user/delete-request',
+    userController.requestDeleteAccount
+);
+
+userRouter.delete(
+    '/user/delete', 
+    runValidation(deleteAccountValidation),
+    userController.deleteAccount
+);
+
+userRouter.post(
+    '/fcm/token', 
+    runValidation(fcmTokenValidation), 
+    userController.setFcmToken
+);
+
+export { userRouter };

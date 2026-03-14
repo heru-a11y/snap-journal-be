@@ -1,0 +1,35 @@
+import cors from "cors";
+import rateLimit from "express-rate-limit";
+
+export const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, 
+    max: 100, 
+    standardHeaders: true, 
+    legacyHeaders: false, 
+    handler: (req, res, next, options) => {
+        const lang = req.lang || 'id';
+        const errorMsg = lang === 'en' 
+            ? "Too many requests, please try again later." 
+            : "Terlalu banyak request, silakan coba lagi nanti.";
+        
+        res.status(options.statusCode).json({ errors: errorMsg });
+    }
+});
+
+const whitelist = [
+    "http://localhost:5173", 
+    "http://localhost:3001",
+    "http://localhost:64493",
+    "https://api-znp6gyu5hq-et.a.run.app"
+];
+
+export const corsOptions = cors({
+    origin: (origin, callback) => {
+        if (!origin || whitelist.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    credentials: true,
+});

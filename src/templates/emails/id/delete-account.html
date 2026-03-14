@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Konfirmasi Penghapusan Akun</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f1f5f9;font-family:Arial,Helvetica,sans-serif;">
+    
+    <table width="100%" cellpadding="0" cellspacing="0" style="padding:30px 15px;">
+        <tr>
+            <td align="center">
+
+                <!-- Container -->
+                <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background:#dc2626;padding:20px 30px;color:#ffffff;">
+                            <h2 style="margin:0;font-size:20px;">Snap Journal</h2>
+                            <p style="margin:5px 0 0 0;font-size:13px;opacity:0.9;">
+                                Konfirmasi Penghapusan Akun
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding:30px;">
+                            
+                            <p style="margin:0 0 15px 0;color:#0f172a;font-size:14px;">
+                                Halo, <strong>{{name}}</strong>,
+                            </p>
+
+                            <p style="margin:0 0 15px 0;color:#334155;font-size:14px;line-height:1.6;">
+                                Kami menerima permintaan untuk <strong>menghapus akun Snap Journal Anda secara permanen</strong>.
+                                Tindakan ini <strong>tidak dapat dibatalkan</strong>. Semua data, jurnal, dan foto Anda akan hilang selamanya.
+                            </p>
+
+                            <p style="margin:0 0 20px 0;color:#334155;font-size:14px;">
+                                Jika Anda yakin ingin melanjutkan, gunakan kode OTP berikut:
+                            </p>
+
+                            <!-- OTP Box -->
+                            <div style="text-align:center;margin:25px 0;">
+                                <div style="
+                                    display:inline-block;
+                                    padding:18px 28px;
+                                    background:#fef2f2;
+                                    border:2px dashed #dc2626;
+                                    border-radius:10px;
+                                ">
+                                    <span style="
+                                        font-size:30px;
+                                        letter-spacing:8px;
+                                        font-weight:bold;
+                                        color:#dc2626;
+                                        font-family:'Courier New',monospace;
+                                    ">
+                                        {{otp}}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <p style="margin:0 0 20px 0;color:#64748b;font-size:13px;">
+                                Kode berlaku selama <strong>5 menit</strong>.
+                            </p>
+
+                            <!-- Warning -->
+                            <div style="
+                                background:#f0fdf4;
+                                border-left:4px solid #10b981;
+                                padding:15px;
+                                border-radius:6px;
+                                margin-top:20px;
+                            ">
+                                <p style="margin:0;color:#065f46;font-size:13px;">
+                                    <strong>Tidak melakukan permintaan ini?</strong>
+                                    Abaikan email ini. Akun Anda tetap aman selama kode ini tidak diberikan kepada siapa pun.
+                                </p>
+                            </div>
+
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding:20px 30px;background:#f8fafc;text-align:center;">
+                            <p style="margin:0;color:#94a3b8;font-size:12px;">
+                                &copy; {{year}} Snap Journal. All rights reserved.
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

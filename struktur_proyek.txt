@@ -1,0 +1,121 @@
+.
+├── Dockerfile
+├── README.md
+├── docker-compose.yaml
+├── env.example
+├── firebase.json
+├── index.js
+├── package-lock.json
+├── package.json
+├── service-account-key.json
+├── src
+│   ├── applications
+│   │   ├── database.js
+│   │   ├── firebase.js
+│   │   ├── gemini.js
+│   │   ├── google-storage.js
+│   │   ├── logging.js
+│   │   ├── swagger.js
+│   │   └── web.js
+│   ├── constants
+│   │   ├── ai-constants.js
+│   │   ├── auth-constant.js
+│   │   ├── email-constant.js
+│   │   ├── feeling-constant.js
+│   │   ├── inactiveUserJob-constant.js
+│   │   ├── journal-constant.js
+│   │   ├── mediaCleanupJob-constant.js
+│   │   ├── notification-constant.js
+│   │   └── user-constant.js
+│   ├── controllers
+│   │   ├── auth-controller.js
+│   │   ├── feeling-controller.js
+│   │   ├── journal-controller.js
+│   │   ├── notification-controller.js
+│   │   └── user-controller.js
+│   ├── docs
+│   │   ├── auth-doc.js
+│   │   ├── feeling-doc.js
+│   │   ├── journal-doc.js
+│   │   ├── media-doc.js
+│   │   ├── notification-doc.js
+│   │   ├── public-doc.js
+│   │   └── user-doc.js
+│   ├── error
+│   │   └── response-error.js
+│   ├── jobs
+│   │   ├── checkInactiveUsers.js
+│   │   └── mediaCleanupJob.js
+│   ├── main.js
+│   ├── middlewares
+│   │   ├── auth-middleware.js
+│   │   ├── error-middleware.js
+│   │   ├── multipart-middleware.js
+│   │   ├── parse-images-middleware.js
+│   │   ├── security-middleware.js
+│   │   ├── validation-middleware.js
+│   │   └── verified-middleware.js
+│   ├── repositories
+│   │   ├── feeling-repository.js
+│   │   ├── journal-repository.js
+│   │   ├── notification-repository.js
+│   │   └── user-repository.js
+│   ├── routes
+│   │   ├── auth-api.js
+│   │   ├── feeling-api.js
+│   │   ├── journal-api.js
+│   │   ├── notification-api.js
+│   │   ├── public-api.js
+│   │   └── user-api.js
+│   ├── services
+│   │   ├── ai
+│   │   │   ├── ai-chat-service.js
+│   │   │   ├── ai-client.js
+│   │   │   ├── ai-insight-service.js
+│   │   │   ├── ai-reminder-service.js
+│   │   │   ├── ai-text-service.js
+│   │   │   └── ai-vision-service.js
+│   │   ├── auth
+│   │   │   ├── auth-login-service.js
+│   │   │   ├── auth-password-reset-service.js
+│   │   │   └── auth-registration-service.js
+│   │   ├── delete-service.js
+│   │   ├── email-service.js
+│   │   ├── feeling-service.js
+│   │   ├── journal
+│   │   │   ├── journal-access-service.js
+│   │   │   ├── journal-ai-service.js
+│   │   │   ├── journal-media-service.js
+│   │   │   ├── journal-query-service.js
+│   │   │   └── journal-service.js
+│   │   ├── notification-service.js
+│   │   ├── upload-service.js
+│   │   └── user
+│   │       ├── user-account-service.js
+│   │       ├── user-email-service.js
+│   │       ├── user-media-service.js
+│   │       ├── user-password-service.js
+│   │       └── user-profile-service.js
+│   ├── templates
+│   │   └── emails
+│   │       ├── change-email.html
+│   │       ├── delete-account.html
+│   │       ├── reset-password.html
+│   │       ├── update-password.html
+│   │       └── verification-email.html
+│   ├── utils
+│   │   ├── email-utils.js
+│   │   ├── html-parser-util.js
+│   │   ├── multipart-parser.js
+│   │   ├── security-util.js
+│   │   ├── textFormatter.js
+│   │   └── video-processor.js
+│   └── validations
+│       ├── auth-validation.js
+│       ├── feeling-validation.js
+│       ├── journal-validation.js
+│       ├── user-validation.js
+│       └── validation.js
+└── struktur_proyek.txt
+
+20 directories, 99 files

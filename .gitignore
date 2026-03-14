@@ -1,0 +1,20 @@
+# --- 1. Dependencies & System (WAJIB) ---
+**/node_modules/
+.DS_Store
+._*
+
+# --- 2. Secrets & Keys (SANGAT KRUSIAL) ---
+service-account-key.json
+.env
+
+# --- 3. Logs & Debugging ---
+*.log
+firebase-debug.log
+functions/firebase-debug.log
+
+# --- 4. Firebase Cache ---
+.firebase/
+functions/.firebase/
+
+# --- 5. Coverage (Jika ada testing nanti) ---
+coverage/service-account-key.json

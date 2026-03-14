@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "snap-journal-be",
+    "snapjournal-nodejs": "snap-journal-nodejs"
+  },
+  "targets": {},
+  "etags": {}
+}
