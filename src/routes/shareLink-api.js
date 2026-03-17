@@ -36,7 +36,6 @@ router.get(
 router.post(
     "/l/:token/request",
     authMiddleware,
-    runValidation(requestAccessValidation),
     shareLinkController.requestAccess
 );
 
