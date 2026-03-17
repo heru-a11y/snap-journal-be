@@ -106,6 +106,13 @@ export const validateShareLinkService = async (token, userId = null) => {
         };
     }
 
+    if (userId === shareLink.user_id) {
+        return {
+            access: true,
+            journalId: shareLink.journalId
+    };
+}
+
     const request = await getAccessRequest(token, userId);
 
     if (!request) {
@@ -148,7 +155,7 @@ export const requestAccessService = async (token, requesterId) => {
         throw new Error(SHARE_LINK_MESSAGES.en.LINK_NOT_FOUND);
     }
 
-    if (requesterId === shareLink.userId) {
+    if (requesterId === shareLink.user_id) {
         throw new Error(SHARE_LINK_MESSAGES.en.ACCESS_DENIED);
     }
 
@@ -175,7 +182,7 @@ export const requestAccessService = async (token, requesterId) => {
     const data = {
         token,
         requesterId,
-        userId: shareLink.userId,
+        userId: shareLink.user_id,
         journalId: shareLink.journalId,
         status: ACCESS_STATUS.PENDING,
         createdAt: new Date(),
