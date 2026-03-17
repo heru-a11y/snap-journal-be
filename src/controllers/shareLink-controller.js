@@ -5,7 +5,7 @@ const createShareLink = async (req, res, next) => {
         const { journalId, shareType, expiresAt } = req.body;
 
         const result = await shareLinkService.createShareLinkService(
-            req.user.uid,
+            req.user.user_id,
             journalId,
             shareType,
             expiresAt
@@ -21,7 +21,7 @@ const accessLink = async (req, res, next) => {
     try {
         const result = await shareLinkService.validateShareLinkService(
             req.params.token,
-            req.user?.uid
+            req.user?.user_id
         );
 
         res.status(200).json({ data: result });
@@ -34,7 +34,7 @@ const requestAccess = async (req, res, next) => {
     try {
         const result = await shareLinkService.requestAccessService(
             req.params.token,
-            req.user.uid
+            req.user.user_id
         );
 
         res.status(200).json({ data: result });
@@ -46,7 +46,7 @@ const requestAccess = async (req, res, next) => {
 const revokeShareLink = async (req, res, next) => {
     try {
         const result = await shareLinkService.revokeShareLinkService(
-            req.user.uid,
+            req.user.user_id,
             req.params.token
         );
 
