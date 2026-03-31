@@ -21,6 +21,7 @@ const options = {
     { name: "Journal", description: "Manajemen Journal" },
     { name: "Cron Job (Testing)", description: "Endpoint Cron Manual" },
     { name: "Notification", description: "Manajemen Notifikasi" },
+    { name: "Share Link", description: "Manajemen Share Link" },
     ],
     
     servers: [

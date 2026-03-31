@@ -43,3 +43,4 @@ const bucket = admin.storage().bucket();
 const messaging = admin.messaging();
 
 export { admin, db, bucket, messaging, firebaseApp };
+

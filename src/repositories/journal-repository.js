@@ -106,4 +106,8 @@ const find = async (userId, filters = {}, sort = "desc", limitCount = null) => {
     }));
 };
 
+export const getJournalById = async (journalId) => {
+    return await findById(journalId);
+};
+
 export default { save, update, findById, deleteById, find };

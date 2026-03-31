@@ -9,6 +9,7 @@ import { authRouter } from "../routes/auth-api.js";
 import { journalRouter } from "../routes/journal-api.js";
 import { notificationRouter } from "../routes/notification-api.js";
 import { feelingRouter } from "../routes/feeling-api.js";
+import { shareLinkRouter} from "../routes/shareLink-api.js";
 import swaggerDocs from "./swagger.js";
 
 export const web = express();
@@ -31,5 +32,6 @@ web.use(apiPrefix, userRouter);
 web.use(apiPrefix, journalRouter);
 web.use(apiPrefix, notificationRouter);
 web.use(apiPrefix, feelingRouter);
+web.use(apiPrefix, shareLinkRouter);
 
 web.use(errorMiddleware);

@@ -14,3 +14,5 @@ cron.schedule("0 * * * *", async () => {
   logger.info("Running cron job...");
   await checkInactiveUsers();
 });
+
+
