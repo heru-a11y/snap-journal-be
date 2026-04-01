@@ -95,7 +95,7 @@ export const validateShareLinkService = async (token, userId = null) => {
     if (shareLink.shareType === SHARE_TYPE.PUBLIC) {
         return {
             access: true,
-            journalId: shareLink.journalId
+            journal
         };
     }
 
@@ -109,9 +109,9 @@ export const validateShareLinkService = async (token, userId = null) => {
     if (userId === shareLink.user_id) {
         return {
             access: true,
-            journalId: shareLink.journalId
-    };
-}
+            journal
+        };
+    }
 
     const request = await getAccessRequest(token, userId);
 
@@ -138,7 +138,7 @@ export const validateShareLinkService = async (token, userId = null) => {
 
     return {
         access: true,
-        journalId: shareLink.journalId
+        journal
     };
 };
 
